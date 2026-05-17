@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'creatoros-server',
       cwd: '/root/creatoros/server',
-      script: 'dist/main.js',
+      script: 'dist/src/main.js',
       env: {
         NODE_ENV: 'production',
         PORT: 4000,
@@ -17,7 +17,7 @@ module.exports = {
     {
       name: 'creatoros-admin',
       cwd: '/root/creatoros/admin',
-      script: 'node_modules/.bin/serve',
+      script: 'serve',
       args: '-s dist -l 4001',
       env: {
         NODE_ENV: 'production',
