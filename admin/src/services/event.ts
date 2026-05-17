@@ -1,50 +1,64 @@
 import api from './api'
 
 export interface Event {
-  id: number
+  id: string
   title: string
-  description: string
-  startTime: string
-  endTime?: string
-  location: string
-  hostName: string
-  hostId?: number
-  status: 'upcoming' | 'ongoing' | 'ended'
-  signupCount: number
-  capacity?: number
-  coverColor?: string
-  tags?: string[]
-  featured?: boolean
+  description?: string
+  coverUrl?: string
+  date: string
+  venueId: string
+  hostName?: string
+  maxCapacity: number
+  price: number
+  status: string
+  featured: boolean
+  createdAt: string
+  updatedAt: string
+  venue?: { id: string; name: string; city: string }
+  _count?: { signups: number }
 }
 
 export interface EventFormData {
   title: string
-  description: string
-  startTime?: string
-  endTime?: string
-  location: string
-  hostName: string
-  capacity?: number
-  coverColor?: string
-  tags?: string[]
+  description?: string
+  coverUrl?: string
+  date: string
+  venueId: string
+  hostName?: string
+  maxCapacity: number
+  price?: number
+  status?: string
+  featured?: boolean
 }
 
-export async function getEvents(): Promise<Event[]> {
-  return api.get('/events?limit=100') as Promise<Event[]>
+interface PaginatedResponse {
+  data: Event[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
 }
 
-export async function getEventDetail(id: number): Promise<Event> {
-  return api.get(`/events/${id}`) as Promise<Event>
+export async function getEvents(page = 1, limit = 100): Promise<PaginatedResponse> {
+  return api.get(`/admin/events?page=${page}&limit=${limit}`) as any
+}
+
+export async function getEventDetail(id: string): Promise<Event> {
+  return api.get(`/admin/events/${id}`) as any
 }
 
 export async function createEvent(data: EventFormData): Promise<Event> {
-  return api.post('/events', data) as Promise<Event>
+  return api.post('/admin/events', data) as any
 }
 
-export async function updateEvent(id: number, data: Partial<EventFormData>): Promise<Event> {
-  return api.patch(`/events/${id}`, data) as Promise<Event>
+export async function updateEvent(id: string, data: Partial<EventFormData>): Promise<Event> {
+  return api.put(`/admin/events/${id}`, data) as any
 }
 
-export async function deleteEvent(id: number): Promise<void> {
-  return api.delete(`/events/${id}`) as Promise<void>
+export async function updateEventStatus(id: string, status: string): Promise<Event> {
+  return api.put(`/admin/events/${id}/status`, { status }) as any
+}
+
+export async function getStats(): Promise<any> {
+  return api.get('/admin/stats') as any
 }

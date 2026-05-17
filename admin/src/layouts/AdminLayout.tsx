@@ -132,9 +132,9 @@ export default function AdminLayout() {
                 style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
                 size="small"
               >
-                {user?.username?.charAt(0)?.toUpperCase() || 'A'}
+                {user?.nickname?.charAt(0)?.toUpperCase() || 'A'}
               </Avatar>
-              <Text>{user?.username || 'Admin'}</Text>
+              <Text>{user?.nickname || 'Admin'}</Text>
             </Space>
           </Dropdown>
         </Header>

@@ -2,88 +2,91 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Card, Table, Button, Tag, Space, Typography, Statistic, Row, Col,
-  Popconfirm, message, Input, Select
+  message, Select
 } from 'antd'
 import {
-  PlusOutlined, EditOutlined, DeleteOutlined,
-  CalendarOutlined, UserOutlined, FireOutlined, CheckCircleOutlined,
-  SearchOutlined
+  PlusOutlined, EditOutlined,
+  CalendarOutlined, UserOutlined, FireOutlined, CheckCircleOutlined
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { getEvents, deleteEvent, type Event } from '../services/event'
+import { getEvents, getStats, updateEventStatus, type Event } from '../services/event'
 
 const { Title, Text } = Typography
-const { Search } = Input
 
-const STATUS_COLORS: Record<string, string> = {
-  upcoming: 'blue',
-  ongoing: 'green',
-  ended: 'default'
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  upcoming: '即将开始',
-  ongoing: '进行中',
-  ended: '已结束'
+const STATUS_MAP: Record<string, { color: string; label: string }> = {
+  DRAFT: { color: 'default', label: '草稿' },
+  PUBLISHED: { color: 'green', label: '报名中' },
+  FULL: { color: 'red', label: '报名已满' },
+  ONGOING: { color: 'blue', label: '进行中' },
+  ENDED: { color: 'default', label: '已结束' },
+  CANCELLED: { color: 'orange', label: '已取消' },
 }
 
 export default function EventList() {
   const navigate = useNavigate()
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchText, setSearchText] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [stats, setStats] = useState<any>({})
 
   useEffect(() => {
-    loadEvents()
+    loadData()
   }, [])
 
-  const loadEvents = async () => {
+  const loadData = async () => {
     try {
       setLoading(true)
-      const data = await getEvents()
-      setEvents(data)
+      const [eventsRes, statsRes] = await Promise.all([getEvents(), getStats()])
+      setEvents(eventsRes.data || [])
+      setStats(statsRes || {})
     } catch (err) {
-      message.error('加载活动失败')
+      message.error('加载数据失败')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDelete = async (id: number) => {
+  const handleStatusChange = async (id: string, status: string) => {
     try {
-      await deleteEvent(id)
-      message.success('删除成功')
-      setEvents(events.filter(e => e.id !== id))
+      await updateEventStatus(id, status)
+      message.success('状态更新成功')
+      loadData()
     } catch (err) {
-      message.error('删除失败')
+      message.error('状态更新失败')
     }
   }
 
-  // Stats
-  const totalEvents = events.length
-  const upcomingCount = events.filter(e => e.status === 'upcoming').length
-  const totalSignups = events.reduce((sum, e) => sum + (e.signupCount || 0), 0)
-  const ongoingCount = events.filter(e => e.status === 'ongoing').length
-
-  // Filter
-  const filteredEvents = events.filter(e => {
-    const matchSearch = !searchText || e.title.includes(searchText) || e.location?.includes(searchText)
-    const matchStatus = statusFilter === 'all' || e.status === statusFilter
-    return matchSearch && matchStatus
-  })
+  const filteredEvents = statusFilter === 'all'
+    ? events
+    : events.filter(e => e.status === statusFilter)
 
   const columns: ColumnsType<Event> = [
     {
       title: '活动名称',
       dataIndex: 'title',
       key: 'title',
-      render: (title: string, record) => (
-        <Space direction="vertical" size={0}>
-          <Text strong>{title}</Text>
-          <Text type="secondary" style={{ fontSize: 12 }}>{record.location}</Text>
-        </Space>
+      render: (title: string) => <Text strong>{title}</Text>
+    },
+    {
+      title: '时间',
+      dataIndex: 'date',
+      key: 'date',
+      width: 160,
+      render: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm')
+    },
+    {
+      title: '场所',
+      key: 'venue',
+      width: 160,
+      render: (_, record) => record.venue?.name || '-'
+    },
+    {
+      title: '报名/上限',
+      key: 'signups',
+      width: 100,
+      render: (_, record) => (
+        <Text>{record._count?.signups || 0} / {record.maxCapacity}</Text>
       )
     },
     {
@@ -91,58 +94,34 @@ export default function EventList() {
       dataIndex: 'status',
       key: 'status',
       width: 100,
-      render: (status: string) => (
-        <Tag color={STATUS_COLORS[status]}>{STATUS_LABELS[status]}</Tag>
-      )
-    },
-    {
-      title: '开始时间',
-      dataIndex: 'startTime',
-      key: 'startTime',
-      width: 160,
-      render: (time: string) => dayjs(time).format('YYYY-MM-DD HH:mm')
-    },
-    {
-      title: '报名人数',
-      dataIndex: 'signupCount',
-      key: 'signupCount',
-      width: 100,
-      render: (count: number, record) => (
-        <Text>{count}{record.capacity ? ` / ${record.capacity}` : ''}</Text>
-      )
-    },
-    {
-      title: '主办方',
-      dataIndex: 'hostName',
-      key: 'hostName',
-      width: 120
+      render: (status: string) => {
+        const s = STATUS_MAP[status] || { color: 'default', label: status }
+        return <Tag color={s.color}>{s.label}</Tag>
+      }
     },
     {
       title: '操作',
       key: 'actions',
-      width: 120,
+      width: 160,
       render: (_, record) => (
         <Space>
           <Button
-            type="text"
-            icon={<EditOutlined />}
+            type="link"
             size="small"
+            icon={<EditOutlined />}
             onClick={() => navigate(`/events/${record.id}/edit`)}
-          />
-          <Popconfirm
-            title="确定删除这个活动吗？"
-            onConfirm={() => handleDelete(record.id)}
-            okText="删除"
-            cancelText="取消"
-            okButtonProps={{ danger: true }}
           >
+            编辑
+          </Button>
+          {record.status === 'DRAFT' && (
             <Button
-              type="text"
-              icon={<DeleteOutlined />}
+              type="link"
               size="small"
-              danger
-            />
-          </Popconfirm>
+              onClick={() => handleStatusChange(record.id, 'PUBLISHED')}
+            >
+              发布
+            </Button>
+          )}
         </Space>
       )
     }
@@ -150,13 +129,12 @@ export default function EventList() {
 
   return (
     <div>
-      {/* Stats */}
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col span={6}>
           <Card bordered={false} style={{ borderRadius: 12 }}>
             <Statistic
               title="活动总数"
-              value={totalEvents}
+              value={stats.totalEvents || 0}
               prefix={<CalendarOutlined style={{ color: '#6366f1' }} />}
               valueStyle={{ color: '#6366f1' }}
             />
@@ -165,8 +143,8 @@ export default function EventList() {
         <Col span={6}>
           <Card bordered={false} style={{ borderRadius: 12 }}>
             <Statistic
-              title="即将开始"
-              value={upcomingCount}
+              title="进行中"
+              value={stats.activeEvents || 0}
               prefix={<FireOutlined style={{ color: '#f59e0b' }} />}
               valueStyle={{ color: '#f59e0b' }}
             />
@@ -175,8 +153,8 @@ export default function EventList() {
         <Col span={6}>
           <Card bordered={false} style={{ borderRadius: 12 }}>
             <Statistic
-              title="进行中"
-              value={ongoingCount}
+              title="总报名人次"
+              value={stats.totalSignups || 0}
               prefix={<CheckCircleOutlined style={{ color: '#10b981' }} />}
               valueStyle={{ color: '#10b981' }}
             />
@@ -185,8 +163,8 @@ export default function EventList() {
         <Col span={6}>
           <Card bordered={false} style={{ borderRadius: 12 }}>
             <Statistic
-              title="总报名人次"
-              value={totalSignups}
+              title="总用户数"
+              value={stats.totalUsers || 0}
               prefix={<UserOutlined style={{ color: '#8b5cf6' }} />}
               valueStyle={{ color: '#8b5cf6' }}
             />
@@ -194,34 +172,22 @@ export default function EventList() {
         </Col>
       </Row>
 
-      {/* Table */}
       <Card
         bordered={false}
         style={{ borderRadius: 12 }}
-        title={
-          <Space>
-            <Title level={5} style={{ margin: 0 }}>活动列表</Title>
-          </Space>
-        }
+        title={<Title level={5} style={{ margin: 0 }}>活动列表</Title>}
         extra={
           <Space>
-            <Search
-              placeholder="搜索活动名称、地点"
-              allowClear
-              style={{ width: 220 }}
-              onSearch={setSearchText}
-              onChange={e => !e.target.value && setSearchText('')}
-              prefix={<SearchOutlined />}
-            />
             <Select
               value={statusFilter}
               onChange={setStatusFilter}
               style={{ width: 120 }}
               options={[
                 { value: 'all', label: '全部状态' },
-                { value: 'upcoming', label: '即将开始' },
-                { value: 'ongoing', label: '进行中' },
-                { value: 'ended', label: '已结束' }
+                { value: 'DRAFT', label: '草稿' },
+                { value: 'PUBLISHED', label: '报名中' },
+                { value: 'FULL', label: '报名已满' },
+                { value: 'ENDED', label: '已结束' },
               ]}
             />
             <Button

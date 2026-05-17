@@ -19,8 +19,8 @@ export default function Login() {
   const handleLogin = async (values: LoginForm) => {
     try {
       setLoading(true)
-      const { token, user } = await adminLogin(values.username, values.password)
-      setAuth(token, user)
+      const { accessToken, user } = await adminLogin(values.username, values.password)
+      setAuth(accessToken, user)
       message.success('登录成功')
       navigate('/events')
     } catch (err) {
