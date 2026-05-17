@@ -1,0 +1,129 @@
+.venue-page {
+  height: 100vh;
+  background: #f5f5f7;
+}
+
+.scroll-view {
+  height: 100%;
+}
+
+.venue-hero {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  padding: 60px 20px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .hero-icon {
+    font-size: 56px;
+    margin-bottom: 12px;
+  }
+
+  .venue-name {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    display: block;
+  }
+
+  .venue-slogan {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 6px;
+    display: block;
+  }
+}
+
+.info-section {
+  background: #fff;
+  margin: 16px;
+  border-radius: 16px;
+  padding: 4px 16px;
+
+  .info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid #f0f0f0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .info-icon {
+      font-size: 18px;
+      margin-top: 2px;
+    }
+
+    .info-content {
+      flex: 1;
+
+      .info-label {
+        font-size: 12px;
+        color: #999;
+        display: block;
+      }
+
+      .info-value {
+        font-size: 14px;
+        color: #1d1d1f;
+        margin-top: 3px;
+        display: block;
+      }
+    }
+  }
+}
+
+.section {
+  margin: 0 16px 16px;
+
+  .section-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #1d1d1f;
+    display: block;
+    margin-bottom: 12px;
+  }
+}
+
+.amenities-grid {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  .amenity-item {
+    width: calc(33.33% - 8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 8px;
+    background: #f8f8ff;
+    border-radius: 12px;
+
+    .amenity-icon {
+      font-size: 24px;
+      display: block;
+    }
+
+    .amenity-name {
+      font-size: 12px;
+      color: #666;
+      margin-top: 6px;
+      display: block;
+    }
+  }
+}
+
+.desc-text {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  font-size: 14px;
+  color: #3c3c43;
+  line-height: 1.7;
+  display: block;
+}

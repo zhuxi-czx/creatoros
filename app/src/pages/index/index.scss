@@ -1,0 +1,123 @@
+.index-page {
+  background-color: #f5f5f7;
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+
+.header {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  padding: 60px 20px 24px;
+  display: flex;
+  flex-direction: column;
+
+  .logo-text {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+  }
+
+  .header-subtitle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 4px;
+  }
+}
+
+.section {
+  margin: 16px 0;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    margin-bottom: 12px;
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1d1d1f;
+    }
+
+    .section-more {
+      font-size: 13px;
+      color: #6366f1;
+    }
+  }
+}
+
+.venue-card {
+  margin: 0 16px;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+
+  .venue-card-inner {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .venue-icon {
+    font-size: 32px;
+    width: 56px;
+    height: 56px;
+    background: #f0f0ff;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .venue-info {
+    flex: 1;
+
+    .venue-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1d1d1f;
+      display: block;
+    }
+
+    .venue-address {
+      font-size: 12px;
+      color: #999;
+      margin-top: 2px;
+      display: block;
+    }
+
+    .venue-desc {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+      display: block;
+    }
+  }
+
+  .venue-arrow {
+    font-size: 20px;
+    color: #ccc;
+  }
+}
+
+.featured-scroll {
+  padding-left: 16px;
+  white-space: nowrap;
+
+  .featured-item {
+    display: inline-block;
+    width: 260px;
+    margin-right: 12px;
+  }
+}
+
+.loading-tip,
+.empty-tip {
+  text-align: center;
+  padding: 24px;
+  color: #999;
+  font-size: 14px;
+}
