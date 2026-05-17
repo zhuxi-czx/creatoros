@@ -62,3 +62,11 @@ export async function updateEventStatus(id: string, status: string): Promise<Eve
 export async function getStats(): Promise<any> {
   return api.get('/admin/stats') as any
 }
+
+export async function getVenues(): Promise<any[]> {
+  return api.get('/admin/venues') as any
+}
+
+export async function createVenue(data: any): Promise<any> {
+  return api.post('/admin/venues', data) as any
+}

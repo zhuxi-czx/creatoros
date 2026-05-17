@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CreateVenueDto } from './dto/create-venue.dto';
 
 @Injectable()
 export class VenueService {
@@ -20,6 +21,21 @@ export class VenueService {
     }
 
     return venue;
+  }
+
+  async createVenue(dto: CreateVenueDto) {
+    return this.prisma.venue.create({ data: dto });
+  }
+
+  async getAllVenues() {
+    return this.prisma.venue.findMany({
+      orderBy: { name: 'asc' },
+      include: {
+        _count: {
+          select: { events: true },
+        },
+      },
+    });
   }
 
   async getVenueEvents(

@@ -149,18 +149,38 @@ export class EventService {
   }
 
   async adminCreateEvent(dto: CreateEventDto) {
-    // Verify venue exists
-    const venue = await this.prisma.venue.findUnique({
-      where: { id: dto.venueId },
-    });
+    let venueId = dto.venueId;
 
-    if (!venue) {
-      throw new BadRequestException('Venue not found');
+    // If venueId is 'default' or empty, find or create the default venue
+    if (!venueId || venueId === 'default') {
+      const defaultVenueName = '敞开酒馆 Often Bar';
+      let defaultVenue = await this.prisma.venue.findFirst({
+        where: { name: defaultVenueName },
+      });
+      if (!defaultVenue) {
+        defaultVenue = await this.prisma.venue.create({
+          data: {
+            name: defaultVenueName,
+            city: '杭州',
+            address: '浙江杭州',
+          },
+        });
+      }
+      venueId = defaultVenue.id;
+    } else {
+      // Verify venue exists
+      const venue = await this.prisma.venue.findUnique({
+        where: { id: venueId },
+      });
+      if (!venue) {
+        throw new BadRequestException('Venue not found');
+      }
     }
 
     const event = await this.prisma.event.create({
       data: {
         ...dto,
+        venueId,
         date: new Date(dto.date),
         price: dto.price ?? 0,
         featured: dto.featured ?? false,
@@ -226,7 +246,7 @@ export class EventService {
       totalUsers,
       totalEvents,
       totalSignups,
-      publishedEvents,
+      activeEvents,
       activeSignups,
     ] = await Promise.all([
       this.prisma.user.count(),
@@ -256,7 +276,7 @@ export class EventService {
       totalUsers,
       totalEvents,
       totalSignups,
-      publishedEvents,
+      activeEvents,
       activeSignups,
       recentEvents,
     };

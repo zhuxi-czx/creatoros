@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   Card, Form, Input, Button, DatePicker, InputNumber,
-  message, Space, Typography, Divider
+  message, Space, Typography, Divider, Select
 } from 'antd'
 import { ArrowLeftOutlined, SaveOutlined, SendOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
-import { createEvent, updateEvent, updateEventStatus, getEventDetail, type EventFormData } from '../services/event'
+import { createEvent, updateEvent, updateEventStatus, getEventDetail, getVenues, type EventFormData } from '../services/event'
 
 const { Title, Text } = Typography
 const { TextArea } = Input
@@ -19,12 +19,23 @@ export default function EventForm() {
   const [loading, setLoading] = useState(false)
   const [fetchLoading, setFetchLoading] = useState(isEdit)
   const [currentStatus, setCurrentStatus] = useState('DRAFT')
+  const [venues, setVenues] = useState<any[]>([])
 
   useEffect(() => {
+    loadVenues()
     if (isEdit && id) {
       loadEvent(id)
     }
   }, [id])
+
+  const loadVenues = async () => {
+    try {
+      const data = await getVenues()
+      setVenues(data)
+    } catch {
+      // venues list is optional; ignore errors
+    }
+  }
 
   const loadEvent = async (eventId: string) => {
     try {
@@ -37,6 +48,7 @@ export default function EventForm() {
         maxCapacity: event.maxCapacity,
         price: event.price ? event.price / 100 : 0,
         date: event.date ? dayjs(event.date) : undefined,
+        venueId: event.venueId,
       })
       setCurrentStatus(event.status)
     } catch (err) {
@@ -51,7 +63,7 @@ export default function EventForm() {
       title: values.title as string,
       description: values.description as string,
       date: (values.date as dayjs.Dayjs)?.toISOString(),
-      venueId: 'default',
+      venueId: (values.venueId as string) || 'default',
       hostName: values.hostName as string,
       maxCapacity: values.maxCapacity as number,
       price: ((values.price as number) || 0) * 100,
@@ -120,6 +132,17 @@ export default function EventForm() {
               format="YYYY-MM-DD HH:mm"
               style={{ width: '100%' }}
               placeholder="选择活动时间"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="活动场地"
+            name="venueId"
+          >
+            <Select
+              placeholder="选择场地（不选则使用默认场地）"
+              allowClear
+              options={venues.map(v => ({ label: `${v.name} · ${v.city}`, value: v.id }))}
             />
           </Form.Item>
 
