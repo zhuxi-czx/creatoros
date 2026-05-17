@@ -1,6 +1,6 @@
 import { defineConfig, type UserConfigExport } from '@tarojs/cli'
 
-export default defineConfig<'vite'>({
+export default defineConfig<'webpack5'>({
   projectName: 'creatoros',
   date: '2024-01-01',
   designWidth: 375,
@@ -23,7 +23,7 @@ export default defineConfig<'vite'>({
     options: {}
   },
   framework: 'react',
-  compiler: 'vite',
+  compiler: 'webpack5',
   mini: {
     postcss: {
       pxtransform: {
@@ -57,4 +57,4 @@ export default defineConfig<'vite'>({
       }
     }
   }
-} as UserConfigExport<'vite'>)
+} as UserConfigExport<'webpack5'>)
