@@ -18,7 +18,7 @@ module.exports = {
       name: 'creatoros-admin',
       cwd: '/root/creatoros/admin',
       script: 'serve',
-      args: '-s dist -l tcp://0.0.0.0:4001',
+      args: '-s dist -p 4001',
       env: {
         NODE_ENV: 'production',
       },
