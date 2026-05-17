@@ -29,7 +29,7 @@
 | 数据库 | PostgreSQL |
 | ORM | Prisma |
 | 文件存储 | 腾讯云 COS |
-| 部署 | Docker Compose (Nginx + Node.js + PostgreSQL) |
+| 部署 | PM2 + Nginx + PostgreSQL (共享服务器) |
 
 ## 项目结构
 

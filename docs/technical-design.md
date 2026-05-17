@@ -454,64 +454,92 @@ creatoros/
 
 ## 7. 部署方案
 
-### docker-compose.yml
+### 服务器环境
 
-```yaml
-version: "3.8"
+- **服务器:** 121.196.149.0 (Ubuntu, 14G RAM, 18G 磁盘可用)
+- **已有服务:** PM2 管理的 15+ 个 Node.js 服务（不能影响）
+- **已有 PostgreSQL:** 5432 端口，多个数据库（不能影响）
+- **已有 Nginx:** 80/443 端口（不能影响）
 
-services:
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: creatoros
-      POSTGRES_USER: creatoros
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+### 部署方式：PM2 + 现有 PostgreSQL（与其他项目保持一致）
 
-  server:
-    build: ./server
-    environment:
-      DATABASE_URL: postgresql://creatoros:${DB_PASSWORD}@postgres:5432/creatoros
-      JWT_SECRET: ${JWT_SECRET}
-      WX_APPID: ${WX_APPID}
-      WX_SECRET: ${WX_SECRET}
-      COS_SECRET_ID: ${COS_SECRET_ID}
-      COS_SECRET_KEY: ${COS_SECRET_KEY}
-      COS_BUCKET: ${COS_BUCKET}
-      COS_REGION: ${COS_REGION}
-    ports:
-      - "3000:3000"
-    depends_on:
-      - postgres
+**不使用 Docker**，直接使用服务器现有基础设施。
 
-  admin:
-    build: ./admin
-    ports:
-      - "3001:80"
+### 端口分配
 
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - /etc/letsencrypt:/etc/letsencrypt
-    depends_on:
-      - server
-      - admin
+| 服务 | 端口 | PM2 名称 |
+|------|------|----------|
+| Nest.js API Server | 4000 | creatoros-server |
+| 管理后台 (serve) | 4001 | creatoros-admin |
+| 预留 | 4002 | - |
 
-volumes:
-  pgdata:
+### 数据库隔离
+
+```sql
+-- 创建独立用户和数据库，与其他业务完全隔离
+CREATE USER creatoros WITH PASSWORD 'xxx';
+CREATE DATABASE creatoros OWNER creatoros;
+GRANT ALL PRIVILEGES ON DATABASE creatoros TO creatoros;
+```
+
+**连接地址:** `postgresql://creatoros:xxx@127.0.0.1:5432/creatoros`
+
+### PM2 配置 (ecosystem.config.js)
+
+```javascript
+module.exports = {
+  apps: [
+    {
+      name: 'creatoros-server',
+      cwd: '/root/creatoros/server',
+      script: 'dist/main.js',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 4000,
+        DATABASE_URL: 'postgresql://creatoros:xxx@127.0.0.1:5432/creatoros',
+        JWT_SECRET: 'xxx',
+        WX_APPID: 'xxx',
+        WX_SECRET: 'xxx',
+      }
+    },
+    {
+      name: 'creatoros-admin',
+      cwd: '/root/creatoros/admin',
+      script: 'node_modules/.bin/serve',
+      args: '-s dist -l 4001',
+      env: {
+        NODE_ENV: 'production'
+      }
+    }
+  ]
+};
+```
+
+### Nginx 配置 (新增 /etc/nginx/conf.d/creatoros.conf)
+
+```nginx
+# 仅新增一个 conf 文件，不修改现有配置
+server {
+    listen 80;
+    server_name creatoros.example.com;  # 替换为实际域名
+
+    location /api {
+        proxy_pass http://127.0.0.1:4000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:4001;
+        proxy_set_header Host $host;
+    }
+}
 ```
 
 ### 环境变量 (.env)
 
 ```
-DB_PASSWORD=your_db_password
+DATABASE_URL=postgresql://creatoros:xxx@127.0.0.1:5432/creatoros
 JWT_SECRET=your_jwt_secret
 WX_APPID=your_wx_appid
 WX_SECRET=your_wx_secret
@@ -521,6 +549,13 @@ COS_BUCKET=your_cos_bucket
 COS_REGION=ap-hangzhou
 ```
 
+### 安全约束
+
+1. **数据库隔离:** 独立用户 `creatoros`，只能访问 `creatoros` 数据库
+2. **端口隔离:** 只使用 4000/4001/4002，不占用其他端口
+3. **Nginx 隔离:** 只新增 conf 文件，不修改已有配置
+4. **PM2 隔离:** 独立进程名 `creatoros-*`，不影响其他 PM2 进程
+
 ---
 
 ## 8. 开发里程碑
@@ -529,7 +564,7 @@ COS_REGION=ap-hangzhou
 - [ ] 初始化 Nest.js 项目 + Prisma + PostgreSQL
 - [ ] 初始化 Taro 小程序项目
 - [ ] 初始化管理后台项目
-- [ ] Docker Compose 本地开发环境
+- [ ] 服务器创建独立数据库用户和数据库
 
 ### Phase 2: 认证 + 用户 (第 2 周)
 - [ ] 微信小程序登录流程
@@ -551,3 +586,38 @@ COS_REGION=ap-hangzhou
 - [ ] 管理后台响应式适配
 - [ ] 小程序审核提交
 - [ ] 服务器部署
+
+---
+
+## 9. 开发流程规范
+
+每次迭代严格遵循以下流程：
+
+```
+编码完成
+  │
+  ▼
+Review 代码
+  ├── 检查安全性（SQL 注入、XSS、权限校验）
+  ├── 检查逻辑正确性
+  └── 检查是否影响已有服务
+  │
+  ▼
+自测
+  ├── API 接口测试
+  ├── 前端页面功能验证
+  └── 数据库数据验证
+  │
+  ▼
+发布
+  ├── git push 到 GitHub
+  ├── 服务器拉取代码
+  ├── 构建 + PM2 reload
+  └── 线上验证
+```
+
+**关键原则：**
+- 不 review 不发布，不自测不上线
+- 数据库变更必须用 Prisma migrate，不手动改表
+- 部署只用 PM2 reload，不 restart 其他服务
+- 每次部署前确认 4000/4001 端口无冲突
