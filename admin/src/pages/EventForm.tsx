@@ -77,7 +77,7 @@ export default function EventForm() {
   }
 
   return (
-    <div style={{ maxWidth: 680, margin: '0 auto' }}>
+    <div style={{ maxWidth: 680, margin: '0 auto', padding: '0' }}>
       <Space style={{ marginBottom: 24 }}>
         <Button
           type="text"
