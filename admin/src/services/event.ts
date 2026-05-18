@@ -70,3 +70,15 @@ export async function getVenues(): Promise<any[]> {
 export async function createVenue(data: any): Promise<any> {
   return api.post('/admin/venues', data) as any
 }
+
+export async function getEventSignups(id: string, page = 1, limit = 50): Promise<any> {
+  return api.get(`/admin/events/${id}/signups?page=${page}&limit=${limit}`) as any
+}
+
+export async function uploadImage(file: File): Promise<{ url: string }> {
+  const formData = new FormData()
+  formData.append('file', file)
+  return api.post('/upload/image', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }) as any
+}

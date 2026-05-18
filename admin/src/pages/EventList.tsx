@@ -98,13 +98,18 @@ export default function EventList() {
     {
       title: '操作',
       key: 'actions',
-      width: isMobile ? 80 : 140,
+      width: isMobile ? 100 : 200,
       render: (_: any, record: Event) => (
         <Space size={4}>
           <Button type="link" size="small" icon={<EditOutlined />}
             onClick={() => navigate(`/events/${record.id}/edit`)}
           >
             {!isMobile && '编辑'}
+          </Button>
+          <Button type="link" size="small"
+            onClick={() => navigate(`/events/${record.id}/signups`)}
+          >
+            报名{!isMobile && '详情'}
           </Button>
           {record.status === 'DRAFT' && (
             <Button type="link" size="small"

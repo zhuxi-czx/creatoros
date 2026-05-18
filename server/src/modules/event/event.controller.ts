@@ -65,6 +65,22 @@ export class EventController {
   }
 
   @UseGuards(AdminGuard)
+  @Get('api/admin/events/:id')
+  async adminGetEventById(@Param('id') id: string) {
+    return this.eventService.adminGetEventById(id);
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('api/admin/events/:id/signups')
+  async adminGetEventSignups(
+    @Param('id') id: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
+  ) {
+    return this.eventService.adminGetEventSignups(id, page, limit);
+  }
+
+  @UseGuards(AdminGuard)
   @Post('api/admin/events')
   async adminCreateEvent(@Body() dto: CreateEventDto) {
     return this.eventService.adminCreateEvent(dto);

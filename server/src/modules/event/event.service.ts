@@ -127,6 +127,44 @@ export class EventService {
   }
 
   // Admin endpoints
+  async adminGetEventById(id: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id },
+      include: {
+        venue: true,
+        _count: {
+          select: { signups: { where: { status: 'CONFIRMED' } } },
+        },
+      },
+    });
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+    return event;
+  }
+
+  async adminGetEventSignups(id: string, page: number = 1, limit: number = 50) {
+    const skip = (page - 1) * limit;
+    const [signups, total] = await Promise.all([
+      this.prisma.signup.findMany({
+        where: { eventId: id },
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              id: true, nickname: true, avatarUrl: true,
+              city: true, phone: true, mbti: true, createdAt: true,
+            },
+          },
+        },
+      }),
+      this.prisma.signup.count({ where: { eventId: id } }),
+    ]);
+    return { data: signups, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+
   async adminGetEvents(
     page: number = 1,
     limit: number = 20,
