@@ -1,20 +1,33 @@
 import api from './api'
 
+export interface Venue {
+  id: string
+  name: string
+  address: string
+  city?: string
+  description?: string
+  coverUrl?: string
+}
+
 export interface Event {
   id: string
   title: string
-  description: string
-  location: string
-  startTime: string
+  description?: string
+  date?: string
+  startTime?: string
   endTime?: string
+  location?: string
   coverUrl?: string
   hostName?: string
   hostAvatar?: string
   price?: number
   maxParticipants?: number
   currentParticipants?: number
-  status: 'open' | 'full' | 'ended' | 'cancelled'
+  status: 'PUBLISHED' | 'DRAFT' | 'FULL' | 'ONGOING' | 'ENDED' | 'CANCELLED'
   tags?: string[]
+  isSignedUp?: boolean
+  venue?: Venue
+  _count?: { signups: number }
 }
 
 export interface EventsResponse {
@@ -22,6 +35,14 @@ export interface EventsResponse {
   total: number
   page: number
   limit: number
+  totalPages?: number
+}
+
+export interface Participant {
+  id: string
+  nickname?: string
+  avatarUrl?: string
+  city?: string
 }
 
 export const getEvents = (page = 1, limit = 20): Promise<EventsResponse> =>
@@ -30,8 +51,11 @@ export const getEvents = (page = 1, limit = 20): Promise<EventsResponse> =>
 export const getFeaturedEvents = (): Promise<Event[]> =>
   api.get('/events/featured') as unknown as Promise<Event[]>
 
-export const getEventDetail = (id: string): Promise<Event> =>
-  api.get(`/events/${id}`) as unknown as Promise<Event>
+export const getEventDetail = (id: string, userId?: string): Promise<Event> =>
+  api.get(`/events/${id}`, { params: userId ? { userId } : {} }) as unknown as Promise<Event>
+
+export const getEventSignups = (id: string): Promise<Participant[]> =>
+  api.get(`/events/${id}/signups`) as unknown as Promise<Participant[]>
 
 export const signup = (eventId: string): Promise<void> =>
   api.post(`/events/${eventId}/signup`) as unknown as Promise<void>

@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import dayjs from 'dayjs'
-import { getEventDetail, signup, cancelSignup, Event } from '../services/event'
+import { getEventDetail, getEventSignups, signup, cancelSignup, Event, Participant } from '../services/event'
 
 const AVATAR_COLORS = ['#8B5CF6', '#EC4899', '#F97316', '#06B6D4', '#10B981', '#EF4444']
 
@@ -9,18 +9,33 @@ export default function EventDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [event, setEvent] = useState<Event | null>(null)
+  const [participants, setParticipants] = useState<Participant[]>([])
   const [loading, setLoading] = useState(true)
-  const [signedUp, setSignedUp] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
   const isLoggedIn = !!localStorage.getItem('h5_token')
 
+  const fetchEvent = useCallback(async () => {
+    if (!id) return
+    try {
+      const data = await getEventDetail(id)
+      setEvent(data)
+    } catch {
+      setEvent(null)
+    }
+  }, [id])
+
   useEffect(() => {
     if (!id) return
-    getEventDetail(id)
-      .then(setEvent)
-      .catch(() => setEvent(MOCK_EVENT))
+    setLoading(true)
+    Promise.allSettled([getEventDetail(id), getEventSignups(id)])
+      .then(([eventResult, signupsResult]) => {
+        if (eventResult.status === 'fulfilled') setEvent(eventResult.value)
+        if (signupsResult.status === 'fulfilled') {
+          setParticipants(Array.isArray(signupsResult.value) ? signupsResult.value : [])
+        }
+      })
       .finally(() => setLoading(false))
   }, [id])
 
@@ -37,15 +52,15 @@ export default function EventDetail() {
     if (!id) return
     setActionLoading(true)
     try {
-      if (signedUp) {
+      if (event?.isSignedUp) {
         await cancelSignup(id)
-        setSignedUp(false)
         showToast('已取消报名')
       } else {
         await signup(id)
-        setSignedUp(true)
         showToast('报名成功！')
       }
+      // Refetch event to update isSignedUp and _count
+      await fetchEvent()
     } catch {
       showToast('操作失败，请重试')
     } finally {
@@ -65,28 +80,32 @@ export default function EventDetail() {
     </div>
   )
 
-  const isFull = event.status === 'full'
-  const isEnded = event.status === 'ended'
+  const isPublished = event.status === 'PUBLISHED'
+  const isFull = event.status === 'FULL'
+  const isEnded = ['ENDED', 'CANCELLED'].includes(event.status)
+  const isSignedUp = event.isSignedUp ?? false
+  const signupCount = event._count?.signups ?? participants.length
+
+  // Determine event date to display
+  const eventDate = event.date || event.startTime
+
+  // Price: divide by 100 if likely stored in fen, show yuan
+  const priceDisplay = event.price == null
+    ? '免费'
+    : event.price === 0
+    ? '免费'
+    : `¥${(event.price / 100).toFixed(0)}`
 
   return (
     <div className="page-container" style={{ paddingBottom: 90 }}>
       {/* Cover */}
-      <div style={{ position: 'relative', height: 260 }}>
+      <div style={{ position: 'relative', height: 260, flexShrink: 0 }}>
         {event.coverUrl ? (
           <img src={event.coverUrl} alt={event.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
-          <div style={{
-            width: '100%',
-            height: '100%',
-            background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <span style={{ fontSize: 64 }}>🎯</span>
-          </div>
+          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #8B5CF6, #EC4899)' }} />
         )}
-        {/* Overlay buttons */}
+        {/* Overlay nav buttons */}
         <div style={{
           position: 'absolute',
           top: 0,
@@ -110,15 +129,22 @@ export default function EventDetail() {
         </div>
         {/* Status badge */}
         <div style={{ position: 'absolute', bottom: 14, right: 14 }}>
-          <span className={`badge ${event.status === 'open' ? 'badge-open' : event.status === 'full' ? 'badge-full' : 'badge-ended'}`}
-            style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)' }}>
-            {event.status === 'open' ? '报名中' : event.status === 'full' ? '报名已满' : '已结束'}
+          <span style={{
+            padding: '4px 10px',
+            borderRadius: 9999,
+            fontSize: 12,
+            fontWeight: 600,
+            background: 'rgba(255,255,255,0.9)',
+            backdropFilter: 'blur(8px)',
+            color: isPublished ? '#8B5CF6' : '#999',
+          }}>
+            {isPublished ? '报名中' : isFull ? '报名已满' : '已结束'}
           </span>
         </div>
       </div>
 
       {/* Content */}
-      <div style={{ padding: '24px 20px 0' }}>
+      <div style={{ padding: '24px 16px 0' }}>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', lineHeight: 1.3, letterSpacing: -0.5 }}>
           {event.title}
         </h1>
@@ -131,37 +157,50 @@ export default function EventDetail() {
 
         {/* Info rows */}
         <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <DetailRow icon="📅" label="时间">
-            {dayjs(event.startTime).format('YYYY年MM月DD日 HH:mm')}
-            {event.endTime && ` — ${dayjs(event.endTime).format('HH:mm')}`}
-          </DetailRow>
-          <DetailRow icon="📍" label="地点">{event.location}</DetailRow>
-          {event.hostName && <DetailRow icon="👤" label="主办方">{event.hostName}</DetailRow>}
-          <DetailRow icon="💰" label="费用">
-            {event.price ? `¥${event.price}` : '免费'}
-          </DetailRow>
+          {eventDate && (
+            <DetailRow icon={<CalendarIcon />} label="时间">
+              {dayjs(eventDate).format('YYYY年MM月DD日 HH:mm')}
+              {event.endTime && ` — ${dayjs(event.endTime).format('HH:mm')}`}
+            </DetailRow>
+          )}
+          {event.venue && (
+            <DetailRow icon={<MapPinIcon />} label="地点">
+              {event.venue.name}
+              {event.venue.address && (
+                <span style={{ color: '#999', fontSize: 12, display: 'block', marginTop: 2 }}>
+                  {event.venue.address}
+                </span>
+              )}
+            </DetailRow>
+          )}
+          {event.hostName && (
+            <DetailRow icon={<UserIcon />} label="主办方">{event.hostName}</DetailRow>
+          )}
+          <DetailRow icon={<TicketIcon />} label="费用">{priceDisplay}</DetailRow>
           {event.maxParticipants && (
-            <DetailRow icon="👥" label="名额">
-              {event.currentParticipants ?? 0}/{event.maxParticipants} 人
+            <DetailRow icon={<UsersIcon />} label="名额">
+              {signupCount}/{event.maxParticipants} 人
             </DetailRow>
           )}
         </div>
 
         {/* Participants */}
-        {(event.currentParticipants ?? 0) > 0 && (
+        {signupCount > 0 && (
           <div style={{ marginTop: 28 }}>
             <h3 style={{ fontSize: 15, fontWeight: 600, color: '#1A1A1A', marginBottom: 12 }}>
-              参与者 ({event.currentParticipants})
+              参与者 ({signupCount})
             </h3>
-            <div style={{ display: 'flex', gap: -8 }}>
-              {Array.from({ length: Math.min(event.currentParticipants ?? 0, 8) }).map((_, i) => (
-                <div key={i} style={{
+            <div style={{ display: 'flex' }}>
+              {participants.slice(0, 8).map((p, i) => (
+                <div key={p.id} style={{
                   width: 36,
                   height: 36,
                   borderRadius: '50%',
-                  background: AVATAR_COLORS[i % AVATAR_COLORS.length],
                   border: '2px solid #fff',
                   marginLeft: i > 0 ? -10 : 0,
+                  overflow: 'hidden',
+                  flexShrink: 0,
+                  background: p.avatarUrl ? undefined : AVATAR_COLORS[i % AVATAR_COLORS.length],
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -169,10 +208,14 @@ export default function EventDetail() {
                   color: '#fff',
                   fontWeight: 600,
                 }}>
-                  {String.fromCharCode(65 + i)}
+                  {p.avatarUrl ? (
+                    <img src={p.avatarUrl} alt={p.nickname ?? ''} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    (p.nickname?.[0] ?? String.fromCharCode(65 + i))
+                  )}
                 </div>
               ))}
-              {(event.currentParticipants ?? 0) > 8 && (
+              {signupCount > 8 && (
                 <div style={{
                   width: 36,
                   height: 36,
@@ -185,8 +228,9 @@ export default function EventDetail() {
                   justifyContent: 'center',
                   fontSize: 11,
                   color: '#999',
+                  flexShrink: 0,
                 }}>
-                  +{(event.currentParticipants ?? 0) - 8}
+                  +{signupCount - 8}
                 </div>
               )}
             </div>
@@ -202,7 +246,7 @@ export default function EventDetail() {
         transform: 'translateX(-50%)',
         width: '100%',
         maxWidth: 430,
-        padding: '12px 20px',
+        padding: '12px 16px',
         paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0))',
         background: '#fff',
         borderTop: '1px solid #F0F0F0',
@@ -219,23 +263,49 @@ export default function EventDetail() {
             fontWeight: 600,
             textAlign: 'center',
           }}>活动已结束</div>
-        ) : (
+        ) : !isLoggedIn ? (
           <button
-            onClick={handleSignup}
-            disabled={actionLoading || (isFull && !signedUp)}
+            onClick={() => navigate('/login')}
             style={{
               width: '100%',
               padding: '14px',
               borderRadius: 14,
-              background: signedUp ? '#F5F5F7' : isFull ? '#F5F5F7' : 'linear-gradient(135deg, #8B5CF6, #EC4899)',
-              color: signedUp ? '#666' : isFull ? '#999' : '#fff',
+              background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+              color: '#fff',
+              fontSize: 16,
+              fontWeight: 600,
+            }}
+          >
+            登录后报名
+          </button>
+        ) : isFull && !isSignedUp ? (
+          <div style={{
+            width: '100%',
+            padding: '14px',
+            borderRadius: 14,
+            background: '#F5F5F7',
+            color: '#999',
+            fontSize: 15,
+            fontWeight: 600,
+            textAlign: 'center',
+          }}>报名已满</div>
+        ) : (
+          <button
+            onClick={handleSignup}
+            disabled={actionLoading}
+            style={{
+              width: '100%',
+              padding: '14px',
+              borderRadius: 14,
+              background: isSignedUp ? '#F5F5F7' : 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+              color: isSignedUp ? '#666' : '#fff',
               fontSize: 16,
               fontWeight: 600,
               opacity: actionLoading ? 0.6 : 1,
               transition: 'opacity 0.15s',
             }}
           >
-            {actionLoading ? '处理中...' : signedUp ? '取消报名' : isFull ? '名额已满' : '立即报名'}
+            {actionLoading ? '处理中...' : isSignedUp ? '取消报名' : '立即报名'}
           </button>
         )}
       </div>
@@ -281,7 +351,7 @@ function IconButton({ onClick, children }: { onClick: () => void; children: Reac
   )
 }
 
-function DetailRow({ icon, label, children }: { icon: string; label: string; children: React.ReactNode }) {
+function DetailRow({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
       <div style={{
@@ -293,7 +363,7 @@ function DetailRow({ icon, label, children }: { icon: string; label: string; chi
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
-        fontSize: 18,
+        color: '#8B5CF6',
       }}>
         {icon}
       </div>
@@ -305,15 +375,49 @@ function DetailRow({ icon, label, children }: { icon: string; label: string; chi
   )
 }
 
-const MOCK_EVENT: Event = {
-  id: 'mock-1',
-  title: '创作者见面会 Vol.3',
-  description: '聚集北京最有趣的创作者，分享各自的创作经历与心得，认识志同道合的伙伴。这是一个开放、轻松的交流氛围，不管你是设计师、程序员、产品人还是内容创作者，只要你热爱创作，这里就是你的地方。',
-  location: '北京市朝阳区三里屯街道工体北路8号',
-  startTime: new Date(Date.now() + 3 * 24 * 3600 * 1000).toISOString(),
-  status: 'open',
-  hostName: 'CreatorOS',
-  price: 0,
-  currentParticipants: 18,
-  maxParticipants: 30,
+function CalendarIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  )
+}
+
+function MapPinIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  )
+}
+
+function UserIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  )
+}
+
+function TicketIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z" />
+    </svg>
+  )
+}
+
+function UsersIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  )
 }

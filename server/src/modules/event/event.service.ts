@@ -82,7 +82,7 @@ export class EventService {
     return events;
   }
 
-  async getEventById(id: string) {
+  async getEventById(id: string, userId?: string) {
     const event = await this.prisma.event.findUnique({
       where: { id },
       include: {
@@ -101,7 +101,29 @@ export class EventService {
       throw new NotFoundException('Event not found');
     }
 
-    return event;
+    let isSignedUp = false;
+    if (userId) {
+      const signup = await this.prisma.signup.findUnique({
+        where: { userId_eventId: { userId, eventId: id } },
+      });
+      isSignedUp = !!signup && signup.status === 'CONFIRMED';
+    }
+
+    return { ...event, isSignedUp };
+  }
+
+  async getEventSignups(id: string) {
+    const signups = await this.prisma.signup.findMany({
+      where: { eventId: id, status: 'CONFIRMED' },
+      include: {
+        user: {
+          select: { id: true, nickname: true, avatarUrl: true, city: true },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+      take: 50,
+    });
+    return signups.map(s => s.user);
   }
 
   // Admin endpoints

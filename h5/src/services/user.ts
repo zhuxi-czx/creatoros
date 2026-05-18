@@ -2,7 +2,9 @@ import api from './api'
 
 export interface UserProfile {
   id: string
-  name: string
+  nickname?: string
+  name?: string
+  avatarUrl?: string
   avatar?: string
   city?: string
   bio?: string
@@ -18,10 +20,13 @@ export interface SignupRecord {
   event: {
     id: string
     title: string
-    startTime: string
-    location: string
-    coverUrl?: string
-    status: string
+    date?: string
+    startTime?: string
+    venue?: {
+      name: string
+      city?: string
+    }
+    _count?: { signups: number }
   }
   createdAt: string
 }

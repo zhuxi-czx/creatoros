@@ -7,6 +7,7 @@ import {
   Param,
   Query,
   UseGuards,
+  Request,
   ParseIntPipe,
   DefaultValuePipe,
 } from '@nestjs/common';
@@ -15,6 +16,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { UpdateEventStatusDto } from './dto/update-event-status.dto';
 import { AdminGuard } from '../auth/admin.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller()
 export class EventController {
@@ -36,8 +38,13 @@ export class EventController {
   }
 
   @Get('api/events/:id')
-  async getEventById(@Param('id') id: string) {
-    return this.eventService.getEventById(id);
+  async getEventById(@Param('id') id: string, @Query('userId') userId?: string) {
+    return this.eventService.getEventById(id, userId);
+  }
+
+  @Get('api/events/:id/signups')
+  async getEventSignups(@Param('id') id: string) {
+    return this.eventService.getEventSignups(id);
   }
 
   // Admin routes

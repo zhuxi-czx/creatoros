@@ -38,12 +38,19 @@ html, body {
 }
 
 .page-container {
-  max-width: var(--max-width);
-  margin: 0 auto;
+  width: 100%;
   min-height: 100vh;
   background: var(--color-white);
   position: relative;
   overflow-x: hidden;
+}
+
+/* Only apply max-width constraint on large screens (tablets/desktop) */
+@media (min-width: 480px) {
+  .page-container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
 }
 
 a {
@@ -115,12 +122,13 @@ img {
 .tab-bar {
   position: fixed;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
   width: 100%;
-  max-width: var(--max-width);
+  height: 56px;
   background: var(--color-white);
   border-top: 1px solid #F0F0F0;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
   display: flex;
   z-index: 100;
   padding-bottom: env(safe-area-inset-bottom, 0);
