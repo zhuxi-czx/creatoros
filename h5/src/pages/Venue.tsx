@@ -115,7 +115,7 @@ export default function Venue() {
 
       {/* Venue Info */}
       <div style={{ padding: '24px 16px 0' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', letterSpacing: -0.5 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A', letterSpacing: -0.5 }}>
           {venue.name}
         </h1>
 
@@ -130,7 +130,7 @@ export default function Venue() {
         )}
 
         {venue.description && (
-          <p style={{ marginTop: 14, fontSize: 14, color: '#666', lineHeight: 1.7 }}>
+          <p style={{ marginTop: 14, fontSize: 14, color: '#666', lineHeight: 1.6 }}>
             {venue.description}
           </p>
         )}
@@ -162,7 +162,7 @@ export default function Venue() {
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ fontSize: 17, fontWeight: 700, color: '#fff', flex: 1, lineHeight: 1.3, paddingRight: 8 }}>
+                    <div style={{ fontSize: 16, fontWeight: 600, color: '#fff', flex: 1, lineHeight: 1.3, paddingRight: 8 }}>
                       {ev.title}
                     </div>
                     <span style={{
@@ -179,7 +179,7 @@ export default function Venue() {
                     </span>
                   </div>
                   {ev.description && (
-                    <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 8, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', marginTop: 8, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                       {ev.description}
                     </p>
                   )}

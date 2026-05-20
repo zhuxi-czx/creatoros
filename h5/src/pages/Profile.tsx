@@ -87,11 +87,11 @@ export default function Profile() {
 
         {/* Name */}
         <div style={{ marginTop: 10, textAlign: isLoggedIn ? 'left' : 'center' }}>
-          <div style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A' }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A' }}>
             {displayName ?? (isLoggedIn ? '加载中…' : '未登录')}
           </div>
           {profile?.city && (
-            <div style={{ fontSize: 13, color: '#999', marginTop: 2, display: 'flex', alignItems: 'center', gap: 3, justifyContent: isLoggedIn ? 'flex-start' : 'center' }}>
+            <div style={{ fontSize: 12, color: '#999', marginTop: 2, display: 'flex', alignItems: 'center', gap: 3, justifyContent: isLoggedIn ? 'flex-start' : 'center' }}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
               </svg>
@@ -125,7 +125,7 @@ export default function Profile() {
 
         {/* Bio */}
         {profile?.bio && (
-          <p style={{ fontSize: 14, color: '#666', lineHeight: 1.7, marginBottom: 24, marginTop: isLoggedIn && !profile.gender ? 14 : 0 }}>
+          <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 24, marginTop: isLoggedIn && !profile.gender ? 14 : 0 }}>
             {profile.bio}
           </p>
         )}
@@ -153,7 +153,7 @@ export default function Profile() {
         {/* My signups */}
         {isLoggedIn && (
           <div style={{ marginTop: 8 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1A1A1A', marginBottom: 14 }}>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', marginBottom: 14 }}>
               我参与的
             </h3>
             {loading ? (

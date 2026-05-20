@@ -68,7 +68,7 @@ export default function Home() {
         zIndex: 50,
         borderBottom: '1px solid #F5F5F7',
       }}>
-        <h1 className="gradient-text" style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5 }}>
+        <h1 className="gradient-text" style={{ fontSize: 24, fontWeight: 700, letterSpacing: -0.5 }}>
           CreatorOS
         </h1>
         <button style={{ padding: 6, borderRadius: 20 }} aria-label="通知">
@@ -110,7 +110,7 @@ export default function Home() {
               </svg>
             </div>
             <div style={{ padding: '12px 14px', flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 600, fontSize: 15, color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontWeight: 600, fontSize: 16, color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {venue?.name ?? '敞开酒馆 Often Bar'}
               </div>
               <div style={{ fontSize: 12, color: '#999', marginTop: 4, lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -188,7 +188,7 @@ export default function Home() {
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div style={{ fontSize: 17, fontWeight: 700, color: '#fff', flex: 1, lineHeight: 1.3, paddingRight: 8 }}>
+                      <div style={{ fontSize: 16, fontWeight: 600, color: '#fff', flex: 1, lineHeight: 1.3, paddingRight: 8 }}>
                         {ev.title}
                       </div>
                       <span className={`badge ${cls}`} style={{ flexShrink: 0, marginTop: 2 }}>
@@ -196,7 +196,7 @@ export default function Home() {
                       </span>
                     </div>
                     {ev.description && (
-                      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 8, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', marginTop: 8, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                         {ev.description}
                       </p>
                     )}

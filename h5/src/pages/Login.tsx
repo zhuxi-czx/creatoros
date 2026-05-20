@@ -48,12 +48,12 @@ export default function Login() {
           }}>
             <span style={{ color: '#fff', fontSize: 24, fontWeight: 800 }}>C</span>
           </div>
-          <h1 className="gradient-text" style={{ fontSize: 26, fontWeight: 700 }}>CreatorOS</h1>
-          <p style={{ marginTop: 6, fontSize: 13, color: '#999' }}>创作者社区</p>
+          <h1 className="gradient-text" style={{ fontSize: 24, fontWeight: 700 }}>CreatorOS</h1>
+          <p style={{ marginTop: 6, fontSize: 14, color: '#999' }}>创作者社区</p>
         </div>
 
         {/* Form */}
-        <label style={{ display: 'block', marginBottom: 8, fontSize: 13, fontWeight: 500, color: '#666' }}>昵称</label>
+        <label style={{ display: 'block', marginBottom: 8, fontSize: 14, fontWeight: 500, color: '#666' }}>昵称</label>
         <input
           type="text"
           value={nickname}
@@ -64,7 +64,7 @@ export default function Login() {
           style={{
             width: '100%', padding: '14px 16px', borderRadius: 12,
             border: '1.5px solid #E5E5E5', fontSize: 16, outline: 'none',
-            fontFamily: 'inherit', background: '#FAFAFA',
+            background: '#FAFAFA',
           }}
           onFocus={e => { e.target.style.borderColor = '#8B5CF6' }}
           onBlur={e => { e.target.style.borderColor = '#E5E5E5' }}

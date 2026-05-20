@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -21,15 +23,34 @@
   --max-width: 430px;
 }
 
+/* Typography scale (Major Third 1.333) */
+html { font-size: 100%; /* 16px base */ }
+
 html, body {
   height: 100%;
   background: var(--color-bg);
-  font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  font-weight: 400;
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
+  line-height: 1.5;
 }
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+h1 { font-size: 2.369rem; }   /* 37.9px — page hero */
+h2 { font-size: 1.777rem; }   /* 28.4px — section hero */
+h3 { font-size: 1.333rem; }   /* 21.3px — section title */
+h4 { font-size: 1rem; }       /* 16px — card title */
+h5 { font-size: 0.875rem; }   /* 14px — sub heading */
+
+small { font-size: 0.75rem; } /* 12px */
 
 #root {
   min-height: 100%;
@@ -45,7 +66,6 @@ html, body {
   overflow-x: hidden;
 }
 
-/* Only apply max-width constraint on large screens (tablets/desktop) */
 @media (min-width: 480px) {
   .page-container {
     max-width: var(--max-width);
@@ -100,10 +120,11 @@ img {
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 10px;
+  padding: 3px 10px;
   border-radius: var(--radius-pill);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 500;
+  letter-spacing: 0.01em;
 }
 .badge-open {
   background: rgba(34, 197, 94, 0.12);
@@ -118,6 +139,17 @@ img {
   color: var(--color-muted);
 }
 
+/* Section title */
+.section-title {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 24px 0 12px;
+}
+.section-title:first-child {
+  margin-top: 0;
+}
+
 /* Bottom tab bar */
 .tab-bar {
   position: fixed;
@@ -128,7 +160,7 @@ img {
   height: 56px;
   background: var(--color-white);
   border-top: 1px solid #F0F0F0;
-  box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 -1px 8px rgba(0,0,0,0.04);
   display: flex;
   z-index: 100;
   padding-bottom: env(safe-area-inset-bottom, 0);
@@ -142,7 +174,8 @@ img {
   justify-content: center;
   padding: 8px 0 6px;
   gap: 3px;
-  font-size: 11px;
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 500;
   color: var(--color-muted);
   transition: color 0.15s;
 }
@@ -152,8 +185,8 @@ img {
 }
 
 .tab-bar-item svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
 }
 
 /* Page with bottom tab */
@@ -170,9 +203,9 @@ img {
 }
 .spinner::after {
   content: '';
-  width: 32px;
-  height: 32px;
-  border: 3px solid #F0F0F0;
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid #F0F0F0;
   border-top-color: var(--color-purple);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
@@ -188,6 +221,6 @@ img {
   align-items: center;
   padding: 48px 24px;
   color: var(--color-muted);
-  font-size: 14px;
+  font-size: 0.875rem;
   gap: 8px;
 }

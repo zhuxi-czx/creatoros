@@ -145,7 +145,7 @@ export default function EventDetail() {
 
       {/* Content */}
       <div style={{ padding: '24px 16px 0' }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', lineHeight: 1.3, letterSpacing: -0.5 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A', lineHeight: 1.3, letterSpacing: -0.5 }}>
           {event.title}
         </h1>
 
@@ -187,7 +187,7 @@ export default function EventDetail() {
         {/* Participants */}
         {signupCount > 0 && (
           <div style={{ marginTop: 28 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 600, color: '#1A1A1A', marginBottom: 12 }}>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', marginBottom: 12 }}>
               参与者 ({signupCount})
             </h3>
             <div style={{ display: 'flex' }}>
@@ -259,7 +259,7 @@ export default function EventDetail() {
             borderRadius: 14,
             background: '#F5F5F7',
             color: '#999',
-            fontSize: 15,
+            fontSize: 16,
             fontWeight: 600,
             textAlign: 'center',
           }}>活动已结束</div>
@@ -285,7 +285,7 @@ export default function EventDetail() {
             borderRadius: 14,
             background: '#F5F5F7',
             color: '#999',
-            fontSize: 15,
+            fontSize: 16,
             fontWeight: 600,
             textAlign: 'center',
           }}>报名已满</div>
