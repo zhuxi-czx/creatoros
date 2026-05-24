@@ -26,7 +26,7 @@ export class UploadService {
     return `${baseUrl}/uploads/${filename}`;
   }
 
-  async processImage(filePath: string, type: string = 'default'): Promise<string> {
+  async processImage(filePath: string, type: string = 'default'): Promise<{ mainPath: string; thumbPath: string }> {
     try {
       const ratio = ASPECT_RATIOS[type] || ASPECT_RATIOS.default;
       const targetRatio = ratio.width / ratio.height;
@@ -35,17 +35,15 @@ export class UploadService {
       const metadata = await sharp(filePath).metadata();
 
       if (!metadata.width || !metadata.height) {
-        return filePath;
+        return { mainPath: filePath, thumbPath: filePath };
       }
 
+      // Build crop+resize pipeline
       const currentRatio = metadata.width / metadata.height;
-      let pipeline = sharp(filePath);
+      let cropWidth = metadata.width;
+      let cropHeight = metadata.height;
 
-      // Center crop if aspect ratio differs by more than 5%
       if (Math.abs(currentRatio - targetRatio) / targetRatio > 0.05) {
-        let cropWidth: number;
-        let cropHeight: number;
-
         if (currentRatio > targetRatio) {
           cropHeight = metadata.height;
           cropWidth = Math.round(metadata.height * targetRatio);
@@ -53,33 +51,34 @@ export class UploadService {
           cropWidth = metadata.width;
           cropHeight = Math.round(metadata.width / targetRatio);
         }
-
-        pipeline = pipeline.resize(cropWidth, cropHeight, {
-          fit: 'cover',
-          position: 'centre',
-        });
       }
 
-      // Always resize to maxWidth
-      pipeline = pipeline.resize(maxWidth, null, { withoutEnlargement: true });
+      const baseName = path.basename(filePath).replace(/\.\w+$/, '');
 
-      // Compress aggressively for mobile
-      const outputPath = filePath.replace(/\.\w+$/, '.jpg');
-      await pipeline
-        .jpeg({ quality: 75, mozjpeg: true })
-        .toFile(outputPath + '.tmp');
+      // Main image: WebP format, quality 78
+      const mainFile = path.join(this.uploadDir, `${baseName}.webp`);
+      await sharp(filePath)
+        .resize(cropWidth, cropHeight, { fit: 'cover', position: 'centre' })
+        .resize(maxWidth, null, { withoutEnlargement: true })
+        .webp({ quality: 78 })
+        .toFile(mainFile);
 
-      // Replace original
+      // Thumbnail: 20px wide, blurred, WebP, ~1-2KB
+      const thumbFile = path.join(this.uploadDir, `${baseName}_thumb.webp`);
+      await sharp(filePath)
+        .resize(cropWidth, cropHeight, { fit: 'cover', position: 'centre' })
+        .resize(20, null, { withoutEnlargement: true })
+        .blur(2)
+        .webp({ quality: 50 })
+        .toFile(thumbFile);
+
+      // Remove original
       fs.unlinkSync(filePath);
-      if (outputPath !== filePath && fs.existsSync(outputPath)) {
-        fs.unlinkSync(outputPath);
-      }
-      fs.renameSync(outputPath + '.tmp', outputPath);
 
-      return outputPath;
+      return { mainPath: mainFile, thumbPath: thumbFile };
     } catch (error) {
       console.error('Image processing failed, using original file:', error);
-      return filePath;
+      return { mainPath: filePath, thumbPath: filePath };
     }
   }
 }

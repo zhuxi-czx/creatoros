@@ -39,7 +39,7 @@ export class UploadController {
         }
       },
       limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB max
+        fileSize: 5 * 1024 * 1024,
       },
     }),
   )
@@ -51,21 +51,21 @@ export class UploadController {
       throw new BadRequestException('请上传图片文件');
     }
 
-    // Process image: center crop to target aspect ratio + compress
-    const processedPath = await this.uploadService.processImage(
+    const { mainPath, thumbPath } = await this.uploadService.processImage(
       file.path,
       type || 'default',
     );
 
-    const filename = path.basename(processedPath);
-    const url = this.uploadService.getFileUrl(filename);
+    const mainFilename = path.basename(mainPath);
+    const thumbFilename = path.basename(thumbPath);
 
     return {
-      url,
-      filename,
+      url: this.uploadService.getFileUrl(mainFilename),
+      thumbUrl: this.uploadService.getFileUrl(thumbFilename),
+      filename: mainFilename,
       originalName: file.originalname,
       size: file.size,
-      mimeType: file.mimetype,
+      mimeType: 'image/webp',
     };
   }
 }
