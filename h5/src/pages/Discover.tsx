@@ -14,19 +14,21 @@ export default function Discover() {
   const navigate = useNavigate()
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
+  const [fetched, setFetched] = useState(false)
   const [selectedTag, setSelectedTag] = useState('全部')
 
   useEffect(() => {
-    // Cache first for instant display
     const cached = getCached<Event[]>('events')
-    if (cached) { setEvents(cached); setLoading(false) }
+    if (cached && cached.length > 0) { setEvents(cached); setLoading(false); setFetched(true) }
 
     getEvents(1, 20)
       .then((res) => {
         const data = Array.isArray(res) ? res : (res as { data: Event[] }).data || []
         setEvents(data)
         setCache('events', data, 60000)
+        setFetched(true)
       })
+      .catch(() => setFetched(true))
       .finally(() => setLoading(false))
   }, [])
 
@@ -139,7 +141,7 @@ export default function Discover() {
               </div>
             </div>
           ))
-        ) : events.length === 0 ? (
+        ) : events.length === 0 && fetched ? (
           <div style={{ textAlign: 'center', padding: 40, color: '#999', fontSize: 14 }}>
             暂无活动
           </div>

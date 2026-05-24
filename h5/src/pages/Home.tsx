@@ -373,7 +373,16 @@ export default function Home() {
                   style={{ fontSize: 13, color: '#999', cursor: 'pointer' }}
                 >查看更多</span>
               </div>
-              {featured.length > 0 ? (
+              {loading ? (
+                <div style={{ display: 'flex', gap: 10, padding: '0 16px' }}>
+                  {[0,1,2].map(i => (
+                    <div key={i} style={{ flexShrink: 0, width: 140 }}>
+                      <div style={{ width: 140, height: 180, borderRadius: 8, background: '#F0EBE3' }} />
+                      <div style={{ width: 100, height: 14, background: '#F0EBE3', borderRadius: 4, marginTop: 8 }} />
+                    </div>
+                  ))}
+                </div>
+              ) : featured.length > 0 ? (
                 <div style={{
                   overflowX: 'auto',
                   display: 'flex',

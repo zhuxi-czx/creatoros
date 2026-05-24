@@ -26,16 +26,29 @@ export default function EventDetail() {
     return undefined
   }
 
-  const fetchAll = useCallback(async () => {
+  const fetchAll = useCallback(async (retry = 0): Promise<void> => {
     if (!id) return
     const userId = getUserId()
-    const [eventResult, signupsResult] = await Promise.allSettled([
-      getEventDetail(id, userId),
-      getEventSignups(id),
-    ])
-    if (eventResult.status === 'fulfilled') setEvent(eventResult.value)
-    if (signupsResult.status === 'fulfilled') {
-      setParticipants(Array.isArray(signupsResult.value) ? signupsResult.value : [])
+    try {
+      const [eventResult, signupsResult] = await Promise.allSettled([
+        getEventDetail(id, userId),
+        getEventSignups(id),
+      ])
+      if (eventResult.status === 'fulfilled') {
+        setEvent(eventResult.value)
+      } else if (retry < 2) {
+        // Retry on failure
+        await new Promise(r => setTimeout(r, 1000))
+        return fetchAll(retry + 1)
+      }
+      if (signupsResult.status === 'fulfilled') {
+        setParticipants(Array.isArray(signupsResult.value) ? signupsResult.value : [])
+      }
+    } catch {
+      if (retry < 2) {
+        await new Promise(r => setTimeout(r, 1000))
+        return fetchAll(retry + 1)
+      }
     }
   }, [id])
 
