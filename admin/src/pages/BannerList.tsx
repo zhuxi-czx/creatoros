@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Card, Table, Button, Space, Typography, Switch, Modal, Form, Input,
-  InputNumber, Upload, message, Popconfirm, Image, Grid
+  InputNumber, Upload, message, Popconfirm, Image, Grid, Tag
 } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons'
+import {
+  PlusOutlined, EditOutlined, DeleteOutlined, UploadOutlined,
+  ArrowUpOutlined, ArrowDownOutlined
+} from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { getBanners, createBanner, updateBanner, deleteBanner, type Banner, type BannerFormData } from '../services/banner'
 import { uploadImage } from '../services/event'
@@ -19,8 +22,9 @@ export default function BannerList() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Banner | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  const [imageUrl, setImageUrl] = useState('')
+  const [imageUrls, setImageUrls] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
+  const [autoplay, setAutoplay] = useState(true)
   const [form] = Form.useForm()
 
   useEffect(() => { loadData() }, [])
@@ -40,18 +44,22 @@ export default function BannerList() {
   const openModal = (record?: Banner) => {
     if (record) {
       setEditing(record)
-      setImageUrl(record.imageUrl)
+      setImageUrls(record.imageUrls || [])
+      setAutoplay(record.autoplay !== false)
       form.setFieldsValue({
         title: record.title,
         subtitle: record.subtitle,
         sortOrder: record.sortOrder,
         enabled: record.enabled,
+        autoplay: record.autoplay !== false,
+        interval: record.interval ? record.interval / 1000 : 3,
       })
     } else {
       setEditing(null)
-      setImageUrl('')
+      setImageUrls([])
+      setAutoplay(true)
       form.resetFields()
-      form.setFieldsValue({ sortOrder: 0, enabled: true })
+      form.setFieldsValue({ sortOrder: 0, enabled: true, autoplay: true, interval: 3 })
     }
     setModalOpen(true)
   }
@@ -59,12 +67,20 @@ export default function BannerList() {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields()
-      if (!imageUrl) {
-        message.error('请上传Banner图片')
+      if (imageUrls.length === 0) {
+        message.error('请至少上传一张Banner图片')
         return
       }
       setSubmitting(true)
-      const data: BannerFormData = { ...values, imageUrl }
+      const data: BannerFormData = {
+        title: values.title,
+        subtitle: values.subtitle,
+        imageUrls,
+        sortOrder: values.sortOrder,
+        enabled: values.enabled,
+        autoplay: values.autoplay,
+        interval: values.autoplay ? Math.round((values.interval || 3) * 1000) : undefined,
+      }
       if (editing) {
         await updateBanner(editing.id, data)
         message.success('更新成功')
@@ -105,7 +121,7 @@ export default function BannerList() {
     try {
       setUploading(true)
       const res = await uploadImage(file)
-      setImageUrl(res.url)
+      setImageUrls(prev => [...prev, res.url])
       message.success('上传成功')
     } catch {
       message.error('上传失败')
@@ -115,21 +131,44 @@ export default function BannerList() {
     return false
   }
 
+  const moveImage = useCallback((index: number, direction: 'up' | 'down') => {
+    setImageUrls(prev => {
+      const arr = [...prev]
+      const targetIndex = direction === 'up' ? index - 1 : index + 1
+      if (targetIndex < 0 || targetIndex >= arr.length) return prev
+      ;[arr[index], arr[targetIndex]] = [arr[targetIndex], arr[index]]
+      return arr
+    })
+  }, [])
+
+  const removeImage = useCallback((index: number) => {
+    setImageUrls(prev => prev.filter((_, i) => i !== index))
+  }, [])
+
   const columns: ColumnsType<Banner> = [
     {
       title: '图片',
-      dataIndex: 'imageUrl',
-      key: 'imageUrl',
-      width: 80,
-      render: (url: string) => (
-        <Image
-          src={url}
-          width={60}
-          height={36}
-          style={{ objectFit: 'cover', borderRadius: 4 }}
-          preview={false}
-        />
-      )
+      dataIndex: 'imageUrls',
+      key: 'imageUrls',
+      width: 100,
+      render: (urls: string[]) => {
+        const count = urls?.length || 0
+        const first = urls?.[0]
+        return (
+          <Space size={4} align="center">
+            {first && (
+              <Image
+                src={first}
+                width={48}
+                height={30}
+                style={{ objectFit: 'cover', borderRadius: 4 }}
+                preview={false}
+              />
+            )}
+            <Tag color="blue">{count}张</Tag>
+          </Space>
+        )
+      }
     },
     {
       title: '标题',
@@ -143,6 +182,17 @@ export default function BannerList() {
       key: 'subtitle',
       ellipsis: true,
     } as any] : []),
+    {
+      title: '轮播',
+      dataIndex: 'autoplay',
+      key: 'autoplay',
+      width: 70,
+      render: (val: boolean) => (
+        <Tag color={val !== false ? 'green' : 'default'}>
+          {val !== false ? '开' : '关'}
+        </Tag>
+      )
+    },
     {
       title: '排序',
       dataIndex: 'sortOrder',
@@ -207,7 +257,7 @@ export default function BannerList() {
           loading={loading}
           size={isMobile ? 'small' : 'middle'}
           pagination={{ pageSize: 10, showSizeChanger: false, size: 'small' }}
-          scroll={isMobile ? { x: 500 } : undefined}
+          scroll={isMobile ? { x: 600 } : undefined}
         />
       </Card>
 
@@ -218,6 +268,7 @@ export default function BannerList() {
         onOk={handleSubmit}
         confirmLoading={submitting}
         destroyOnClose
+        width={560}
       >
         <Form form={form} layout="vertical">
           <Form.Item label="Banner图片" required>
@@ -225,24 +276,82 @@ export default function BannerList() {
               showUploadList={false}
               beforeUpload={handleUpload as any}
               accept="image/*"
+              multiple
             >
               <Button icon={<UploadOutlined />} loading={uploading}>上传图片</Button>
             </Upload>
-            {imageUrl && (
-              <Image
-                src={imageUrl}
-                width={200}
-                height={120}
-                style={{ objectFit: 'cover', borderRadius: 8, marginTop: 8 }}
-              />
+            {imageUrls.length > 0 && (
+              <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {imageUrls.map((url, index) => (
+                  <div
+                    key={`${url}-${index}`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: 8,
+                      background: '#fafafa',
+                      borderRadius: 8,
+                      border: '1px solid #f0f0f0',
+                    }}
+                  >
+                    <Image
+                      src={url}
+                      width={80}
+                      height={50}
+                      style={{ objectFit: 'cover', borderRadius: 6, flexShrink: 0 }}
+                      preview={{ mask: '预览' }}
+                    />
+                    <span style={{ flex: 1, fontSize: 12, color: '#999' }}>
+                      第{index + 1}张
+                    </span>
+                    <Space size={2}>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<ArrowUpOutlined />}
+                        disabled={index === 0}
+                        onClick={() => moveImage(index, 'up')}
+                      />
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<ArrowDownOutlined />}
+                        disabled={index === imageUrls.length - 1}
+                        onClick={() => moveImage(index, 'down')}
+                      />
+                      <Button
+                        type="text"
+                        size="small"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => removeImage(index)}
+                      />
+                    </Space>
+                  </div>
+                ))}
+              </div>
             )}
           </Form.Item>
+
           <Form.Item name="title" label="标题" rules={[{ required: true, message: '请输入标题' }]}>
             <Input placeholder="请输入Banner标题" />
           </Form.Item>
           <Form.Item name="subtitle" label="副标题">
             <Input placeholder="请输入副标题（可选）" />
           </Form.Item>
+
+          <Space size={16}>
+            <Form.Item name="autoplay" label="开启轮播" valuePropName="checked" initialValue={true}>
+              <Switch onChange={val => setAutoplay(val)} />
+            </Form.Item>
+            {autoplay && (
+              <Form.Item name="interval" label="轮播时长(秒)" initialValue={3}>
+                <InputNumber min={1} max={30} step={0.5} style={{ width: 120 }} />
+              </Form.Item>
+            )}
+          </Space>
+
           <Form.Item name="sortOrder" label="排序" initialValue={0}>
             <InputNumber min={0} style={{ width: '100%' }} />
           </Form.Item>

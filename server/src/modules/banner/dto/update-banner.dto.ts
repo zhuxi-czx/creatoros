@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsInt, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsInt, IsBoolean, IsArray, Min } from 'class-validator';
 
 export class UpdateBannerDto {
   @IsOptional()
@@ -10,8 +10,18 @@ export class UpdateBannerDto {
   subtitle?: string;
 
   @IsOptional()
-  @IsString()
-  imageUrl?: string;
+  @IsArray()
+  @IsString({ each: true })
+  imageUrls?: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  autoplay?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1000)
+  interval?: number;
 
   @IsOptional()
   @IsInt()

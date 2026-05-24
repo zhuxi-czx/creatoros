@@ -5,6 +5,9 @@ export interface Event {
   title: string
   description?: string
   coverUrl?: string
+  imageUrls?: string[]
+  autoplay?: boolean
+  interval?: number
   date: string
   venueId: string
   hostName?: string
@@ -22,6 +25,9 @@ export interface EventFormData {
   title: string
   description?: string
   coverUrl?: string
+  imageUrls?: string[]
+  autoplay?: boolean
+  interval?: number
   date: string
   venueId: string
   hostName?: string

@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   Card, Form, Input, Button, DatePicker, InputNumber,
-  message, Space, Typography, Divider, Select, Upload, Switch
+  message, Space, Typography, Divider, Select, Upload, Switch, Image
 } from 'antd'
-import { ArrowLeftOutlined, SaveOutlined, SendOutlined, UploadOutlined } from '@ant-design/icons'
+import {
+  ArrowLeftOutlined, SaveOutlined, SendOutlined, UploadOutlined,
+  ArrowUpOutlined, ArrowDownOutlined, DeleteOutlined
+} from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { createEvent, updateEvent, updateEventStatus, getEventDetail, getVenues, uploadImage, type EventFormData } from '../services/event'
 
@@ -20,7 +23,7 @@ export default function EventForm() {
   const [fetchLoading, setFetchLoading] = useState(isEdit)
   const [currentStatus, setCurrentStatus] = useState('DRAFT')
   const [venues, setVenues] = useState<any[]>([])
-  const [coverUrl, setCoverUrl] = useState<string>('')
+  const [imageUrls, setImageUrls] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
@@ -48,8 +51,14 @@ export default function EventForm() {
         date: event.date ? dayjs(event.date) : undefined,
         venueId: event.venueId,
         featured: event.featured,
+        autoplay: event.autoplay !== false,
+        interval: event.interval ? event.interval / 1000 : 3,
       })
-      if (event.coverUrl) setCoverUrl(event.coverUrl)
+      if (event.imageUrls && event.imageUrls.length > 0) {
+        setImageUrls(event.imageUrls)
+      } else if (event.coverUrl) {
+        setImageUrls([event.coverUrl])
+      }
       setCurrentStatus(event.status)
     } catch {
       message.error('加载活动失败')
@@ -62,8 +71,8 @@ export default function EventForm() {
     try {
       setUploading(true)
       const res = await uploadImage(file)
-      setCoverUrl(res.url)
-      message.success('封面上传成功')
+      setImageUrls(prev => [...prev, res.url])
+      message.success('图片上传成功')
     } catch {
       message.error('上传失败')
     } finally {
@@ -71,6 +80,20 @@ export default function EventForm() {
     }
     return false // prevent default upload
   }
+
+  const moveImage = useCallback((index: number, direction: 'up' | 'down') => {
+    setImageUrls(prev => {
+      const arr = [...prev]
+      const targetIndex = direction === 'up' ? index - 1 : index + 1
+      if (targetIndex < 0 || targetIndex >= arr.length) return prev
+      ;[arr[index], arr[targetIndex]] = [arr[targetIndex], arr[index]]
+      return arr
+    })
+  }, [])
+
+  const removeImage = useCallback((index: number) => {
+    setImageUrls(prev => prev.filter((_, i) => i !== index))
+  }, [])
 
   const handleSubmit = async (values: Record<string, unknown>, publish = false) => {
     const data: EventFormData = {
@@ -81,7 +104,12 @@ export default function EventForm() {
       hostName: values.hostName as string,
       maxCapacity: values.maxCapacity as number,
       price: ((values.price as number) || 0) * 100,
-      coverUrl: coverUrl || undefined,
+      coverUrl: imageUrls[0] || undefined,
+      imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
+      autoplay: imageUrls.length > 1 ? (values.autoplay as boolean) : undefined,
+      interval: imageUrls.length > 1 && values.autoplay
+        ? Math.round(((values.interval as number) || 3) * 1000)
+        : undefined,
       status: publish ? 'PUBLISHED' : undefined,
       featured: values.featured as boolean,
     }
@@ -123,26 +151,89 @@ export default function EventForm() {
 
       <Card bordered={false} style={{ borderRadius: 16 }} loading={fetchLoading}>
         <Form form={form} layout="vertical" onFinish={values => handleSubmit(values, false)}>
-          {/* Cover upload */}
-          <Form.Item label="封面图片">
-            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-              <div style={{
-                width: 160, height: 100, borderRadius: 12, overflow: 'hidden', flexShrink: 0,
-                background: coverUrl ? undefined : 'linear-gradient(135deg, #8B5CF6, #EC4899)',
-              }}>
-                {coverUrl && <img src={coverUrl} alt="封面" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+          {/* Multi-image upload */}
+          <Form.Item label="活动图片">
+            <Upload
+              accept="image/*"
+              showUploadList={false}
+              multiple
+              beforeUpload={file => { handleUpload(file); return false }}
+            >
+              <Button icon={<UploadOutlined />} loading={uploading}>
+                上传图片
+              </Button>
+            </Upload>
+            {imageUrls.length > 0 && (
+              <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {imageUrls.map((url, index) => (
+                  <div
+                    key={`${url}-${index}`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: 8,
+                      background: '#fafafa',
+                      borderRadius: 8,
+                      border: '1px solid #f0f0f0',
+                    }}
+                  >
+                    <Image
+                      src={url}
+                      width={80}
+                      height={50}
+                      style={{ objectFit: 'cover', borderRadius: 6, flexShrink: 0 }}
+                      preview={{ mask: '预览' }}
+                    />
+                    <span style={{ flex: 1, fontSize: 12, color: index === 0 ? '#6366f1' : '#999' }}>
+                      {index === 0 ? '封面(第1张)' : `第${index + 1}张`}
+                    </span>
+                    <Space size={2}>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<ArrowUpOutlined />}
+                        disabled={index === 0}
+                        onClick={() => moveImage(index, 'up')}
+                      />
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<ArrowDownOutlined />}
+                        disabled={index === imageUrls.length - 1}
+                        onClick={() => moveImage(index, 'down')}
+                      />
+                      <Button
+                        type="text"
+                        size="small"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => removeImage(index)}
+                      />
+                    </Space>
+                  </div>
+                ))}
               </div>
-              <Upload
-                accept="image/*"
-                showUploadList={false}
-                beforeUpload={file => { handleUpload(file); return false }}
-              >
-                <Button icon={<UploadOutlined />} loading={uploading}>
-                  {coverUrl ? '更换封面' : '上传封面'}
-                </Button>
-              </Upload>
-            </div>
+            )}
           </Form.Item>
+
+          {/* Carousel settings - only show when more than 1 image */}
+          {imageUrls.length > 1 && (
+            <Space size={16} style={{ marginBottom: 16 }}>
+              <Form.Item name="autoplay" label="开启轮播" valuePropName="checked" initialValue={true} style={{ marginBottom: 0 }}>
+                <Switch />
+              </Form.Item>
+              <Form.Item noStyle shouldUpdate={(prev, cur) => prev.autoplay !== cur.autoplay}>
+                {({ getFieldValue }) =>
+                  getFieldValue('autoplay') ? (
+                    <Form.Item name="interval" label="轮播时长(秒)" initialValue={3} style={{ marginBottom: 0 }}>
+                      <InputNumber min={1} max={30} step={0.5} style={{ width: 120 }} />
+                    </Form.Item>
+                  ) : null
+                }
+              </Form.Item>
+            </Space>
+          )}
 
           <Form.Item label="活动名称" name="title" rules={[{ required: true, message: '请输入活动名称' }]}>
             <Input placeholder="请输入活动名称" maxLength={50} showCount />

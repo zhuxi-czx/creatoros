@@ -4,7 +4,9 @@ export interface Banner {
   id: string
   title: string
   subtitle?: string
-  imageUrl: string
+  imageUrls: string[]
+  autoplay?: boolean
+  interval?: number
   sortOrder: number
   enabled: boolean
   createdAt: string
@@ -14,7 +16,9 @@ export interface Banner {
 export interface BannerFormData {
   title: string
   subtitle?: string
-  imageUrl: string
+  imageUrls: string[]
+  autoplay?: boolean
+  interval?: number
   sortOrder?: number
   enabled?: boolean
 }

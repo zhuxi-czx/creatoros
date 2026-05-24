@@ -5,6 +5,7 @@ import {
   IsInt,
   Min,
   IsBoolean,
+  IsArray,
 } from 'class-validator';
 
 export class UpdateEventDto {
@@ -19,6 +20,20 @@ export class UpdateEventDto {
   @IsOptional()
   @IsString()
   coverUrl?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  imageUrls?: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  autoplay?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1000)
+  interval?: number;
 
   @IsOptional()
   @IsDateString()

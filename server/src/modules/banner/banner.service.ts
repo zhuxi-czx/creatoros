@@ -24,6 +24,9 @@ export class BannerService {
     return this.prisma.banner.create({
       data: {
         ...dto,
+        imageUrls: dto.imageUrls,
+        autoplay: dto.autoplay ?? true,
+        interval: dto.interval ?? 3000,
         sortOrder: dto.sortOrder ?? 0,
         enabled: dto.enabled ?? true,
       },

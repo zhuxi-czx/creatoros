@@ -250,6 +250,9 @@ export class EventService {
         date: new Date(dto.date),
         price: dto.price ?? 0,
         featured: dto.featured ?? false,
+        imageUrls: dto.imageUrls ?? [],
+        autoplay: dto.autoplay ?? true,
+        interval: dto.interval ?? 3000,
       },
       include: {
         venue: true,

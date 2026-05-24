@@ -74,6 +74,9 @@ model Event {
   title       String
   description String?
   coverUrl    String?
+  imageUrls   String[]    @default([])
+  autoplay    Boolean     @default(true)
+  interval    Int         @default(3000)
   date        DateTime
   venueId     String
   hostName    String?
@@ -103,12 +106,14 @@ model Signup {
 }
 
 model Banner {
-  id        String   @id @default(cuid())
-  title     String
-  subtitle  String?
-  imageUrl  String
-  sortOrder Int      @default(0)
-  enabled   Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(cuid())
+  title         String
+  subtitle      String?
+  imageUrls     String[] @default([])
+  autoplay      Boolean  @default(true)
+  interval      Int      @default(3000)
+  sortOrder     Int      @default(0)
+  enabled       Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
