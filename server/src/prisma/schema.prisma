@@ -92,6 +92,9 @@ model Event {
 
   venue   Venue    @relation(fields: [venueId], references: [id])
   signups Signup[]
+
+  @@index([status])
+  @@index([featured])
 }
 
 model Signup {
@@ -106,6 +109,8 @@ model Signup {
   event Event @relation(fields: [eventId], references: [id])
 
   @@unique([userId, eventId])
+  @@index([eventId])
+  @@index([userId])
 }
 
 model Banner {
@@ -119,4 +124,6 @@ model Banner {
   enabled       Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@index([enabled])
 }

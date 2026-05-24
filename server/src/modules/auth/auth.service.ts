@@ -89,7 +89,8 @@ export class AuthService {
     const { username, password } = adminLoginDto;
 
     const adminUsername = 'admin';
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    if (!adminPassword) throw new Error('ADMIN_PASSWORD must be set');
 
     if (username !== adminUsername || password !== adminPassword) {
       throw new UnauthorizedException('Invalid credentials');

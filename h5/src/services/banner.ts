@@ -4,8 +4,7 @@ export interface Banner {
   id: string
   title: string
   subtitle?: string
-  imageUrl?: string
-  imageUrls?: string[]
+  imageUrls: string[]
   autoplay?: boolean
   interval?: number
 }

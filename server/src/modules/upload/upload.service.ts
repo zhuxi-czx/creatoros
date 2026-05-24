@@ -28,59 +28,64 @@ export class UploadService {
   }
 
   async processImage(filePath: string, type: string = 'default'): Promise<string> {
-    const ratio = ASPECT_RATIOS[type] || ASPECT_RATIOS.default;
-    const targetRatio = ratio.width / ratio.height;
-    const maxWidth = ratio.maxWidth;
+    try {
+      const ratio = ASPECT_RATIOS[type] || ASPECT_RATIOS.default;
+      const targetRatio = ratio.width / ratio.height;
+      const maxWidth = ratio.maxWidth;
 
-    const image = sharp(filePath);
-    const metadata = await image.metadata();
+      const image = sharp(filePath);
+      const metadata = await image.metadata();
 
-    if (!metadata.width || !metadata.height) {
-      return filePath;
-    }
-
-    const currentRatio = metadata.width / metadata.height;
-    let pipeline = sharp(filePath);
-
-    // Center crop if aspect ratio differs by more than 5%
-    if (Math.abs(currentRatio - targetRatio) / targetRatio > 0.05) {
-      let cropWidth: number;
-      let cropHeight: number;
-
-      if (currentRatio > targetRatio) {
-        // Image is too wide, crop width
-        cropHeight = metadata.height;
-        cropWidth = Math.round(metadata.height * targetRatio);
-      } else {
-        // Image is too tall, crop height
-        cropWidth = metadata.width;
-        cropHeight = Math.round(metadata.width / targetRatio);
+      if (!metadata.width || !metadata.height) {
+        return filePath;
       }
 
-      pipeline = pipeline.resize(cropWidth, cropHeight, {
-        fit: 'cover',
-        position: 'centre',
-      });
+      const currentRatio = metadata.width / metadata.height;
+      let pipeline = sharp(filePath);
+
+      // Center crop if aspect ratio differs by more than 5%
+      if (Math.abs(currentRatio - targetRatio) / targetRatio > 0.05) {
+        let cropWidth: number;
+        let cropHeight: number;
+
+        if (currentRatio > targetRatio) {
+          // Image is too wide, crop width
+          cropHeight = metadata.height;
+          cropWidth = Math.round(metadata.height * targetRatio);
+        } else {
+          // Image is too tall, crop height
+          cropWidth = metadata.width;
+          cropHeight = Math.round(metadata.width / targetRatio);
+        }
+
+        pipeline = pipeline.resize(cropWidth, cropHeight, {
+          fit: 'cover',
+          position: 'centre',
+        });
+      }
+
+      // Resize if too large
+      if (metadata.width > maxWidth) {
+        pipeline = pipeline.resize(maxWidth, null, { withoutEnlargement: true });
+      }
+
+      // Compress and output as JPEG
+      const outputPath = filePath.replace(/\.\w+$/, '.jpg');
+      await pipeline
+        .jpeg({ quality: 82, mozjpeg: true })
+        .toFile(outputPath + '.tmp');
+
+      // Replace original
+      fs.unlinkSync(filePath);
+      if (outputPath !== filePath && fs.existsSync(outputPath)) {
+        fs.unlinkSync(outputPath);
+      }
+      fs.renameSync(outputPath + '.tmp', outputPath);
+
+      return outputPath;
+    } catch (error) {
+      console.error('Image processing failed, using original file:', error);
+      return filePath;
     }
-
-    // Resize if too large
-    if (metadata.width > maxWidth) {
-      pipeline = pipeline.resize(maxWidth, null, { withoutEnlargement: true });
-    }
-
-    // Compress and output as JPEG
-    const outputPath = filePath.replace(/\.\w+$/, '.jpg');
-    await pipeline
-      .jpeg({ quality: 82, mozjpeg: true })
-      .toFile(outputPath + '.tmp');
-
-    // Replace original
-    fs.unlinkSync(filePath);
-    if (outputPath !== filePath && fs.existsSync(outputPath)) {
-      fs.unlinkSync(outputPath);
-    }
-    fs.renameSync(outputPath + '.tmp', outputPath);
-
-    return outputPath;
   }
 }

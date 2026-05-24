@@ -142,7 +142,7 @@ export default function Home() {
                       overflow: 'hidden',
                     }}
                   >
-                    <LazyImage src={banner.imageUrls?.[0] || banner.imageUrl || ''} alt={banner.title} />
+                    <LazyImage src={banner.imageUrls[0]} alt={banner.title} />
                     <div style={{
                       position: 'absolute',
                       bottom: 0,
