@@ -268,33 +268,32 @@ export default function BannerList() {
           styles={{ body: { padding: isMobile ? 12 : 24 } }}
           title={<Title level={5} style={{ margin: 0 }}>轮播设置</Title>}
         >
-          <Space size={24} wrap>
-            <Space>
-              <span>开启轮播</span>
-              <Switch checked={autoplay} onChange={async (val) => {
-                setAutoplay(val)
-                try {
-                  await Promise.all(banners.map(b => updateBanner(b.id, { autoplay: val })))
-                  message.success('轮播设置已更新')
-                } catch { message.error('更新失败') }
-              }} />
-            </Space>
-            {autoplay && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+            <Space size={24} wrap>
+              <Space>
+                <span>开启轮播</span>
+                <Switch checked={autoplay} onChange={val => setAutoplay(val)} />
+              </Space>
               <Space>
                 <span>轮播时长(秒)</span>
                 <InputNumber value={interval} min={1} max={30} step={0.5} style={{ width: 100 }}
-                  onChange={async (val) => {
-                    const v = val || 3
-                    setInterval_(v)
-                    try {
-                      await Promise.all(banners.map(b => updateBanner(b.id, { interval: Math.round(v * 1000) })))
-                      message.success('轮播时长已更新')
-                    } catch { message.error('更新失败') }
-                  }}
-                />
+                  onChange={val => setInterval_(val || 3)} />
               </Space>
-            )}
-          </Space>
+            </Space>
+            <Button type="primary" style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', border: 'none' }}
+              onClick={async () => {
+                try {
+                  await Promise.all(banners.map(b => updateBanner(b.id, {
+                    autoplay,
+                    interval: Math.round(interval * 1000),
+                  })))
+                  message.success('轮播设置已保存并生效')
+                } catch { message.error('保存失败') }
+              }}
+            >
+              保存并生效
+            </Button>
+          </div>
           <div style={{ marginTop: 8, fontSize: 12, color: '#999' }}>
             设置后所有 Banner 图片将按此配置在首页自动轮播
           </div>

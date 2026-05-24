@@ -28,7 +28,11 @@ export default function EventForm() {
 
   useEffect(() => {
     loadVenues()
-    if (isEdit && id) loadEvent(id)
+    if (isEdit && id) {
+      loadEvent(id)
+    } else {
+      form.setFieldsValue({ autoplay: false, interval: 3 })
+    }
   }, [id])
 
   const loadVenues = async () => {
@@ -51,7 +55,7 @@ export default function EventForm() {
         date: event.date ? dayjs(event.date) : undefined,
         venueId: event.venueId,
         featured: event.featured,
-        autoplay: event.autoplay !== false,
+        autoplay: (event.imageUrls?.length || 0) > 1 ? event.autoplay !== false : false,
         interval: event.interval ? event.interval / 1000 : 3,
       })
       if (event.imageUrls && event.imageUrls.length > 0) {
@@ -238,17 +242,26 @@ export default function EventForm() {
           </Form.Item>
 
           {/* Carousel settings */}
-          <Space size={16} style={{ marginBottom: 16 }} align="center">
-            <Form.Item name="autoplay" label="开启轮播" valuePropName="checked" initialValue={false} style={{ marginBottom: 0 }}>
-              <Switch disabled={imageUrls.length <= 1} />
-            </Form.Item>
-            <Form.Item name="interval" label="轮播时长(秒)" initialValue={3} style={{ marginBottom: 0 }}>
-              <InputNumber min={1} max={30} step={0.5} style={{ width: 100 }} disabled={imageUrls.length <= 1} />
-            </Form.Item>
-            {imageUrls.length <= 1 && (
-              <span style={{ fontSize: 12, color: '#999' }}>上传2张及以上图片可开启轮播</span>
-            )}
-          </Space>
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 8 }}>
+              <span style={{ fontSize: 14 }}>轮播设置</span>
+              <span style={{ fontSize: 12, color: '#999', marginLeft: 8 }}>上传2张及以上图片可开启轮播</span>
+            </div>
+            <Space size={24} align="center">
+              <Space size={8} align="center">
+                <span style={{ fontSize: 13 }}>开启轮播</span>
+                <Form.Item name="autoplay" valuePropName="checked" initialValue={false} noStyle>
+                  <Switch disabled={imageUrls.length <= 1} />
+                </Form.Item>
+              </Space>
+              <Space size={8} align="center">
+                <span style={{ fontSize: 13 }}>轮播时长(秒)</span>
+                <Form.Item name="interval" initialValue={3} noStyle>
+                  <InputNumber min={1} max={30} step={0.5} style={{ width: 80 }} disabled={imageUrls.length <= 1} />
+                </Form.Item>
+              </Space>
+            </Space>
+          </div>
 
           <Form.Item label="活动名称" name="title" rules={[{ required: true, message: '请输入活动名称' }]}>
             <Input placeholder="请输入活动名称" maxLength={50} showCount />
@@ -270,17 +283,17 @@ export default function EventForm() {
             />
           </Form.Item>
 
-          <Space style={{ width: '100%' }} size={16}>
-            <Form.Item label="发起人" name="hostName" style={{ flex: 1 }}>
+          <div style={{ display: 'flex', gap: 16 }}>
+            <Form.Item label="发起人" name="hostName" style={{ flex: 1, marginBottom: 16 }}>
               <Input placeholder="发起人名称" />
             </Form.Item>
-            <Form.Item label="人数上限" name="maxCapacity" rules={[{ required: true, message: '请输入' }]} style={{ flex: 1 }}>
+            <Form.Item label="人数上限" name="maxCapacity" rules={[{ required: true, message: '请输入' }]} style={{ flex: 1, marginBottom: 16 }}>
               <InputNumber placeholder="30" min={1} style={{ width: '100%' }} />
             </Form.Item>
-            <Form.Item label="费用 (元)" name="price" style={{ flex: 1 }}>
+            <Form.Item label="费用 (元)" name="price" style={{ flex: 1, marginBottom: 16 }}>
               <InputNumber placeholder="0" min={0} style={{ width: '100%' }} />
             </Form.Item>
-          </Space>
+          </div>
 
           <Form.Item name="featured" valuePropName="checked" label="社区精选" style={{ marginBottom: 8 }}>
             <Switch checkedChildren="是" unCheckedChildren="否" />

@@ -147,6 +147,7 @@ export default function Discover() {
             return (
               <div
                 key={ev.id}
+                onClick={() => navigate(`/event/${ev.id}`)}
                 style={{
                   background: '#fff',
                   borderRadius: 12,
@@ -154,6 +155,7 @@ export default function Discover() {
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 10,
+                  cursor: 'pointer',
                 }}
               >
                 {/* Title */}

@@ -50,7 +50,7 @@ export default function VenueList() {
       setEditing(record)
       setCoverUrl(record.coverUrl || '')
       setImageUrls(record.imageUrls || [])
-      setAutoplay(record.autoplay ?? true)
+      setAutoplay((record.imageUrls?.length || 0) > 1 ? (record.autoplay ?? true) : false)
       setInterval_(record.interval ? record.interval / 1000 : 3)
       form.setFieldsValue({
         name: record.name,
@@ -244,20 +244,25 @@ export default function VenueList() {
                 ))}
               </div>
             )}
-            {imageUrls.length > 1 && (
-              <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 16 }}>
-                <Space>
-                  <Text style={{ fontSize: 13 }}>开启轮播</Text>
-                  <Switch checked={autoplay} onChange={setAutoplay} size="small" />
-                </Space>
-                {autoplay && (
-                  <Space>
-                    <Text style={{ fontSize: 13 }}>时长(秒)</Text>
-                    <InputNumber value={interval} onChange={v => setInterval_(v || 3)} min={1} max={30} step={0.5} size="small" style={{ width: 80 }} />
-                  </Space>
-                )}
+            <div style={{ marginTop: 12 }}>
+              <div style={{ marginBottom: 8 }}>
+                <span style={{ fontSize: 14 }}>轮播设置</span>
+                <span style={{ fontSize: 12, color: '#999', marginLeft: 8 }}>上传2张及以上图片可开启轮播</span>
               </div>
-            )}
+              <Space size={24} align="center">
+                <Space size={8} align="center">
+                  <span style={{ fontSize: 13 }}>开启轮播</span>
+                  <Switch checked={autoplay} onChange={val => {
+                    setAutoplay(val)
+                    if (imageUrls.length <= 1) setAutoplay(false)
+                  }} disabled={imageUrls.length <= 1} size="small" />
+                </Space>
+                <Space size={8} align="center">
+                  <span style={{ fontSize: 13 }}>轮播时长(秒)</span>
+                  <InputNumber value={interval} onChange={v => setInterval_(v || 3)} min={1} max={30} step={0.5} size="small" style={{ width: 80 }} disabled={imageUrls.length <= 1} />
+                </Space>
+              </Space>
+            </div>
           </Form.Item>
 
           <Divider style={{ margin: '12px 0' }} />
