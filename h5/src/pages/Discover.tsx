@@ -37,40 +37,6 @@ export default function Discover() {
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#F7F7F7' }}>
-      {/* Status Bar */}
-      <div style={{
-        height: 44,
-        background: '#fff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 16px',
-      }}>
-        <span style={{ fontSize: 15, fontWeight: 600, color: '#000' }}>9:41</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {/* Signal */}
-          <svg width="16" height="12" viewBox="0 0 16 12">
-            <rect x="0" y="7" width="3" height="5" rx="1" fill="#000" />
-            <rect x="4.5" y="4.5" width="3" height="7.5" rx="1" fill="#000" />
-            <rect x="9" y="2" width="3" height="10" rx="1" fill="#000" />
-            <rect x="13" y="0" width="3" height="12" rx="1" fill="#000" />
-          </svg>
-          {/* WiFi */}
-          <svg width="14" height="12" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12.55a11 11 0 0 1 14.08 0" />
-            <path d="M1.42 9a16 16 0 0 1 21.16 0" />
-            <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-            <circle cx="12" cy="20" r="1" fill="#000" />
-          </svg>
-          {/* Battery */}
-          <svg width="24" height="12" viewBox="0 0 24 12">
-            <rect x="0" y="0.5" width="20" height="11" rx="2" stroke="#000" strokeWidth="1" fill="none" />
-            <rect x="2" y="2.5" width="16" height="7" rx="1" fill="#000" />
-            <rect x="21" y="3.5" width="2" height="5" rx="1" fill="#000" />
-          </svg>
-        </div>
-      </div>
-
       {/* Nav Bar */}
       <div style={{
         height: 48,
@@ -96,21 +62,6 @@ export default function Discover() {
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
           <span style={{ fontSize: 13, color: '#BBB' }}>搜索活动、主题、场地</span>
-        </div>
-        {/* Mini-program capsule */}
-        <div style={{
-          height: 32,
-          borderRadius: 16,
-          background: '#F0F0F0',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 12px',
-          gap: 8,
-          flexShrink: 0,
-        }}>
-          <span style={{ fontSize: 16, color: '#666', lineHeight: 1 }}>···</span>
-          <span style={{ width: 1, height: 16, background: '#D0D0D0' }} />
-          <span style={{ fontSize: 16, color: '#666', lineHeight: 1 }}>—</span>
         </div>
       </div>
 

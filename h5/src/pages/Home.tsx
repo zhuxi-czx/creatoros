@@ -88,85 +88,16 @@ export default function Home() {
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       background: '#F7F7F7',
     }}>
-      {/* Status Bar */}
-      <div style={{
-        height: 44,
-        background: '#fff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 16px',
-        flexShrink: 0,
-      }}>
-        <span style={{ fontSize: 15, fontWeight: 600, color: '#000' }}>9:41</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {/* Signal */}
-          <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
-            <rect x="0" y="8" width="3" height="4" rx="0.5" fill="#000" />
-            <rect x="4.5" y="5" width="3" height="7" rx="0.5" fill="#000" />
-            <rect x="9" y="2" width="3" height="10" rx="0.5" fill="#000" />
-            <rect x="13.5" y="0" width="2.5" height="12" rx="0.5" fill="#000" opacity="0.3" />
-          </svg>
-          {/* WiFi */}
-          <svg width="15" height="12" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12.55a11 11 0 0 1 14.08 0" />
-            <path d="M1.42 9a16 16 0 0 1 21.16 0" />
-            <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-            <circle cx="12" cy="20" r="1" fill="#000" />
-          </svg>
-          {/* Battery */}
-          <svg width="24" height="12" viewBox="0 0 28 13" fill="none">
-            <rect x="0.5" y="0.5" width="22" height="12" rx="2.5" stroke="#000" strokeOpacity="0.35" />
-            <rect x="2" y="2" width="19" height="9" rx="1.5" fill="#000" />
-            <path d="M24 4.5v4a2 2 0 0 0 0-4z" fill="#000" opacity="0.4" />
-          </svg>
-        </div>
-      </div>
-
       {/* Nav Bar */}
       <div style={{
         height: 44,
         background: '#fff',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
         padding: '0 16px',
         flexShrink: 0,
       }}>
         <span style={{ fontSize: 20, fontWeight: 700, color: '#1A1A1A' }}>首页</span>
-        {/* Mini-program capsule button */}
-        <div style={{
-          height: 32,
-          borderRadius: 16,
-          background: '#F0F0F0',
-          border: '0.5px solid #E0E0E0',
-          display: 'flex',
-          alignItems: 'center',
-          overflow: 'hidden',
-        }}>
-          <div style={{
-            width: 40,
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 14,
-            fontWeight: 700,
-            color: '#333',
-            letterSpacing: 1,
-          }}>···</div>
-          <div style={{ width: 0.5, height: 18, background: '#D0D0D0' }} />
-          <div style={{
-            width: 40,
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 16,
-            fontWeight: 500,
-            color: '#333',
-          }}>—</div>
-        </div>
       </div>
 
       {/* Scrollable Content */}

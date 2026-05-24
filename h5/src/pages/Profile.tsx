@@ -73,68 +73,17 @@ export default function Profile() {
         zIndex: 1,
       }} />
 
-      {/* Status Bar */}
-      <div style={{
-        height: 44,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 16px',
-        background: 'transparent',
-        position: 'relative',
-        zIndex: 2,
-      }}>
-        <span style={{ fontSize: 15, fontWeight: 600, color: '#000' }}>9:41</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          {/* Signal */}
-          <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
-            <rect x="0" y="8" width="3" height="4" rx="0.5" fill="#000" />
-            <rect x="4.5" y="5" width="3" height="7" rx="0.5" fill="#000" />
-            <rect x="9" y="2" width="3" height="10" rx="0.5" fill="#000" />
-            <rect x="13.5" y="0" width="2.5" height="12" rx="0.5" fill="#000" fillOpacity="0.3" />
-          </svg>
-          {/* WiFi */}
-          <svg width="15" height="12" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12.55a11 11 0 0 1 14.08 0" />
-            <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-            <circle cx="12" cy="20" r="1" fill="#000" stroke="none" />
-          </svg>
-          {/* Battery */}
-          <svg width="24" height="12" viewBox="0 0 24 12" fill="none">
-            <rect x="0" y="0.5" width="20" height="11" rx="2" stroke="#000" strokeWidth="1" />
-            <rect x="2" y="2.5" width="14" height="7" rx="1" fill="#000" />
-            <rect x="21" y="3.5" width="2.5" height="5" rx="1" fill="#000" fillOpacity="0.3" />
-          </svg>
-        </div>
-      </div>
-
       {/* Nav Bar */}
       <div style={{
         height: 44,
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
         padding: '0 16px',
         background: 'transparent',
         position: 'relative',
         zIndex: 2,
       }}>
         <span style={{ fontSize: 20, fontWeight: 700, color: '#1A1A1A' }}>我的</span>
-        {/* Mini-program capsule */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          background: '#F0F0F0',
-          borderRadius: 16,
-          padding: '5px 12px',
-        }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="1" />
-            <circle cx="19" cy="12" r="1" />
-            <circle cx="5" cy="12" r="1" />
-          </svg>
-        </div>
       </div>
 
       {/* Profile Header */}
