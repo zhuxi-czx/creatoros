@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { View, Text } from '@tarojs/components'
+import { View, Text, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import './index.scss'
 
@@ -9,10 +9,10 @@ interface TabBarProps {
   active: TabKey
 }
 
-const tabs: { key: TabKey; label: string; path: string; icon: string }[] = [
-  { key: 'home', label: '首页', path: '/pages/index/index', icon: '⌂' },
-  { key: 'discover', label: '发现', path: '/pages/discover/index', icon: '◎' },
-  { key: 'profile', label: '我的', path: '/pages/profile/index', icon: '♟' },
+const tabs: { key: TabKey; label: string; path: string; icon: string; activeIcon: string }[] = [
+  { key: 'home', label: '首页', path: '/pages/index/index', icon: '/assets/tab-home.png', activeIcon: '/assets/tab-home-active.png' },
+  { key: 'discover', label: '发现', path: '/pages/discover/index', icon: '/assets/tab-discover.png', activeIcon: '/assets/tab-discover-active.png' },
+  { key: 'profile', label: '我的', path: '/pages/profile/index', icon: '/assets/tab-profile.png', activeIcon: '/assets/tab-profile-active.png' },
 ]
 
 export default function TabBar({ active }: TabBarProps) {
@@ -36,7 +36,7 @@ export default function TabBar({ active }: TabBarProps) {
               className={`tabbar-item ${isActive ? 'active' : ''}`}
               onClick={() => handleTap(tab)}
             >
-              <Text className={`tabbar-icon ${isActive ? 'active' : ''}`}>{tab.icon}</Text>
+              <Image className='tabbar-icon-img' src={isActive ? tab.activeIcon : tab.icon} mode='aspectFit' />
               <Text className={`tabbar-label ${isActive ? 'active' : ''}`}>{tab.label}</Text>
             </View>
           )

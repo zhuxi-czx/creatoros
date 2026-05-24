@@ -19,7 +19,9 @@ export default defineConfig<'webpack5'>({
   ],
   defineConstants: {},
   copy: {
-    patterns: [],
+    patterns: [
+      { from: 'src/assets/', to: 'dist/assets/', ignore: ['*.js'] }
+    ],
     options: {}
   },
   framework: 'react',

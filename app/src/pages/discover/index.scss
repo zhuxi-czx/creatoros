@@ -3,56 +3,30 @@ $accent: #C9A96E;
 .discover-page {
   min-height: 100vh;
   background: #F7F7F7;
-  display: flex;
-  flex-direction: column;
-}
-
-// Search Bar
-.search-bar {
-  padding: 16rpx 32rpx;
-  background: #fff;
-}
-
-.search-input {
-  height: 72rpx;
-  border-radius: 36rpx;
-  background: #F0F0F0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12rpx;
-}
-
-.search-icon {
-  font-size: 28rpx;
-}
-
-.search-placeholder {
-  font-size: 26rpx;
-  color: #BBB;
 }
 
 // Tag Filter
-.tag-scroll {
-  display: flex;
-  flex-wrap: nowrap;
+.tag-bar {
   background: #fff;
   padding: 16rpx 32rpx;
   border-bottom: 1rpx solid #F0F0F0;
+}
+
+.tag-scroll {
   white-space: nowrap;
-  flex-shrink: 0;
-  overflow: visible;
 }
 
 .tag-item {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 12rpx 28rpx;
   border-radius: 40rpx;
   background: #FFFFFF;
   border: 2rpx solid #E0E0E0;
   margin-right: 20rpx;
-  flex-shrink: 0;
-  white-space: nowrap;
+  height: 56rpx;
+  box-sizing: border-box;
 
   &.active {
     background: #1A1A1A;
@@ -65,6 +39,7 @@ $accent: #C9A96E;
   font-weight: 500;
   color: #666;
   white-space: nowrap;
+  line-height: 1;
 
   &.active {
     color: #fff;
@@ -74,7 +49,6 @@ $accent: #C9A96E;
 
 // Event List
 .event-list {
-  flex: 1;
   padding: 16rpx 32rpx 200rpx;
 }
 

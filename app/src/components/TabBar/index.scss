@@ -36,14 +36,9 @@
   }
 }
 
-.tabbar-icon {
-  font-size: 36rpx;
-  line-height: 1;
-  color: #999;
-
-  &.active {
-    color: #fff;
-  }
+.tabbar-icon-img {
+  width: 36rpx;
+  height: 36rpx;
 }
 
 .tabbar-label {

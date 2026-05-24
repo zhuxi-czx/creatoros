@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { getEvents, Event } from '../services/event'
 import TabBar from '../components/TabBar'
+import LazyImage from '../components/LazyImage'
 
 const TAGS = ['全部', '音乐', '品鉴', '沙龙', '脱口秀', '派对']
 
@@ -117,9 +118,21 @@ export default function Discover() {
         background: '#F7F7F7',
       }}>
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}>
-            <div className="spinner" />
-          </div>
+          [0, 1, 2].map(i => (
+            <div key={i} style={{ background: '#fff', borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ width: '60%', height: 18, background: '#F0EBE3', borderRadius: 4 }} />
+              <div style={{ display: 'flex', gap: 12 }}>
+                <div style={{ width: 80, height: 14, background: '#F0EBE3', borderRadius: 4 }} />
+                <div style={{ width: 50, height: 14, background: '#F0EBE3', borderRadius: 4 }} />
+                <div style={{ width: 60, height: 14, background: '#F0EBE3', borderRadius: 4 }} />
+              </div>
+              <div style={{ width: '100%', height: 160, background: '#F0EBE3', borderRadius: 8 }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ width: 100, height: 14, background: '#F0EBE3', borderRadius: 4 }} />
+                <div style={{ width: 80, height: 32, background: '#F0EBE3', borderRadius: 20 }} />
+              </div>
+            </div>
+          ))
         ) : events.length === 0 ? (
           <div style={{ textAlign: 'center', padding: 40, color: '#999', fontSize: 14 }}>
             暂无活动
@@ -185,15 +198,10 @@ export default function Discover() {
 
                 {/* Cover image */}
                 {ev.coverUrl ? (
-                  <img
+                  <LazyImage
                     src={ev.coverUrl}
                     alt={ev.title}
-                    style={{
-                      width: '100%',
-                      height: 160,
-                      borderRadius: 8,
-                      objectFit: 'cover',
-                    }}
+                    style={{ width: '100%', height: 160, borderRadius: 8 }}
                   />
                 ) : (
                   <div style={{

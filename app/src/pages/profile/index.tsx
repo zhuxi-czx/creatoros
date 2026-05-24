@@ -5,7 +5,7 @@ import { useAuthStore } from '../../stores/useAuthStore'
 import { wxLogin } from '../../services/auth'
 import { getMySignups } from '../../services/user'
 import type { SignupRecord } from '../../services/user'
-import TabBar from '../../components/TabBar'
+import NavBar from '../../components/NavBar'
 import './index.scss'
 
 export default function Profile() {
@@ -76,6 +76,8 @@ export default function Profile() {
 
   return (
     <View className='profile-page'>
+      <NavBar title='我的' />
+
       {/* Gradient background */}
       <View className='profile-bg' />
       <View className='profile-bg-overlay' />
@@ -212,8 +214,6 @@ export default function Profile() {
         )}
       </ScrollView>
 
-      {/* Custom TabBar */}
-      <TabBar active='profile' />
     </View>
   )
 }

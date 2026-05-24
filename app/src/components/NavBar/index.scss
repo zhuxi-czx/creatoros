@@ -1,0 +1,39 @@
+.navbar {
+  background: #fff;
+  width: 100%;
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  height: 88rpx;
+  padding: 0 32rpx;
+  gap: 20rpx;
+}
+
+.navbar-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1A1A1A;
+  flex-shrink: 0;
+}
+
+.navbar-search {
+  flex: 1;
+  height: 60rpx;
+  border-radius: 30rpx;
+  background: #F0F0F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+}
+
+.navbar-search-icon {
+  font-size: 24rpx;
+}
+
+.navbar-search-text {
+  font-size: 24rpx;
+  color: #BBB;
+}

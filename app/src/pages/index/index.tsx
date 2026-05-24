@@ -7,14 +7,14 @@ import { getFeaturedEvents } from '../../services/event'
 import type { Banner } from '../../services/banner'
 import type { Venue } from '../../services/venue'
 import type { Event } from '../../services/event'
-import TabBar from '../../components/TabBar'
+import NavBar from '../../components/NavBar'
 import './index.scss'
 
 const FEATURE_ICONS = [
-  { label: '主题分享', icon: '💬' },
-  { label: '活动策划', icon: '📅' },
-  { label: 'PlanF', icon: '🚀' },
-  { label: 'Creator', icon: '⭐' },
+  { label: '主题分享', icon: '/assets/icon-chat.png' },
+  { label: '活动策划', icon: '/assets/icon-calendar.png' },
+  { label: 'PlanF', icon: '/assets/icon-rocket.png' },
+  { label: 'Creator', icon: '/assets/icon-star.png' },
 ]
 
 const VENUE_COLORS = [
@@ -68,6 +68,8 @@ export default function Index() {
 
   return (
     <View className='index-page'>
+      <NavBar title='首页' />
+
       {/* Banner Carousel */}
       <View className='banner-section'>
         {banners.length > 0 ? (
@@ -110,7 +112,7 @@ export default function Index() {
         {FEATURE_ICONS.map((item, i) => (
           <View key={i} className='feature-item'>
             <View className='feature-icon-wrap'>
-              <Text className='feature-icon'>{item.icon}</Text>
+              <Image className='feature-icon-img' src={item.icon} mode='aspectFit' />
             </View>
             <Text className='feature-label'>{item.label}</Text>
           </View>
@@ -209,8 +211,6 @@ export default function Index() {
         )}
       </View>
 
-      {/* Custom TabBar */}
-      <TabBar active='home' />
     </View>
   )
 }
