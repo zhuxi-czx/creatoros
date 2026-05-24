@@ -7,6 +7,9 @@ export interface Venue {
   city: string
   description?: string
   coverUrl?: string
+  imageUrls?: string[]
+  autoplay?: boolean
+  interval?: number
   latitude?: number
   longitude?: number
   createdAt: string
@@ -20,6 +23,9 @@ export interface VenueFormData {
   city: string
   description?: string
   coverUrl?: string
+  imageUrls?: string[]
+  autoplay?: boolean
+  interval?: number
   latitude?: number
   longitude?: number
 }

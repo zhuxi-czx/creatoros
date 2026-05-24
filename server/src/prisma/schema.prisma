@@ -61,6 +61,9 @@ model Venue {
   city        String
   description String?
   coverUrl    String?
+  imageUrls   String[] @default([])
+  autoplay    Boolean  @default(true)
+  interval    Int      @default(3000)
   latitude    Float?
   longitude   Float?
   createdAt   DateTime @default(now())
