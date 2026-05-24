@@ -51,21 +51,19 @@ export default function BannerList() {
     if (record) {
       setEditing(record)
       setImageUrls(record.imageUrls || [])
-      setAutoplay(record.autoplay !== false)
+      // autoplay/interval managed globally, not per-banner modal
       form.setFieldsValue({
         title: record.title,
         subtitle: record.subtitle,
         sortOrder: record.sortOrder,
         enabled: record.enabled,
-        autoplay: record.autoplay !== false,
-        interval: record.interval ? record.interval / 1000 : 3,
       })
     } else {
       setEditing(null)
       setImageUrls([])
       setAutoplay(true)
       form.resetFields()
-      form.setFieldsValue({ sortOrder: 0, enabled: true, autoplay: true, interval: 3 })
+      form.setFieldsValue({ sortOrder: 0, enabled: true })
     }
     setModalOpen(true)
   }
@@ -84,8 +82,6 @@ export default function BannerList() {
         imageUrls,
         sortOrder: values.sortOrder,
         enabled: values.enabled,
-        autoplay: values.autoplay,
-        interval: values.autoplay ? Math.round((values.interval || 3) * 1000) : undefined,
       }
       if (editing) {
         await updateBanner(editing.id, data)
@@ -200,17 +196,6 @@ export default function BannerList() {
       ellipsis: true,
     } as any] : []),
     {
-      title: '轮播',
-      dataIndex: 'autoplay',
-      key: 'autoplay',
-      width: 70,
-      render: (val: boolean) => (
-        <Tag color={val !== false ? 'green' : 'default'}>
-          {val !== false ? '开' : '关'}
-        </Tag>
-      )
-    },
-    {
       title: '排序',
       dataIndex: 'sortOrder',
       key: 'sortOrder',
@@ -279,14 +264,13 @@ export default function BannerList() {
       </Card>
 
       {/* Global Carousel Settings */}
-      {banners.length > 1 && (
-        <Card bordered={false} style={{ borderRadius: 12, marginTop: 16 }}
+      <Card bordered={false} style={{ borderRadius: 12, marginTop: 16 }}
           styles={{ body: { padding: isMobile ? 12 : 24 } }}
           title={<Title level={5} style={{ margin: 0 }}>轮播设置</Title>}
         >
           <Space size={24} wrap>
             <Space>
-              <Text>开启轮播</Text>
+              <span>开启轮播</span>
               <Switch checked={autoplay} onChange={async (val) => {
                 setAutoplay(val)
                 try {
@@ -297,7 +281,7 @@ export default function BannerList() {
             </Space>
             {autoplay && (
               <Space>
-                <Text>轮播时长(秒)</Text>
+                <span>轮播时长(秒)</span>
                 <InputNumber value={interval} min={1} max={30} step={0.5} style={{ width: 100 }}
                   onChange={async (val) => {
                     const v = val || 3
@@ -315,7 +299,6 @@ export default function BannerList() {
             设置后所有 Banner 图片将按此配置在首页自动轮播
           </div>
         </Card>
-      )}
 
       <Modal
         title={editing ? '编辑 Banner' : '新增 Banner'}

@@ -80,7 +80,11 @@ export default function EventForm() {
     try {
       setUploading(true)
       const res = await uploadImage(file, 'event')
-      setImageUrls(prev => [...prev, res.url])
+      setImageUrls(prev => {
+        const next = [...prev, res.url]
+        if (next.length > 1) form.setFieldValue('autoplay', true)
+        return next
+      })
       message.success('图片上传成功')
     } catch {
       message.error('上传失败')
@@ -101,8 +105,12 @@ export default function EventForm() {
   }, [])
 
   const removeImage = useCallback((index: number) => {
-    setImageUrls(prev => prev.filter((_, i) => i !== index))
-  }, [])
+    setImageUrls(prev => {
+      const next = prev.filter((_, i) => i !== index)
+      if (next.length <= 1) form.setFieldValue('autoplay', false)
+      return next
+    })
+  }, [form])
 
   const handleSubmit = async (values: Record<string, unknown>, publish = false) => {
     const data: EventFormData = {
@@ -229,23 +237,18 @@ export default function EventForm() {
             )}
           </Form.Item>
 
-          {/* Carousel settings - only show when more than 1 image */}
-          {imageUrls.length > 1 && (
-            <Space size={16} style={{ marginBottom: 16 }}>
-              <Form.Item name="autoplay" label="开启轮播" valuePropName="checked" initialValue={true} style={{ marginBottom: 0 }}>
-                <Switch />
-              </Form.Item>
-              <Form.Item noStyle shouldUpdate={(prev, cur) => prev.autoplay !== cur.autoplay}>
-                {({ getFieldValue }) =>
-                  getFieldValue('autoplay') ? (
-                    <Form.Item name="interval" label="轮播时长(秒)" initialValue={3} style={{ marginBottom: 0 }}>
-                      <InputNumber min={1} max={30} step={0.5} style={{ width: 120 }} />
-                    </Form.Item>
-                  ) : null
-                }
-              </Form.Item>
-            </Space>
-          )}
+          {/* Carousel settings */}
+          <Space size={16} style={{ marginBottom: 16 }} align="center">
+            <Form.Item name="autoplay" label="开启轮播" valuePropName="checked" initialValue={false} style={{ marginBottom: 0 }}>
+              <Switch disabled={imageUrls.length <= 1} />
+            </Form.Item>
+            <Form.Item name="interval" label="轮播时长(秒)" initialValue={3} style={{ marginBottom: 0 }}>
+              <InputNumber min={1} max={30} step={0.5} style={{ width: 100 }} disabled={imageUrls.length <= 1} />
+            </Form.Item>
+            {imageUrls.length <= 1 && (
+              <span style={{ fontSize: 12, color: '#999' }}>上传2张及以上图片可开启轮播</span>
+            )}
+          </Space>
 
           <Form.Item label="活动名称" name="title" rules={[{ required: true, message: '请输入活动名称' }]}>
             <Input placeholder="请输入活动名称" maxLength={50} showCount />

@@ -50,33 +50,36 @@ export default function Home() {
     }
   }, [])
 
+  // Read autoplay/interval from first banner (global setting)
+  const bannerAutoplay = banners.length > 0 ? banners[0].autoplay !== false : true
+  const bannerInterval = banners.length > 0 && banners[0].interval ? banners[0].interval : 3000
+
   useEffect(() => {
-    if (banners.length <= 1) return
+    if (banners.length <= 1 || !bannerAutoplay) return
     timerRef.current = setInterval(() => {
       setCurrentBanner(prev => {
         const next = (prev + 1) % banners.length
         scrollToBanner(next)
         return next
       })
-    }, 4000)
+    }, bannerInterval)
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
-  }, [banners.length, scrollToBanner])
+  }, [banners.length, bannerAutoplay, bannerInterval, scrollToBanner])
 
   const handleBannerScroll = () => {
     if (!bannerRef.current) return
     const { scrollLeft, offsetWidth } = bannerRef.current
     const index = Math.round(scrollLeft / offsetWidth)
     setCurrentBanner(index)
-    // Reset auto-rotate timer on manual scroll
     if (timerRef.current) clearInterval(timerRef.current)
-    if (banners.length > 1) {
+    if (banners.length > 1 && bannerAutoplay) {
       timerRef.current = setInterval(() => {
         setCurrentBanner(prev => {
           const next = (prev + 1) % banners.length
           scrollToBanner(next)
           return next
         })
-      }, 4000)
+      }, bannerInterval)
     }
   }
 
