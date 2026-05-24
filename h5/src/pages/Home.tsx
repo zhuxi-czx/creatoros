@@ -4,6 +4,7 @@ import { getFeaturedEvents, Event } from '../services/event'
 import { getBanners, Banner } from '../services/banner'
 import { getVenues, Venue } from '../services/venue'
 import TabBar from '../components/TabBar'
+import LazyImage from '../components/LazyImage'
 
 const ACCENT = '#C9A96E'
 
@@ -108,116 +109,102 @@ export default function Home() {
         WebkitOverflowScrolling: 'touch',
         paddingBottom: 100,
       }}>
-        {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
-            <div style={{
-              width: 28,
-              height: 28,
-              border: '3px solid #E0E0E0',
-              borderTop: `3px solid ${ACCENT}`,
-              borderRadius: '50%',
-              animation: 'spin 0.8s linear infinite',
-            }} />
-            <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-          </div>
-        ) : (
-          <>
-            {/* Banner Carousel */}
-            {banners.length > 0 && (
-              <div style={{ position: 'relative' }}>
-                <div
-                  ref={bannerRef}
-                  onScroll={handleBannerScroll}
-                  style={{
-                    display: 'flex',
-                    overflowX: 'auto',
-                    scrollSnapType: 'x mandatory',
-                    WebkitOverflowScrolling: 'touch',
-                    scrollbarWidth: 'none',
-                    msOverflowStyle: 'none',
-                  }}
-                >
-                  <style>{`div::-webkit-scrollbar { display: none; }`}</style>
-                  {banners.map((banner) => (
-                    <div
-                      key={banner.id}
-                      style={{
-                        flexShrink: 0,
-                        width: '100%',
-                        height: 180,
-                        scrollSnapAlign: 'start',
-                        position: 'relative',
-                        overflow: 'hidden',
-                      }}
-                    >
-                      <img
-                        src={banner.imageUrl}
-                        alt={banner.title}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          display: 'block',
-                        }}
-                      />
-                      <div style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        height: 90,
-                        background: 'linear-gradient(transparent, rgba(0,0,0,0.55))',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'flex-end',
-                        padding: 16,
-                      }}>
-                        <div style={{ fontSize: 20, fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>
-                          {banner.title}
-                        </div>
-                        {banner.subtitle && (
-                          <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>
-                            {banner.subtitle}
-                          </div>
-                        )}
+        {/* Banner Carousel - always reserve 180px */}
+        <div style={{ position: 'relative', height: 180, background: '#F0EBE3' }}>
+          {banners.length > 0 ? (
+            <>
+              <div
+                ref={bannerRef}
+                onScroll={handleBannerScroll}
+                style={{
+                  display: 'flex',
+                  overflowX: 'auto',
+                  scrollSnapType: 'x mandatory',
+                  WebkitOverflowScrolling: 'touch',
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                  height: '100%',
+                }}
+              >
+                <style>{`div::-webkit-scrollbar { display: none; }`}</style>
+                {banners.map((banner) => (
+                  <div
+                    key={banner.id}
+                    style={{
+                      flexShrink: 0,
+                      width: '100%',
+                      height: 180,
+                      scrollSnapAlign: 'start',
+                      position: 'relative',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <LazyImage src={banner.imageUrls?.[0] || banner.imageUrl || ''} alt={banner.title} />
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: 90,
+                      background: 'linear-gradient(transparent, rgba(0,0,0,0.55))',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'flex-end',
+                      padding: 16,
+                      pointerEvents: 'none',
+                    }}>
+                      <div style={{ fontSize: 20, fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>
+                        {banner.title}
                       </div>
+                      {banner.subtitle && (
+                        <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>
+                          {banner.subtitle}
+                        </div>
+                      )}
                     </div>
+                  </div>
+                ))}
+              </div>
+              {banners.length > 1 && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: 10,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  display: 'flex',
+                  gap: 5,
+                }}>
+                  {banners.map((_, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        width: currentBanner === i ? 16 : 6,
+                        height: 6,
+                        borderRadius: 3,
+                        background: currentBanner === i ? '#fff' : 'rgba(255,255,255,0.5)',
+                        transition: 'all 0.3s ease',
+                      }}
+                    />
                   ))}
                 </div>
-                {/* Dot indicators */}
-                {banners.length > 1 && (
-                  <div style={{
-                    position: 'absolute',
-                    bottom: 10,
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    display: 'flex',
-                    gap: 5,
-                  }}>
-                    {banners.map((_, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          width: currentBanner === i ? 16 : 6,
-                          height: 6,
-                          borderRadius: 3,
-                          background: currentBanner === i ? '#fff' : 'rgba(255,255,255,0.5)',
-                          transition: 'all 0.3s ease',
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+              )}
+            </>
+          ) : loading ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 6 }}>
+              <div style={{ width: 16, height: 16, border: '2px solid #E0D8CC', borderTop: '2px solid #C9A96E', borderRadius: '50%', animation: 'lazyimg-spin 0.8s linear infinite' }} />
+              <span style={{ fontSize: 11, color: '#B8A88A' }}>loading</span>
+              <style>{`@keyframes lazyimg-spin { to { transform: rotate(360deg) } }`}</style>
+            </div>
+          ) : null}
+        </div>
 
-            {/* Feature Icons Row */}
-            <div style={{
-              background: '#fff',
-              borderRadius: 12,
-              padding: 16,
-              margin: '0',
-            }}>
+        {/* Feature Icons Row */}
+        <div style={{
+          background: '#fff',
+          borderRadius: 12,
+          padding: 16,
+          margin: '12px 16px 0',
+        }}>
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-around',
@@ -282,7 +269,7 @@ export default function Home() {
             </div>
 
             {/* Venue Cards Section */}
-            {venues.length > 0 && (
+            {(venues.length > 0 || loading) && (
               <div style={{
                 padding: '16px 0 0',
               }}>
@@ -295,7 +282,14 @@ export default function Home() {
                   msOverflowStyle: 'none',
                   WebkitOverflowScrolling: 'touch',
                 }}>
-                  {venues.map((venue, i) => (
+                  {loading && venues.length === 0 ? (
+                    [0, 1].map(i => (
+                      <div key={i} style={{ flexShrink: 0, width: 'calc((100vw - 12px - 32px) / 2)', height: 160, background: '#fff', borderRadius: 12, overflow: 'hidden' }}>
+                        <div style={{ padding: 12 }}><div style={{ width: '60%', height: 16, background: '#F0EBE3', borderRadius: 4 }} /></div>
+                        <div style={{ flex: 1, height: 110, background: '#F0EBE3' }} />
+                      </div>
+                    ))
+                  ) : venues.map((venue, i) => (
                     <div
                       key={venue.id}
                       onClick={() => navigate(`/venue/${venue.id}`)}
@@ -327,11 +321,7 @@ export default function Home() {
                       </div>
                       <div style={{ flex: 1, overflow: 'hidden' }}>
                         {venue.coverUrl ? (
-                          <img
-                            src={venue.coverUrl}
-                            alt={venue.name}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                          />
+                          <LazyImage src={venue.coverUrl} alt={venue.name} />
                         ) : (
                           <div style={{
                             width: '100%',
@@ -394,13 +384,10 @@ export default function Home() {
                         height: 180,
                         borderRadius: 8,
                         overflow: 'hidden',
+                        background: '#F0EBE3',
                       }}>
                         {ev.coverUrl ? (
-                          <img
-                            src={ev.coverUrl}
-                            alt={ev.title}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                          />
+                          <LazyImage src={ev.coverUrl} alt={ev.title} />
                         ) : (
                           <div style={{
                             width: '100%',
@@ -446,10 +433,8 @@ export default function Home() {
               )}
             </div>
 
-            {/* Bottom spacer */}
-            <div style={{ height: 20 }} />
-          </>
-        )}
+        {/* Bottom spacer */}
+        <div style={{ height: 20 }} />
       </div>
 
       {/* TabBar */}

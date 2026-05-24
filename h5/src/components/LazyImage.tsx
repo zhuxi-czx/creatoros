@@ -6,9 +6,15 @@ interface LazyImageProps {
   style?: React.CSSProperties
 }
 
-// H5 端将 HTTPS 自签名图片地址转回 HTTP 直连
-const fixSrc = (url: string) =>
-  url.replace('https://121.196.149.0:4443/', 'http://121.196.149.0:4000/')
+// 确保图片地址使用当前页面同源的协议和主机
+const fixSrc = (url: string) => {
+  if (typeof window === 'undefined') return url
+  const host = `${window.location.protocol}//${window.location.hostname}:4000`
+  return url
+    .replace('https://121.196.149.0:4443', host)
+    .replace('http://121.196.149.0:4000', host)
+    .replace('http://116.62.188.30:4000', host)
+}
 
 export default function LazyImage({ src, alt, style }: LazyImageProps) {
   const imgSrc = fixSrc(src)

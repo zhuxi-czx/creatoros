@@ -5,6 +5,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -34,24 +35,34 @@ export class UploadController {
         if (allowedMimeTypes.includes(file.mimetype)) {
           cb(null, true);
         } else {
-          cb(new BadRequestException('Only image files are allowed'), false);
+          cb(new BadRequestException('仅支持 JPG、PNG、GIF、WebP 格式的图片'), false);
         }
       },
       limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB max
+        fileSize: 5 * 1024 * 1024, // 5MB max
       },
     }),
   )
-  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+  async uploadImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Query('type') type?: string,
+  ) {
     if (!file) {
-      throw new BadRequestException('No file uploaded');
+      throw new BadRequestException('请上传图片文件');
     }
 
-    const url = this.uploadService.getFileUrl(file.filename);
+    // Process image: center crop to target aspect ratio + compress
+    const processedPath = await this.uploadService.processImage(
+      file.path,
+      type || 'default',
+    );
+
+    const filename = path.basename(processedPath);
+    const url = this.uploadService.getFileUrl(filename);
 
     return {
       url,
-      filename: file.filename,
+      filename,
       originalName: file.originalname,
       size: file.size,
       mimeType: file.mimetype,

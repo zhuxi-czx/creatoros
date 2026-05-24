@@ -81,10 +81,11 @@ export async function getEventSignups(id: string, page = 1, limit = 50): Promise
   return api.get(`/admin/events/${id}/signups?page=${page}&limit=${limit}`) as any
 }
 
-export async function uploadImage(file: File): Promise<{ url: string }> {
+export async function uploadImage(file: File, type?: string): Promise<{ url: string }> {
   const formData = new FormData()
   formData.append('file', file)
-  return api.post('/upload/image', formData, {
+  const query = type ? `?type=${type}` : ''
+  return api.post(`/upload/image${query}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }) as any
 }

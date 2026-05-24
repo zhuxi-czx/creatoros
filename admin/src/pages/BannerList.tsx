@@ -118,9 +118,20 @@ export default function BannerList() {
   }
 
   const handleUpload = async (file: File) => {
+    // Validate format
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    if (!validTypes.includes(file.type)) {
+      message.error('仅支持 JPG、PNG、GIF、WebP 格式')
+      return false
+    }
+    // Validate size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      message.error('图片大小不能超过 5MB')
+      return false
+    }
     try {
       setUploading(true)
-      const res = await uploadImage(file)
+      const res = await uploadImage(file, 'banner')
       setImageUrls(prev => [...prev, res.url])
       message.success('上传成功')
     } catch {
@@ -280,6 +291,9 @@ export default function BannerList() {
             >
               <Button icon={<UploadOutlined />} loading={uploading}>上传图片</Button>
             </Upload>
+            <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
+              支持 JPG/PNG 格式，单张不超过 5MB，建议宽高比 16:9，系统会自动裁剪压缩
+            </div>
             {imageUrls.length > 0 && (
               <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {imageUrls.map((url, index) => (
