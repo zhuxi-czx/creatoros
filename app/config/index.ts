@@ -25,8 +25,30 @@ export default defineConfig<'webpack5'>({
     options: {}
   },
   framework: 'react',
-  compiler: 'webpack5',
+  compiler: {
+    type: 'webpack5',
+    prebundle: { enable: false }
+  },
   mini: {
+    webpackChain(chain) {
+      // Force ES5 output so WeChat devtools ES6->ES5 transform won't break anything
+      chain.module
+        .rule('script')
+        .use('babelLoader')
+        .tap(options => {
+          return {
+            ...options,
+            presets: [
+              ...(options?.presets || []),
+              ['@babel/preset-env', {
+                targets: { ios: '9', android: '4.4' },
+                modules: false,
+                useBuiltIns: false,
+              }]
+            ]
+          }
+        })
+    },
     postcss: {
       pxtransform: {
         enable: true,

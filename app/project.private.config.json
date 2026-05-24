@@ -1,9 +1,11 @@
 {
-  "libVersion": "3.16.1",
+  "libVersion": "3.15.2",
   "projectname": "app",
   "condition": {},
   "setting": {
     "urlCheck": false,
+    "es6": false,
+    "enhance": false,
     "coverView": true,
     "lazyloadPlaceholderEnable": false,
     "skylineRenderEnable": false,

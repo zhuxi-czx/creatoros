@@ -1,6 +1,6 @@
 import Taro from '@tarojs/taro'
 
-const BASE_URL = 'https://121.196.149.0:4443/api'
+const BASE_URL = 'http://121.196.149.0:4000/api'
 
 export async function request<T = any>(url: string, method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET', data?: any): Promise<T> {
   const token = Taro.getStorageSync('h5_token')

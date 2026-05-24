@@ -1,0 +1,321 @@
+$accent: #C9A96E;
+
+.profile-page {
+  min-height: 100vh;
+  background: #F7F7F7;
+  position: relative;
+}
+
+
+// Gradient background
+.profile-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 520rpx;
+  background: linear-gradient(135deg, #D4B896 0%, #A8C4B8 50%, #8B9EAF 100%);
+  z-index: 0;
+}
+
+.profile-bg-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 520rpx;
+  background: linear-gradient(to bottom, transparent 40%, #F7F7F7 100%);
+  z-index: 1;
+}
+
+// Profile Header
+.profile-header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 32rpx 48rpx;
+}
+
+.avatar-wrap {
+  width: 144rpx;
+  height: 144rpx;
+  border-radius: 50%;
+  border: 6rpx solid #fff;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, $accent, #E8D5B0);
+  box-shadow: 0 4rpx 24rpx rgba(0,0,0,0.1);
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+}
+
+.avatar-letter {
+  font-size: 56rpx;
+  color: #fff;
+  font-weight: 700;
+}
+
+.user-name {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin-top: 24rpx;
+  text-align: center;
+}
+
+.city-row {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  margin-top: 8rpx;
+}
+
+.city-icon {
+  font-size: 24rpx;
+}
+
+.city-text {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.tags-row {
+  display: flex;
+  gap: 16rpx;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 24rpx;
+}
+
+.tag-badge {
+  padding: 8rpx 20rpx;
+  border-radius: 24rpx;
+  background: #F0F0F0;
+}
+
+.tag-text {
+  font-size: 22rpx;
+  font-weight: 500;
+  color: #666;
+}
+
+// Content Area
+.profile-content {
+  position: relative;
+  z-index: 2;
+  padding: 0 32rpx 240rpx;
+  height: calc(100vh - 520rpx);
+}
+
+// Login Card
+.login-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 80rpx 32rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32rpx;
+}
+
+.login-hint {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.login-btn {
+  padding: 24rpx 64rpx;
+  border-radius: 48rpx;
+  background: $accent;
+
+  &.loading {
+    opacity: 0.7;
+  }
+}
+
+.login-btn-text {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #fff;
+}
+
+// Bio Card
+.bio-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 32rpx;
+}
+
+.bio-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.bio-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+.edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.edit-text {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: $accent;
+}
+
+.bio-content {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+// Signups Card
+.signups-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 32rpx;
+}
+
+.signups-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1A1A1A;
+  display: block;
+  margin-bottom: 28rpx;
+}
+
+.loading-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 40rpx;
+}
+
+.loading-spinner {
+  width: 48rpx;
+  height: 48rpx;
+  border: 4rpx solid #F0F0F0;
+  border-top-color: $accent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.empty-wrap {
+  text-align: center;
+  padding: 40rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.signup-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.signup-item {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  padding: 20rpx 0;
+}
+
+.date-box {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 16rpx;
+  background: #FDF6EC;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.date-month {
+  font-size: 22rpx;
+  font-weight: 500;
+  color: $accent;
+  line-height: 1.2;
+}
+
+.date-day {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: $accent;
+  line-height: 1.2;
+}
+
+.signup-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.signup-event-title {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #1A1A1A;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.signup-meta {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 6rpx;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.signup-arrow {
+  font-size: 28rpx;
+  color: #CCC;
+  flex-shrink: 0;
+}
+
+.divider {
+  height: 1rpx;
+  background: #F0F0F0;
+}
+
+// Logout
+.logout-btn {
+  background: #fff;
+  border-radius: 24rpx;
+  height: 100rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40rpx;
+}
+
+.logout-text {
+  font-size: 30rpx;
+  color: #ff3b30;
+}
