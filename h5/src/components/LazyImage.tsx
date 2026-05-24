@@ -16,12 +16,12 @@ const fixSrc = (url: string) => {
     .replace('http://116.62.188.30:4000', host)
 }
 
-// Derive thumb URL from main URL if not provided
+// Derive thumb URL from main URL: always use .webp extension for thumbnails
 const guessThumbUrl = (src: string) => {
   if (!src) return ''
   const dot = src.lastIndexOf('.')
   if (dot === -1) return ''
-  return src.substring(0, dot) + '_thumb' + src.substring(dot)
+  return src.substring(0, dot) + '_thumb.webp'
 }
 
 export default function LazyImage({ src, thumbSrc, alt, style }: LazyImageProps) {
@@ -67,7 +67,7 @@ export default function LazyImage({ src, thumbSrc, alt, style }: LazyImageProps)
           src={thumbUrl}
           alt=""
           onLoad={() => setThumbLoaded(true)}
-          onError={() => {}}
+          onError={() => setThumbLoaded(false)}
           style={{
             position: 'absolute',
             inset: 0,
