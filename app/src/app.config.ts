@@ -1,6 +1,7 @@
 export default defineAppConfig({
   pages: [
     'pages/index/index',
+    'pages/discover/index',
     'pages/event-detail/index',
     'pages/venue/index',
     'pages/profile/index',
@@ -8,13 +9,13 @@ export default defineAppConfig({
   ],
   window: {
     backgroundTextStyle: 'light',
-    navigationBarBackgroundColor: '#fff',
+    navigationBarBackgroundColor: '#ffffff',
     navigationBarTitleText: 'CreatorOS',
     navigationBarTextStyle: 'black'
   },
   tabBar: {
     color: '#999999',
-    selectedColor: '#6366f1',
+    selectedColor: '#C9A96E',
     backgroundColor: '#ffffff',
     borderStyle: 'white',
     list: [
@@ -23,6 +24,12 @@ export default defineAppConfig({
         text: '首页',
         iconPath: 'assets/tab-home.png',
         selectedIconPath: 'assets/tab-home-active.png'
+      },
+      {
+        pagePath: 'pages/discover/index',
+        text: '发现',
+        iconPath: 'assets/tab-discover.png',
+        selectedIconPath: 'assets/tab-discover-active.png'
       },
       {
         pagePath: 'pages/profile/index',

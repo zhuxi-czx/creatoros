@@ -1,14 +1,39 @@
 import { useState, useEffect } from 'react'
-import { View, Text, ScrollView, Image } from '@tarojs/components'
+import { View, Text, Image, ScrollView, Swiper, SwiperItem } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import EventCard from '../../components/EventCard'
-import { getEvents, getFeatured } from '../../services/event'
+import { getBanners } from '../../services/banner'
+import { getVenues } from '../../services/venue'
+import { getFeaturedEvents } from '../../services/event'
+import type { Banner } from '../../services/banner'
+import type { Venue } from '../../services/venue'
 import type { Event } from '../../services/event'
 import './index.scss'
 
+const FEATURE_ICONS = [
+  { label: '主题分享', icon: '💬' },
+  { label: '活动策划', icon: '📅' },
+  { label: 'PlanF', icon: '🚀' },
+  { label: 'Creator', icon: '⭐' },
+]
+
+const VENUE_COLORS = [
+  'linear-gradient(135deg, #8B5CF6, #EC4899)',
+  'linear-gradient(135deg, #06B6D4, #3B82F6)',
+  'linear-gradient(135deg, #F97316, #EF4444)',
+  'linear-gradient(135deg, #10B981, #06B6D4)',
+]
+
+const EVENT_COLORS = [
+  'linear-gradient(135deg, #F97316, #EF4444)',
+  'linear-gradient(135deg, #06B6D4, #3B82F6)',
+  'linear-gradient(135deg, #8B5CF6, #EC4899)',
+  'linear-gradient(135deg, #10B981, #06B6D4)',
+]
+
 export default function Index() {
-  const [featuredEvents, setFeaturedEvents] = useState<Event[]>([])
-  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([])
+  const [banners, setBanners] = useState<Banner[]>([])
+  const [venues, setVenues] = useState<Venue[]>([])
+  const [featured, setFeatured] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -17,13 +42,10 @@ export default function Index() {
 
   const loadData = async () => {
     try {
-      setLoading(true)
-      const [featured, upcoming] = await Promise.all([
-        getFeatured(),
-        getEvents({ status: 'upcoming', limit: 10 })
-      ])
-      setFeaturedEvents(featured)
-      setUpcomingEvents(upcoming)
+      const [b, v, f] = await Promise.allSettled([getBanners(), getVenues(), getFeaturedEvents()])
+      if (b.status === 'fulfilled') setBanners(b.value)
+      if (v.status === 'fulfilled') setVenues(v.value)
+      if (f.status === 'fulfilled') setFeatured(f.value)
     } catch (err) {
       console.error('Failed to load data', err)
     } finally {
@@ -31,80 +53,150 @@ export default function Index() {
     }
   }
 
-  const handleEventTap = (eventId: number) => {
-    Taro.navigateTo({ url: `/pages/event-detail/index?id=${eventId}` })
+  const handleVenueTap = (id: string) => {
+    Taro.navigateTo({ url: `/pages/venue/index?id=${id}` })
   }
 
-  const handleVenueTap = () => {
-    Taro.navigateTo({ url: '/pages/venue/index' })
+  const handleEventTap = (id: string) => {
+    Taro.navigateTo({ url: `/pages/event-detail/index?id=${id}` })
+  }
+
+  const handleMore = () => {
+    Taro.switchTab({ url: '/pages/discover/index' })
   }
 
   return (
-    <View className="index-page">
-      {/* Header */}
-      <View className="header">
-        <Text className="logo-text">CreatorOS</Text>
-        <Text className="header-subtitle">创作者社区</Text>
+    <View className='index-page'>
+      {/* Banner Carousel */}
+      <View className='banner-section'>
+        {banners.length > 0 ? (
+          <Swiper
+            className='banner-swiper'
+            autoplay
+            circular
+            indicatorDots
+            indicatorColor='rgba(255,255,255,0.4)'
+            indicatorActiveColor='#ffffff'
+            interval={4000}
+            duration={500}
+          >
+            {banners.map((banner) => (
+              <SwiperItem key={banner.id} className='banner-item'>
+                <Image
+                  className='banner-image'
+                  src={banner.imageUrl}
+                  mode='aspectFill'
+                  lazyLoad
+                />
+                <View className='banner-overlay'>
+                  <Text className='banner-title'>{banner.title}</Text>
+                  {banner.subtitle && (
+                    <Text className='banner-subtitle'>{banner.subtitle}</Text>
+                  )}
+                </View>
+              </SwiperItem>
+            ))}
+          </Swiper>
+        ) : loading ? (
+          <View className='banner-skeleton'>
+            <View className='skeleton-shimmer' />
+          </View>
+        ) : null}
       </View>
 
-      {/* Venue Card */}
-      <View className="section">
-        <View className="section-header">
-          <Text className="section-title">线下社区</Text>
-        </View>
-        <View className="venue-card" onClick={handleVenueTap}>
-          <View className="venue-card-inner">
-            <View className="venue-icon">🏢</View>
-            <View className="venue-info">
-              <Text className="venue-name">CreatorOS Hub</Text>
-              <Text className="venue-address">上海市静安区</Text>
-              <Text className="venue-desc">创作者聚集地，共享工作空间</Text>
+      {/* Feature Icons Row */}
+      <View className='feature-card'>
+        {FEATURE_ICONS.map((item, i) => (
+          <View key={i} className='feature-item'>
+            <View className='feature-icon-wrap'>
+              <Text className='feature-icon'>{item.icon}</Text>
             </View>
-            <Text className="venue-arrow">›</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Featured Events */}
-      <View className="section">
-        <View className="section-header">
-          <Text className="section-title">社区精选</Text>
-        </View>
-        <ScrollView scrollX className="featured-scroll">
-          {featuredEvents.length === 0 && !loading && (
-            <View className="empty-tip">
-              <Text>暂无精选活动</Text>
-            </View>
-          )}
-          {featuredEvents.map(event => (
-            <View key={event.id} className="featured-item" onClick={() => handleEventTap(event.id)}>
-              <EventCard event={event} featured />
-            </View>
-          ))}
-        </ScrollView>
-      </View>
-
-      {/* Upcoming Events */}
-      <View className="section">
-        <View className="section-header">
-          <Text className="section-title">即将开始</Text>
-          <Text className="section-more">查看全部</Text>
-        </View>
-        {loading && (
-          <View className="loading-tip">
-            <Text>加载中...</Text>
-          </View>
-        )}
-        {!loading && upcomingEvents.length === 0 && (
-          <View className="empty-tip">
-            <Text>暂无活动</Text>
-          </View>
-        )}
-        {upcomingEvents.map(event => (
-          <View key={event.id} onClick={() => handleEventTap(event.id)}>
-            <EventCard event={event} />
+            <Text className='feature-label'>{item.label}</Text>
           </View>
         ))}
+      </View>
+
+      {/* Venue Cards */}
+      {(venues.length > 0 || loading) && (
+        <View className='venue-section'>
+          <ScrollView scrollX className='venue-scroll' enableFlex>
+            {loading && venues.length === 0 ? (
+              <>
+                <View className='venue-card-skeleton' />
+                <View className='venue-card-skeleton' />
+              </>
+            ) : (
+              venues.map((venue, i) => (
+                <View
+                  key={venue.id}
+                  className='venue-card'
+                  onClick={() => handleVenueTap(venue.id)}
+                >
+                  <View className='venue-card-header'>
+                    <Text className='venue-card-name'>{venue.name}</Text>
+                    <Text className='venue-card-arrow'>{'>'}</Text>
+                  </View>
+                  <View className='venue-card-cover'>
+                    {venue.coverUrl ? (
+                      <Image
+                        className='venue-cover-img'
+                        src={venue.coverUrl}
+                        mode='aspectFill'
+                        lazyLoad
+                      />
+                    ) : (
+                      <View
+                        className='venue-cover-placeholder'
+                        style={{ background: VENUE_COLORS[i % VENUE_COLORS.length] }}
+                      >
+                        <Text className='venue-cover-icon'>🏠</Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+              ))
+            )}
+          </ScrollView>
+        </View>
+      )}
+
+      {/* Featured Events */}
+      <View className='events-section'>
+        <View className='section-header'>
+          <Text className='section-title'>精彩活动</Text>
+          <Text className='section-more' onClick={handleMore}>查看更多</Text>
+        </View>
+        {featured.length > 0 ? (
+          <ScrollView scrollX className='events-scroll' enableFlex>
+            {featured.map((ev, i) => (
+              <View
+                key={ev.id}
+                className='event-thumb'
+                onClick={() => handleEventTap(ev.id)}
+              >
+                <View className='event-thumb-cover'>
+                  <View
+                    className='event-thumb-placeholder'
+                    style={{ background: ev.coverColor || EVENT_COLORS[i % EVENT_COLORS.length] }}
+                  >
+                    <Text className='event-thumb-text'>{ev.title}</Text>
+                  </View>
+                </View>
+                <Text className='event-thumb-title'>{ev.title}</Text>
+              </View>
+            ))}
+          </ScrollView>
+        ) : loading ? (
+          <View className='events-skeleton'>
+            <View className='event-thumb-skeleton' />
+            <View className='event-thumb-skeleton' />
+            <View className='event-thumb-skeleton' />
+          </View>
+        ) : (
+          <View className='empty-tip'>
+            <Text className='empty-text'>暂无精彩活动</Text>
+          </View>
+        )}
       </View>
     </View>
   )

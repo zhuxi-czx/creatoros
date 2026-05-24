@@ -11,17 +11,17 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  token: null,
-  user: null,
+  token: Taro.getStorageSync('h5_token') || null,
+  user: Taro.getStorageSync('user') || null,
 
   login: (token: string, user: User) => {
-    Taro.setStorageSync('token', token)
+    Taro.setStorageSync('h5_token', token)
     Taro.setStorageSync('user', user)
     set({ token, user })
   },
 
   logout: () => {
-    Taro.removeStorageSync('token')
+    Taro.removeStorageSync('h5_token')
     Taro.removeStorageSync('user')
     set({ token: null, user: null })
   },

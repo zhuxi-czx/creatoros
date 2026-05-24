@@ -1,22 +1,28 @@
 import { request } from './api'
 import type { User } from './auth'
-import type { Event } from './event'
 
-interface UpdateProfileData {
-  name?: string
-  bio?: string
-  tags?: string[]
-  avatarUrl?: string
+export interface SignupRecord {
+  id: string
+  eventId: string
+  event: {
+    id: string
+    title: string
+    date?: string
+    startTime?: string
+    venue?: {
+      name: string
+      city?: string
+    }
+    _count?: { signups: number }
+  }
+  createdAt: string
 }
 
-export async function updateProfile(data: UpdateProfileData): Promise<User> {
-  return request<User>({
-    url: '/users/profile',
-    method: 'PATCH',
-    data: data as Record<string, unknown>
-  })
-}
+export const getProfile = (): Promise<User> =>
+  request<User>('/auth/profile')
 
-export async function getMySignups(): Promise<Event[]> {
-  return request<Event[]>({ url: '/users/my-signups' })
-}
+export const updateProfile = (data: Partial<User>): Promise<User> =>
+  request<User>('/users/profile', 'PUT', data)
+
+export const getMySignups = (): Promise<SignupRecord[]> =>
+  request<SignupRecord[]>('/users/signups')

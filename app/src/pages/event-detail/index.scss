@@ -1,17 +1,34 @@
-.event-detail-page {
-  height: 100vh;
+$accent: #C9A96E;
+
+.detail-page {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f5f5f7;
+  background: #F7F7F7;
+
+  &.loading-state {
+    align-items: center;
+    justify-content: center;
+  }
 }
 
-.loading-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
+.loading-spinner {
+  width: 48rpx;
+  height: 48rpx;
+  border: 4rpx solid #F0F0F0;
+  border-top-color: $accent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-text {
+  font-size: 28rpx;
   color: #999;
-  font-size: 14px;
+  margin-top: 16rpx;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .scroll-view {
@@ -19,164 +36,202 @@
   overflow: hidden;
 }
 
-.cover {
-  height: 220px;
+// Cover
+.cover-section {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 20px;
-
-  .cover-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1.3;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  }
-
-  .status-badge {
-    position: absolute;
-    top: 20px;
-    right: 16px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    color: #fff;
-    background: rgba(255, 255, 255, 0.2);
-
-    &.status-upcoming {
-      background: rgba(99, 102, 241, 0.8);
-    }
-
-    &.status-ongoing {
-      background: rgba(16, 185, 129, 0.8);
-    }
-
-    &.status-ended {
-      background: rgba(156, 163, 175, 0.8);
-    }
-  }
+  height: 440rpx;
+  overflow: hidden;
 }
 
-.content {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.cover-image {
+  width: 100%;
+  height: 100%;
 }
 
-.info-card,
-.desc-card,
-.participants-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 16px;
+.cover-gradient {
+  width: 100%;
+  height: 100%;
 }
 
-.card-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1d1d1f;
+.cover-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 32rpx;
+  background: linear-gradient(transparent, rgba(0,0,0,0.6));
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 8rpx 20rpx;
+  border-radius: 40rpx;
+  margin-bottom: 16rpx;
+}
+
+.status-text {
+  font-size: 24rpx;
+  color: #fff;
+  font-weight: 500;
+}
+
+.cover-title {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
   display: block;
-  margin-bottom: 12px;
+}
+
+// Info Card
+.info-card {
+  background: #fff;
+  margin: 24rpx 32rpx;
+  border-radius: 24rpx;
+  padding: 8rpx 32rpx;
 }
 
 .info-row {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
+  gap: 24rpx;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #F0F0F0;
 
   &:last-child {
     border-bottom: none;
   }
+}
 
-  .info-icon {
-    font-size: 18px;
-    width: 24px;
-    text-align: center;
-  }
+.info-icon {
+  font-size: 32rpx;
+  margin-top: 4rpx;
+}
 
-  .info-text {
-    flex: 1;
+.info-content {
+  flex: 1;
+}
 
-    .info-label {
-      font-size: 12px;
-      color: #999;
-      display: block;
-    }
+.info-label {
+  font-size: 24rpx;
+  color: #999;
+  display: block;
+}
 
-    .info-value {
-      font-size: 14px;
-      color: #1d1d1f;
-      margin-top: 2px;
-      display: block;
-    }
-  }
+.info-value {
+  font-size: 28rpx;
+  color: #1A1A1A;
+  margin-top: 4rpx;
+  display: block;
+}
+
+// Description Card
+.desc-card {
+  background: #fff;
+  margin: 0 32rpx 24rpx;
+  border-radius: 24rpx;
+  padding: 32rpx;
+}
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1A1A1A;
+  display: block;
+  margin-bottom: 24rpx;
 }
 
 .desc-text {
-  font-size: 14px;
-  color: #3c3c43;
+  font-size: 28rpx;
+  color: #666;
   line-height: 1.7;
+  display: block;
+  white-space: pre-wrap;
+}
+
+// Participants
+.participants-card {
+  background: #fff;
+  margin: 0 32rpx 24rpx;
+  border-radius: 24rpx;
+  padding: 32rpx;
 }
 
 .participants-scroll {
+  display: flex;
   white-space: nowrap;
+}
 
-  .participant-item {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    margin-right: 16px;
+.participant-item {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 32rpx;
+}
 
-    .participant-avatar {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 600;
-    }
+.participant-avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $accent, #E8D5B0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
 
-    .participant-name {
-      font-size: 11px;
-      color: #666;
-      margin-top: 4px;
-    }
+.participant-avatar-img {
+  width: 100%;
+  height: 100%;
+}
+
+.participant-letter {
+  font-size: 32rpx;
+  color: #fff;
+  font-weight: 600;
+}
+
+.participant-name {
+  font-size: 22rpx;
+  color: #666;
+  margin-top: 8rpx;
+  max-width: 88rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Bottom Action
+.bottom-action {
+  padding: 24rpx 32rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  border-top: 1rpx solid #F0F0F0;
+}
+
+.action-btn {
+  background: $accent;
+  border-radius: 24rpx;
+  height: 100rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.signed {
+    background: #F0F0F0;
+  }
+
+  &.loading {
+    opacity: 0.7;
   }
 }
 
-.bottom-action {
-  padding: 12px 16px;
-  padding-bottom: calc(12px + env(safe-area-inset-bottom));
-  background: #fff;
-  border-top: 1px solid #f0f0f0;
+.action-btn-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #fff;
 
-  .signup-btn {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    border-radius: 14px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 16px;
-    font-weight: 600;
-
-    &.signed {
-      background: #f0f0f5;
-      color: #666;
-    }
-
-    &.loading {
-      opacity: 0.7;
-    }
+  .signed & {
+    color: #666;
   }
 }

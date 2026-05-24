@@ -2,21 +2,23 @@ import Taro from '@tarojs/taro'
 import { request } from './api'
 
 export interface User {
-  id: number
-  name: string
-  bio?: string
-  tags?: string[]
-  openid?: string
+  id: string
+  nickname?: string
   avatarUrl?: string
+  city?: string
+  bio?: string
+  gender?: number
+  mbti?: string
+  zodiac?: string
+  generation?: string
 }
 
 interface LoginResponse {
-  token: string
+  accessToken: string
   user: User
 }
 
 export async function wxLogin(): Promise<LoginResponse> {
-  // Step 1: Get WeChat code
   const loginRes = await new Promise<Taro.login.SuccessCallbackResult>((resolve, reject) => {
     Taro.login({
       success: resolve,
@@ -24,20 +26,16 @@ export async function wxLogin(): Promise<LoginResponse> {
     })
   })
 
-  // Step 2: Exchange code for token
-  const response = await request<LoginResponse>({
-    url: '/auth/wx-login',
-    method: 'POST',
-    data: { code: loginRes.code }
+  const response = await request<LoginResponse>('/auth/wx-login', 'POST', {
+    code: loginRes.code
   })
 
-  // Step 3: Store credentials
-  Taro.setStorageSync('token', response.token)
+  Taro.setStorageSync('h5_token', response.accessToken)
   Taro.setStorageSync('user', response.user)
 
   return response
 }
 
 export async function getProfile(): Promise<User> {
-  return request<User>({ url: '/auth/profile' })
+  return request<User>('/auth/profile')
 }

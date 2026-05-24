@@ -5,33 +5,21 @@ import { useAuthStore } from '../../stores/useAuthStore'
 import { updateProfile } from '../../services/user'
 import './index.scss'
 
-const PRESET_TAGS = ['开发者', '设计师', '产品经理', '创业者', '投资人', '营销人', '内容创作者', '自由职业']
-
 export default function ProfileEdit() {
   const { user, login, token } = useAuthStore()
-  const [name, setName] = useState(user?.name || '')
+  const [nickname, setNickname] = useState(user?.nickname || '')
   const [bio, setBio] = useState(user?.bio || '')
-  const [selectedTags, setSelectedTags] = useState<string[]>(user?.tags || [])
+  const [city, setCity] = useState(user?.city || '')
   const [saving, setSaving] = useState(false)
 
-  const toggleTag = (tag: string) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter(t => t !== tag))
-    } else if (selectedTags.length < 5) {
-      setSelectedTags([...selectedTags, tag])
-    } else {
-      Taro.showToast({ title: '最多选择5个标签', icon: 'none' })
-    }
-  }
-
   const handleSave = async () => {
-    if (!name.trim()) {
+    if (!nickname.trim()) {
       Taro.showToast({ title: '请输入昵称', icon: 'none' })
       return
     }
     try {
       setSaving(true)
-      const updatedUser = await updateProfile({ name, bio, tags: selectedTags })
+      const updatedUser = await updateProfile({ nickname, bio, city })
       if (token) {
         login(token, updatedUser)
       }
@@ -52,9 +40,20 @@ export default function ProfileEdit() {
           <Text className="form-label">昵称</Text>
           <Input
             className="form-input"
-            value={name}
-            onInput={e => setName(e.detail.value)}
+            value={nickname}
+            onInput={e => setNickname(e.detail.value)}
             placeholder="请输入昵称"
+            maxlength={20}
+          />
+        </View>
+
+        <View className="form-group">
+          <Text className="form-label">城市</Text>
+          <Input
+            className="form-input"
+            value={city}
+            onInput={e => setCity(e.detail.value)}
+            placeholder="请输入城市（选填）"
             maxlength={20}
           />
         </View>
@@ -70,21 +69,6 @@ export default function ProfileEdit() {
             autoHeight
           />
           <Text className="char-count">{bio.length}/200</Text>
-        </View>
-
-        <View className="form-group">
-          <Text className="form-label">身份标签（最多5个）</Text>
-          <View className="tags-grid">
-            {PRESET_TAGS.map(tag => (
-              <View
-                key={tag}
-                className={`tag-item ${selectedTags.includes(tag) ? 'selected' : ''}`}
-                onClick={() => toggleTag(tag)}
-              >
-                <Text>{tag}</Text>
-              </View>
-            ))}
-          </View>
         </View>
       </View>
 

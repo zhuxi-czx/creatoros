@@ -1,59 +1,67 @@
 import { request } from './api'
 
+export interface Venue {
+  id: string
+  name: string
+  address: string
+  city?: string
+  description?: string
+  coverUrl?: string
+}
+
 export interface Event {
-  id: number
+  id: string
   title: string
-  description: string
-  startTime: string
+  description?: string
+  date?: string
+  startTime?: string
   endTime?: string
-  location: string
-  hostName: string
-  hostId?: number
-  status: 'upcoming' | 'ongoing' | 'ended'
-  signupCount: number
-  capacity?: number
-  hasSignedUp?: boolean
-  coverColor?: string
+  location?: string
+  coverUrl?: string
+  hostName?: string
+  hostAvatar?: string
+  price?: number
+  maxCapacity?: number
+  maxParticipants?: number
+  currentParticipants?: number
+  featured?: boolean
+  status: 'DRAFT' | 'PUBLISHED' | 'FULL' | 'ONGOING' | 'ENDED' | 'CANCELLED'
   tags?: string[]
-  participants?: Array<{ id: number; name: string; avatarUrl?: string }>
+  isSignedUp?: boolean
+  venue?: Venue
+  _count?: { signups: number }
+  signups?: Array<{ user: { id: string; avatarUrl?: string } }>
 }
 
-interface EventListParams {
-  status?: string
-  limit?: number
-  offset?: number
-  tag?: string
+export interface EventsResponse {
+  data: Event[]
+  total: number
+  page: number
+  limit: number
+  totalPages?: number
 }
 
-export async function getEvents(params: EventListParams = {}): Promise<Event[]> {
-  const query = new URLSearchParams()
-  if (params.status) query.append('status', params.status)
-  if (params.limit) query.append('limit', String(params.limit))
-  if (params.offset) query.append('offset', String(params.offset))
-  if (params.tag) query.append('tag', params.tag)
-
-  const queryStr = query.toString()
-  return request<Event[]>({ url: `/events${queryStr ? `?${queryStr}` : ''}` })
+export interface Participant {
+  id: string
+  nickname?: string
+  avatarUrl?: string
+  city?: string
 }
 
-export async function getFeatured(): Promise<Event[]> {
-  return request<Event[]>({ url: '/events?featured=true&limit=5' })
-}
+export const getEvents = (page = 1, limit = 20): Promise<EventsResponse> =>
+  request<EventsResponse>(`/events?page=${page}&limit=${limit}`)
 
-export async function getEventDetail(id: number): Promise<Event> {
-  return request<Event>({ url: `/events/${id}` })
-}
+export const getFeaturedEvents = (): Promise<Event[]> =>
+  request<Event[]>('/events/featured')
 
-export async function signup(eventId: number): Promise<void> {
-  return request<void>({
-    url: `/events/${eventId}/signup`,
-    method: 'POST'
-  })
-}
+export const getEventDetail = (id: string, userId?: string): Promise<Event> =>
+  request<Event>(`/events/${id}${userId ? `?userId=${userId}` : ''}`)
 
-export async function cancelSignup(eventId: number): Promise<void> {
-  return request<void>({
-    url: `/events/${eventId}/signup`,
-    method: 'DELETE'
-  })
-}
+export const getEventSignups = (id: string): Promise<Participant[]> =>
+  request<Participant[]>(`/events/${id}/signups`)
+
+export const signup = (eventId: string): Promise<void> =>
+  request<void>(`/events/${eventId}/signup`, 'POST')
+
+export const cancelSignup = (eventId: string): Promise<void> =>
+  request<void>(`/events/${eventId}/signup`, 'DELETE')

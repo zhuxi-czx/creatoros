@@ -1,61 +1,124 @@
-import { View, Text } from '@tarojs/components'
+import { View, Text, Image } from '@tarojs/components'
 import type { Event } from '../../services/event'
 import { formatDate } from '../../utils'
 import './index.scss'
 
-const GRADIENT_COLORS = [
-  'linear-gradient(135deg, #6366f1, #8b5cf6)',
-  'linear-gradient(135deg, #ec4899, #8b5cf6)',
-  'linear-gradient(135deg, #10b981, #3b82f6)',
-  'linear-gradient(135deg, #f59e0b, #ef4444)',
-  'linear-gradient(135deg, #3b82f6, #6366f1)'
+const AVATAR_COLORS = ['#8B5CF6', '#EC4899', '#F97316', '#06B6D4', '#10B981', '#3B82F6']
+const COVER_COLORS = [
+  'linear-gradient(135deg, #8B5CF6, #EC4899)',
+  'linear-gradient(135deg, #06B6D4, #3B82F6)',
+  'linear-gradient(135deg, #F97316, #EF4444)',
+  'linear-gradient(135deg, #10B981, #06B6D4)',
 ]
 
 interface EventCardProps {
   event: Event
-  featured?: boolean
+  onClick?: () => void
 }
 
-export default function EventCard({ event, featured = false }: EventCardProps) {
-  const gradientIndex = event.id % GRADIENT_COLORS.length
-  const gradient = event.coverColor || GRADIENT_COLORS[gradientIndex]
+function getStatusInfo(status: string) {
+  if (status === 'PUBLISHED') return { dot: '#4CAF50', label: '报名中' }
+  if (status === 'FULL') return { dot: '#FF9800', label: '即将满员' }
+  if (status === 'ONGOING') return { dot: '#FF9800', label: '进行中' }
+  return { dot: '#999', label: '已结束' }
+}
 
-  const statusText = {
-    upcoming: '即将开始',
-    ongoing: '进行中',
-    ended: '已结束'
-  }[event.status] || ''
+function hashId(id: string): number {
+  let hash = 0
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return Math.abs(hash)
+}
+
+export default function EventCard({ event, onClick }: EventCardProps) {
+  const status = getStatusInfo(event.status)
+  const signupCount = event._count?.signups ?? event.currentParticipants ?? 0
+  const colorIndex = hashId(event.id)
+  const signupAvatars = event.signups?.slice(0, 3) ?? []
 
   return (
-    <View className={`event-card ${featured ? 'featured' : ''}`}>
-      <View className="card-gradient" style={{ background: gradient }}>
-        <View className={`status-badge status-${event.status}`}>
-          <Text>{statusText}</Text>
+    <View className='event-card' onClick={onClick}>
+      {/* Title */}
+      <Text className='card-title'>{event.title}</Text>
+
+      {/* Info row */}
+      <View className='card-info-row'>
+        {(event.date || event.startTime) && (
+          <View className='info-item'>
+            <Text className='info-icon-text'>🕐</Text>
+            <Text className='info-label'>{formatDate(event.date || event.startTime, 'short')}</Text>
+          </View>
+        )}
+        <View className='info-item'>
+          <View className='status-dot' style={{ background: status.dot }} />
+          <Text className='info-label' style={{ color: status.dot }}>{status.label}</Text>
         </View>
-        <Text className="event-title">{event.title}</Text>
-        {event.description && (
-          <Text className="event-desc">{event.description}</Text>
+        {(event.venue?.name || event.location) && (
+          <View className='info-item'>
+            <Text className='info-icon-text'>📍</Text>
+            <Text className='info-label'>{event.venue?.name || event.location}</Text>
+          </View>
         )}
       </View>
-      <View className="card-body">
-        <View className="meta-row">
-          <Text className="meta-icon">📅</Text>
-          <Text className="meta-text">{formatDate(event.startTime)}</Text>
-        </View>
-        <View className="meta-row">
-          <Text className="meta-icon">📍</Text>
-          <Text className="meta-text">{event.location}</Text>
-        </View>
-        <View className="card-footer">
-          <View className="host-info">
-            <View className="host-avatar">
-              <Text>{event.hostName?.charAt(0) || '?'}</Text>
-            </View>
-            <Text className="host-name">{event.hostName}</Text>
+
+      {/* Cover */}
+      <View className='card-cover'>
+        {event.coverUrl ? (
+          <Image className='cover-image' src={event.coverUrl} mode='aspectFill' lazyLoad />
+        ) : (
+          <View
+            className='cover-placeholder'
+            style={{ background: COVER_COLORS[colorIndex % COVER_COLORS.length] }}
+          >
+            <Text className='cover-text'>{event.title.slice(0, 2)}</Text>
           </View>
-          <View className="count-badge">
-            <Text>👥 {event.signupCount}</Text>
+        )}
+      </View>
+
+      {/* Bottom row */}
+      <View className='card-bottom'>
+        {/* Left: avatar stack + count */}
+        <View className='bottom-left'>
+          <View className='avatar-stack'>
+            {signupAvatars.length > 0 ? (
+              signupAvatars.map((s, i) => (
+                <View
+                  key={s.user.id}
+                  className='avatar-circle'
+                  style={{
+                    left: `${i * 40}rpx`,
+                    zIndex: 3 - i,
+                    background: s.user.avatarUrl ? undefined : AVATAR_COLORS[i % AVATAR_COLORS.length],
+                  }}
+                >
+                  {s.user.avatarUrl ? (
+                    <Image className='avatar-img' src={s.user.avatarUrl} mode='aspectFill' />
+                  ) : null}
+                </View>
+              ))
+            ) : signupCount > 0 ? (
+              [0, 1, 2].slice(0, Math.min(3, signupCount)).map((i) => (
+                <View
+                  key={i}
+                  className='avatar-circle'
+                  style={{
+                    left: `${i * 40}rpx`,
+                    zIndex: 3 - i,
+                    background: AVATAR_COLORS[(colorIndex + i) % AVATAR_COLORS.length],
+                  }}
+                />
+              ))
+            ) : null}
           </View>
+          {signupCount > 0 && (
+            <Text className='signup-count'>{signupCount}人已报名</Text>
+          )}
+        </View>
+
+        {/* Right: signup button */}
+        <View className='signup-btn'>
+          <Text className='signup-btn-text'>立即报名</Text>
         </View>
       </View>
     </View>

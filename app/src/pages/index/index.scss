@@ -1,123 +1,296 @@
+$accent: #C9A96E;
+
 .index-page {
-  background-color: #f5f5f7;
   min-height: 100vh;
-  padding-bottom: 100px;
+  background: #F7F7F7;
+  padding-bottom: 40rpx;
 }
 
-.header {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  padding: 60px 20px 24px;
+// Banner
+.banner-section {
+  width: 100%;
+  height: 360rpx;
+  background: #F0EBE3;
+}
+
+.banner-swiper {
+  width: 100%;
+  height: 360rpx;
+}
+
+.banner-item {
+  position: relative;
+  width: 100%;
+  height: 360rpx;
+}
+
+.banner-image {
+  width: 100%;
+  height: 360rpx;
+}
+
+.banner-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 32rpx;
+  background: linear-gradient(transparent, rgba(0,0,0,0.55));
+}
+
+.banner-title {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #fff;
+  display: block;
+  line-height: 1.3;
+}
+
+.banner-subtitle {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: rgba(255,255,255,0.8);
+  margin-top: 8rpx;
+  display: block;
+}
+
+.banner-skeleton {
+  width: 100%;
+  height: 360rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .skeleton-shimmer {
+    width: 60rpx;
+    height: 60rpx;
+    border: 4rpx solid #E0D8CC;
+    border-top-color: $accent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// Feature Icons
+.feature-card {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin: 24rpx 32rpx 0;
+}
+
+.feature-item {
   display: flex;
   flex-direction: column;
-
-  .logo-text {
-    font-size: 24px;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: 1px;
-  }
-
-  .header-subtitle {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.8);
-    margin-top: 4px;
-  }
+  align-items: center;
+  gap: 16rpx;
 }
 
-.section {
-  margin: 16px 0;
+.feature-icon-wrap {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 16px;
-    margin-bottom: 12px;
+.feature-icon {
+  font-size: 48rpx;
+}
 
-    .section-title {
-      font-size: 17px;
-      font-weight: 600;
-      color: #1d1d1f;
-    }
+.feature-label {
+  font-size: 24rpx;
+  font-weight: 500;
+  color: #333;
+}
 
-    .section-more {
-      font-size: 13px;
-      color: #6366f1;
-    }
-  }
+// Venue Cards
+.venue-section {
+  padding: 32rpx 0 0;
+}
+
+.venue-scroll {
+  display: flex;
+  padding: 0 32rpx;
+  white-space: nowrap;
 }
 
 .venue-card {
-  margin: 0 16px;
+  flex-shrink: 0;
+  width: 320rpx;
+  height: 320rpx;
   background: #fff;
-  border-radius: 16px;
+  border-radius: 24rpx;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-
-  .venue-card-inner {
-    display: flex;
-    align-items: center;
-    padding: 16px;
-    gap: 12px;
-  }
-
-  .venue-icon {
-    font-size: 32px;
-    width: 56px;
-    height: 56px;
-    background: #f0f0ff;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .venue-info {
-    flex: 1;
-
-    .venue-name {
-      font-size: 16px;
-      font-weight: 600;
-      color: #1d1d1f;
-      display: block;
-    }
-
-    .venue-address {
-      font-size: 12px;
-      color: #999;
-      margin-top: 2px;
-      display: block;
-    }
-
-    .venue-desc {
-      font-size: 13px;
-      color: #666;
-      margin-top: 4px;
-      display: block;
-    }
-  }
-
-  .venue-arrow {
-    font-size: 20px;
-    color: #ccc;
-  }
+  margin-right: 24rpx;
+  display: inline-flex;
+  flex-direction: column;
 }
 
-.featured-scroll {
-  padding-left: 16px;
+.venue-card-skeleton {
+  flex-shrink: 0;
+  width: 320rpx;
+  height: 320rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  margin-right: 24rpx;
+  display: inline-block;
+}
+
+.venue-card-header {
+  padding: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.venue-card-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1A1A1A;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
-
-  .featured-item {
-    display: inline-block;
-    width: 260px;
-    margin-right: 12px;
-  }
+  flex: 1;
 }
 
-.loading-tip,
-.empty-tip {
-  text-align: center;
-  padding: 24px;
+.venue-card-arrow {
+  font-size: 28rpx;
+  color: $accent;
+  flex-shrink: 0;
+  margin-left: 8rpx;
+}
+
+.venue-card-cover {
+  flex: 1;
+  overflow: hidden;
+}
+
+.venue-cover-img {
+  width: 100%;
+  height: 100%;
+}
+
+.venue-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.venue-cover-icon {
+  font-size: 64rpx;
+}
+
+// Featured Events
+.events-section {
+  margin-top: 40rpx;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32rpx;
+  margin-bottom: 24rpx;
+}
+
+.section-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+.section-more {
+  font-size: 26rpx;
   color: #999;
-  font-size: 14px;
+}
+
+.events-scroll {
+  display: flex;
+  padding: 0 32rpx;
+  white-space: nowrap;
+}
+
+.event-thumb {
+  flex-shrink: 0;
+  width: 280rpx;
+  margin-right: 20rpx;
+  display: inline-block;
+}
+
+.event-thumb-cover {
+  width: 280rpx;
+  height: 360rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  background: #F0EBE3;
+}
+
+.event-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx;
+}
+
+.event-thumb-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+  line-height: 1.4;
+  white-space: normal;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.event-thumb-title {
+  font-size: 24rpx;
+  font-weight: 500;
+  color: #333;
+  margin-top: 16rpx;
+  line-height: 1.4;
+  white-space: normal;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.events-skeleton {
+  display: flex;
+  padding: 0 32rpx;
+  gap: 20rpx;
+}
+
+.event-thumb-skeleton {
+  width: 280rpx;
+  height: 360rpx;
+  background: #F0EBE3;
+  border-radius: 16rpx;
+  flex-shrink: 0;
+}
+
+.empty-tip {
+  padding: 64rpx 32rpx;
+  text-align: center;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
 }
