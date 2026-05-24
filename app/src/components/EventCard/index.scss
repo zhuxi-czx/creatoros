@@ -33,6 +33,7 @@ $accent: #C9A96E;
 
 .info-icon-text {
   font-size: 22rpx;
+  line-height: 1;
 }
 
 .info-label {
@@ -52,6 +53,11 @@ $accent: #C9A96E;
   height: 320rpx;
   border-radius: 16rpx;
   overflow: hidden;
+}
+
+.cover-image {
+  width: 100%;
+  height: 100%;
 }
 
 .cover-placeholder {
@@ -84,7 +90,6 @@ $accent: #C9A96E;
 .avatar-stack {
   position: relative;
   height: 56rpx;
-  min-width: 56rpx;
 }
 
 .avatar-circle {
@@ -105,16 +110,9 @@ $accent: #C9A96E;
   height: 100%;
 }
 
-.avatar-letter {
-  font-size: 20rpx;
-  color: #fff;
-  font-weight: 600;
-}
-
 .signup-count {
   font-size: 24rpx;
   color: #999;
-  margin-left: 60rpx;
 }
 
 .signup-btn {

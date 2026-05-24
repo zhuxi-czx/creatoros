@@ -3,7 +3,7 @@ $accent: #C9A96E;
 .index-page {
   min-height: 100vh;
   background: #F7F7F7;
-  padding-bottom: 40rpx;
+  padding-bottom: 200rpx;
 }
 
 // Banner
@@ -94,15 +94,18 @@ $accent: #C9A96E;
 }
 
 .feature-icon-wrap {
-  width: 56rpx;
-  height: 56rpx;
+  width: 96rpx;
+  height: 96rpx;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: rgba(201, 169, 110, 0.1);
+  border-radius: 50%;
 }
 
 .feature-icon {
-  font-size: 48rpx;
+  font-size: 40rpx;
+  line-height: 1;
 }
 
 .feature-label {
@@ -234,6 +237,11 @@ $accent: #C9A96E;
   border-radius: 16rpx;
   overflow: hidden;
   background: #F0EBE3;
+}
+
+.event-thumb-img {
+  width: 100%;
+  height: 100%;
 }
 
 .event-thumb-placeholder {

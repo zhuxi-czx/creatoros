@@ -5,14 +5,28 @@ import type { User } from '../services/auth'
 interface AuthState {
   token: string | null
   user: User | null
+  initialized: boolean
+  init: () => void
   login: (token: string, user: User) => void
   logout: () => void
   updateUser: (user: Partial<User>) => void
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  token: Taro.getStorageSync('h5_token') || null,
-  user: Taro.getStorageSync('user') || null,
+  token: null,
+  user: null,
+  initialized: false,
+
+  init: () => {
+    if (get().initialized) return
+    try {
+      const token = Taro.getStorageSync('h5_token') || null
+      const user = Taro.getStorageSync('user') || null
+      set({ token, user, initialized: true })
+    } catch {
+      set({ initialized: true })
+    }
+  },
 
   login: (token: string, user: User) => {
     Taro.setStorageSync('h5_token', token)

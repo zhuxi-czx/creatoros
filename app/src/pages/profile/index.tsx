@@ -5,6 +5,7 @@ import { useAuthStore } from '../../stores/useAuthStore'
 import { wxLogin } from '../../services/auth'
 import { getMySignups } from '../../services/user'
 import type { SignupRecord } from '../../services/user'
+import TabBar from '../../components/TabBar'
 import './index.scss'
 
 export default function Profile() {
@@ -210,6 +211,9 @@ export default function Profile() {
           </View>
         )}
       </ScrollView>
+
+      {/* Custom TabBar */}
+      <TabBar active='profile' />
     </View>
   )
 }

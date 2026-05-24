@@ -35,11 +35,13 @@ $accent: #C9A96E;
 // Tag Filter
 .tag-scroll {
   display: flex;
+  flex-wrap: nowrap;
   background: #fff;
   padding: 16rpx 32rpx;
   border-bottom: 1rpx solid #F0F0F0;
   white-space: nowrap;
   flex-shrink: 0;
+  overflow: visible;
 }
 
 .tag-item {
@@ -47,9 +49,10 @@ $accent: #C9A96E;
   padding: 12rpx 28rpx;
   border-radius: 40rpx;
   background: #FFFFFF;
-  border: 1rpx solid #E0E0E0;
+  border: 2rpx solid #E0E0E0;
   margin-right: 20rpx;
   flex-shrink: 0;
+  white-space: nowrap;
 
   &.active {
     background: #1A1A1A;

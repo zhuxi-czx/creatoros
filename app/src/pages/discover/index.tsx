@@ -4,6 +4,7 @@ import Taro from '@tarojs/taro'
 import { getEvents } from '../../services/event'
 import type { Event } from '../../services/event'
 import EventCard from '../../components/EventCard'
+import TabBar from '../../components/TabBar'
 import './index.scss'
 
 const TAGS = ['全部', '音乐', '品鉴', '沙龙', '脱口秀', '派对']
@@ -96,6 +97,9 @@ export default function Discover() {
           ))
         )}
       </ScrollView>
+
+      {/* Custom TabBar */}
+      <TabBar active='discover' />
     </View>
   )
 }

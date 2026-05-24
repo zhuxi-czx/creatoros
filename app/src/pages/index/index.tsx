@@ -7,6 +7,7 @@ import { getFeaturedEvents } from '../../services/event'
 import type { Banner } from '../../services/banner'
 import type { Venue } from '../../services/venue'
 import type { Event } from '../../services/event'
+import TabBar from '../../components/TabBar'
 import './index.scss'
 
 const FEATURE_ICONS = [
@@ -175,12 +176,21 @@ export default function Index() {
                 onClick={() => handleEventTap(ev.id)}
               >
                 <View className='event-thumb-cover'>
-                  <View
-                    className='event-thumb-placeholder'
-                    style={{ background: ev.coverColor || EVENT_COLORS[i % EVENT_COLORS.length] }}
-                  >
-                    <Text className='event-thumb-text'>{ev.title}</Text>
-                  </View>
+                  {ev.coverUrl ? (
+                    <Image
+                      className='event-thumb-img'
+                      src={ev.coverUrl}
+                      mode='aspectFill'
+                      lazyLoad
+                    />
+                  ) : (
+                    <View
+                      className='event-thumb-placeholder'
+                      style={{ background: EVENT_COLORS[i % EVENT_COLORS.length] }}
+                    >
+                      <Text className='event-thumb-text'>{ev.title}</Text>
+                    </View>
+                  )}
                 </View>
                 <Text className='event-thumb-title'>{ev.title}</Text>
               </View>
@@ -198,6 +208,9 @@ export default function Index() {
           </View>
         )}
       </View>
+
+      {/* Custom TabBar */}
+      <TabBar active='home' />
     </View>
   )
 }

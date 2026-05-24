@@ -36,6 +36,11 @@ export default function EventCard({ event, onClick }: EventCardProps) {
   const signupCount = event._count?.signups ?? event.currentParticipants ?? 0
   const colorIndex = hashId(event.id)
   const signupAvatars = event.signups?.slice(0, 3) ?? []
+  const dateStr = event.date || event.startTime
+  const formattedDate = dateStr ? formatDate(dateStr, 'short') : ''
+  // Compute formatted time (HH:mm)
+  const formattedTime = dateStr ? formatDate(dateStr, 'time') : ''
+  const displayDate = formattedDate && formattedTime ? `${formattedDate} ${formattedTime}` : formattedDate
 
   return (
     <View className='event-card' onClick={onClick}>
@@ -44,10 +49,10 @@ export default function EventCard({ event, onClick }: EventCardProps) {
 
       {/* Info row */}
       <View className='card-info-row'>
-        {(event.date || event.startTime) && (
+        {dateStr && (
           <View className='info-item'>
             <Text className='info-icon-text'>🕐</Text>
-            <Text className='info-label'>{formatDate(event.date || event.startTime, 'short')}</Text>
+            <Text className='info-label'>{displayDate}</Text>
           </View>
         )}
         <View className='info-item'>
@@ -80,7 +85,16 @@ export default function EventCard({ event, onClick }: EventCardProps) {
       <View className='card-bottom'>
         {/* Left: avatar stack + count */}
         <View className='bottom-left'>
-          <View className='avatar-stack'>
+          <View
+            className='avatar-stack'
+            style={{
+              width: signupAvatars.length > 0
+                ? `${signupAvatars.length * 40 + 16}rpx`
+                : signupCount > 0
+                  ? `${Math.min(3, signupCount) * 40 + 16}rpx`
+                  : '0',
+            }}
+          >
             {signupAvatars.length > 0 ? (
               signupAvatars.map((s, i) => (
                 <View
