@@ -10,8 +10,8 @@ module.exports = {
         DATABASE_URL: 'postgresql://creatoros:Creatoros2024!@127.0.0.1:5432/creatoros',
         JWT_SECRET: 'creatoros_jwt_secret_2024',
         ADMIN_PASSWORD: 'CreatorOS@admin',
-        WX_APP_ID: '',
-        WX_APP_SECRET: '',
+        WX_APP_ID: 'wxe06a5dc36a7f7550',
+        WX_APP_SECRET: 'fb2f306b7bd95f51ed56dca7dce5c7f9',
       },
     },
     {
