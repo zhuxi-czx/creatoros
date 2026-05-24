@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   UseGuards,
+  Header,
 } from '@nestjs/common';
 import { BannerService } from './banner.service';
 import { CreateBannerDto } from './dto/create-banner.dto';
@@ -18,6 +19,7 @@ export class BannerController {
   constructor(private readonly bannerService: BannerService) {}
 
   @Get()
+  @Header('Cache-Control', 'public, max-age=60')
   async getEnabledBanners() {
     return this.bannerService.getEnabledBanners();
   }

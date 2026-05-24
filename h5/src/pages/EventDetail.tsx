@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { getEventDetail, getEventSignups, signup, cancelSignup, Event, Participant } from '../services/event'
 import ImageCarousel from '../components/ImageCarousel'
+import LazyImage from '../components/LazyImage'
 
 const AVATAR_COLORS = ['#8B5CF6', '#EC4899', '#F97316', '#06B6D4', '#10B981', '#EF4444']
 
@@ -74,14 +75,29 @@ export default function EventDetail() {
   }
 
   if (loading) return (
-    <div className="page-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-      <div className="spinner" />
+    <div style={{ minHeight: '100vh', background: '#F7F7F7', fontFamily: "'Inter', -apple-system, sans-serif" }}>
+      {/* Skeleton cover */}
+      <div style={{ height: 260, background: '#F0EBE3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 24, height: 24, border: '3px solid #E0D8CC', borderTop: '3px solid #C9A96E', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+      </div>
+      {/* Skeleton content */}
+      <div style={{ padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ width: '70%', height: 24, background: '#F0EBE3', borderRadius: 6 }} />
+        <div style={{ width: '50%', height: 16, background: '#F0EBE3', borderRadius: 4 }} />
+        <div style={{ width: '90%', height: 16, background: '#F0EBE3', borderRadius: 4 }} />
+        <div style={{ width: '60%', height: 16, background: '#F0EBE3', borderRadius: 4 }} />
+        <div style={{ width: '100%', height: 80, background: '#F0EBE3', borderRadius: 8 }} />
+      </div>
     </div>
   )
 
   if (!event) return (
-    <div className="page-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-      <div className="empty-state">活动不存在</div>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#F7F7F7', fontFamily: "'Inter', -apple-system, sans-serif", gap: 16 }}>
+      <span style={{ fontSize: 16, color: '#999' }}>活动不存在或加载失败</span>
+      <button onClick={() => window.location.reload()} style={{ padding: '8px 24px', borderRadius: 20, background: '#C9A96E', color: '#fff', border: 'none', fontSize: 14, cursor: 'pointer' }}>
+        重试
+      </button>
     </div>
   )
 
@@ -113,7 +129,7 @@ export default function EventDetail() {
             height={260}
           />
         ) : event.coverUrl || (event.imageUrls && event.imageUrls.length === 1) ? (
-          <img src={event.imageUrls?.[0] || event.coverUrl} alt={event.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <LazyImage src={event.imageUrls?.[0] || event.coverUrl || ''} alt={event.title} />
         ) : (
           <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #8B5CF6, #EC4899)' }} />
         )}

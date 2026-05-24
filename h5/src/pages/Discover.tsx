@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { getEvents, Event } from '../services/event'
+import { getCached, setCache } from '../services/cache'
 import TabBar from '../components/TabBar'
 import LazyImage from '../components/LazyImage'
 
@@ -16,10 +17,15 @@ export default function Discover() {
   const [selectedTag, setSelectedTag] = useState('全部')
 
   useEffect(() => {
+    // Cache first for instant display
+    const cached = getCached<Event[]>('events')
+    if (cached) { setEvents(cached); setLoading(false) }
+
     getEvents(1, 20)
       .then((res) => {
         const data = Array.isArray(res) ? res : (res as { data: Event[] }).data || []
         setEvents(data)
+        setCache('events', data, 60000)
       })
       .finally(() => setLoading(false))
   }, [])

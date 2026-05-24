@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { getFeaturedEvents, Event } from '../services/event'
 import { getBanners, Banner } from '../services/banner'
 import { getVenues, Venue } from '../services/venue'
+import { getCached, setCache } from '../services/cache'
 import TabBar from '../components/TabBar'
 import LazyImage from '../components/LazyImage'
 
@@ -33,11 +34,21 @@ export default function Home() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
+    // Try cache first for instant display
+    const cachedBanners = getCached<Banner[]>('banners')
+    const cachedVenues = getCached<Venue[]>('venues')
+    const cachedFeatured = getCached<Event[]>('featured')
+    if (cachedBanners) setBanners(cachedBanners)
+    if (cachedVenues) setVenues(cachedVenues)
+    if (cachedFeatured) setFeatured(cachedFeatured)
+    if (cachedBanners && cachedVenues && cachedFeatured) setLoading(false)
+
+    // Always fetch fresh data in background
     Promise.allSettled([getBanners(), getVenues(), getFeaturedEvents()])
       .then(([b, v, f]) => {
-        if (b.status === 'fulfilled') setBanners(b.value)
-        if (v.status === 'fulfilled') setVenues(v.value)
-        if (f.status === 'fulfilled') setFeatured(f.value)
+        if (b.status === 'fulfilled') { setBanners(b.value); setCache('banners', b.value, 120000) }
+        if (v.status === 'fulfilled') { setVenues(v.value); setCache('venues', v.value, 120000) }
+        if (f.status === 'fulfilled') { setFeatured(f.value); setCache('featured', f.value, 60000) }
       })
       .finally(() => setLoading(false))
   }, [])

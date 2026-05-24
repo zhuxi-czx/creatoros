@@ -10,6 +10,7 @@ import {
   Request,
   ParseIntPipe,
   DefaultValuePipe,
+  Header,
 } from '@nestjs/common';
 import { EventService } from './event.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -24,6 +25,7 @@ export class EventController {
 
   // Public routes
   @Get('api/events')
+  @Header('Cache-Control', 'public, max-age=30')
   async getPublishedEvents(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
@@ -33,6 +35,7 @@ export class EventController {
   }
 
   @Get('api/events/featured')
+  @Header('Cache-Control', 'public, max-age=30')
   async getFeaturedEvents() {
     return this.eventService.getFeaturedEvents();
   }
