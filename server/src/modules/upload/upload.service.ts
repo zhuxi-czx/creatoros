@@ -3,13 +3,12 @@ import * as path from 'path';
 import * as fs from 'fs';
 import sharp = require('sharp');
 
-// Recommended aspect ratios
 const ASPECT_RATIOS = {
-  banner: { width: 16, height: 9, maxWidth: 1200 },
-  event: { width: 16, height: 9, maxWidth: 1200 },
-  venue: { width: 4, height: 3, maxWidth: 800 },
-  avatar: { width: 1, height: 1, maxWidth: 400 },
-  default: { width: 16, height: 9, maxWidth: 1200 },
+  banner: { width: 16, height: 9, maxWidth: 800 },
+  event: { width: 16, height: 9, maxWidth: 800 },
+  venue: { width: 4, height: 3, maxWidth: 600 },
+  avatar: { width: 1, height: 1, maxWidth: 300 },
+  default: { width: 16, height: 9, maxWidth: 800 },
 };
 
 @Injectable()
@@ -33,8 +32,7 @@ export class UploadService {
       const targetRatio = ratio.width / ratio.height;
       const maxWidth = ratio.maxWidth;
 
-      const image = sharp(filePath);
-      const metadata = await image.metadata();
+      const metadata = await sharp(filePath).metadata();
 
       if (!metadata.width || !metadata.height) {
         return filePath;
@@ -49,11 +47,9 @@ export class UploadService {
         let cropHeight: number;
 
         if (currentRatio > targetRatio) {
-          // Image is too wide, crop width
           cropHeight = metadata.height;
           cropWidth = Math.round(metadata.height * targetRatio);
         } else {
-          // Image is too tall, crop height
           cropWidth = metadata.width;
           cropHeight = Math.round(metadata.width / targetRatio);
         }
@@ -64,15 +60,13 @@ export class UploadService {
         });
       }
 
-      // Resize if too large
-      if (metadata.width > maxWidth) {
-        pipeline = pipeline.resize(maxWidth, null, { withoutEnlargement: true });
-      }
+      // Always resize to maxWidth
+      pipeline = pipeline.resize(maxWidth, null, { withoutEnlargement: true });
 
-      // Compress and output as JPEG
+      // Compress aggressively for mobile
       const outputPath = filePath.replace(/\.\w+$/, '.jpg');
       await pipeline
-        .jpeg({ quality: 82, mozjpeg: true })
+        .jpeg({ quality: 75, mozjpeg: true })
         .toFile(outputPath + '.tmp');
 
       // Replace original
