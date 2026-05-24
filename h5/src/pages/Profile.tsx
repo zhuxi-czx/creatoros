@@ -19,7 +19,10 @@ export default function Profile() {
     }
     Promise.allSettled([getProfile(), getMySignups()])
       .then(([profileResult, signupsResult]) => {
-        if (profileResult.status === 'fulfilled') setProfile(profileResult.value)
+        if (profileResult.status === 'fulfilled') {
+          setProfile(profileResult.value)
+          localStorage.setItem('h5_profile', JSON.stringify(profileResult.value))
+        }
         if (signupsResult.status === 'fulfilled') {
           setSignups(Array.isArray(signupsResult.value) ? signupsResult.value : [])
         }

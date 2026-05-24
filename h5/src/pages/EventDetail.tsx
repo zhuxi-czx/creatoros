@@ -16,28 +16,32 @@ export default function EventDetail() {
 
   const isLoggedIn = !!localStorage.getItem('h5_token')
 
-  const fetchEvent = useCallback(async () => {
-    if (!id) return
+  const getUserId = () => {
     try {
-      const data = await getEventDetail(id)
-      setEvent(data)
-    } catch {
-      setEvent(null)
+      const profile = localStorage.getItem('h5_profile')
+      if (profile) return JSON.parse(profile).id
+    } catch {}
+    return undefined
+  }
+
+  const fetchAll = useCallback(async () => {
+    if (!id) return
+    const userId = getUserId()
+    const [eventResult, signupsResult] = await Promise.allSettled([
+      getEventDetail(id, userId),
+      getEventSignups(id),
+    ])
+    if (eventResult.status === 'fulfilled') setEvent(eventResult.value)
+    if (signupsResult.status === 'fulfilled') {
+      setParticipants(Array.isArray(signupsResult.value) ? signupsResult.value : [])
     }
   }, [id])
 
   useEffect(() => {
     if (!id) return
     setLoading(true)
-    Promise.allSettled([getEventDetail(id), getEventSignups(id)])
-      .then(([eventResult, signupsResult]) => {
-        if (eventResult.status === 'fulfilled') setEvent(eventResult.value)
-        if (signupsResult.status === 'fulfilled') {
-          setParticipants(Array.isArray(signupsResult.value) ? signupsResult.value : [])
-        }
-      })
-      .finally(() => setLoading(false))
-  }, [id])
+    fetchAll().finally(() => setLoading(false))
+  }, [id, fetchAll])
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -59,8 +63,8 @@ export default function EventDetail() {
         await signup(id)
         showToast('报名成功！')
       }
-      // Refetch event to update isSignedUp and _count
-      await fetchEvent()
+      // Refetch event and participants
+      await fetchAll()
     } catch {
       showToast('操作失败，请重试')
     } finally {

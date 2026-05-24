@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import api from '../services/api'
 import { Event } from '../services/event'
+import LazyImage from '../components/LazyImage'
 
 interface VenueDetail {
   id: string
@@ -20,12 +21,16 @@ interface VenueEventsResponse {
   limit: number
 }
 
-const EVENT_GRADIENTS = [
-  'linear-gradient(135deg, #8B5CF6, #EC4899)',
-  'linear-gradient(135deg, #7C3AED, #DB2777)',
-  'linear-gradient(135deg, #6D28D9, #BE185D)',
-  'linear-gradient(135deg, #5B21B6, #9D174D)',
-]
+const ACCENT = '#C9A96E'
+
+const AVATAR_COLORS = ['#C9A96E', '#8B7355', '#A0926B', '#7B6B4E', '#B8956A', '#D4B896']
+
+const statusMap = (status: string) => {
+  if (status === 'PUBLISHED') return { label: '报名中', color: '#4CAF50' }
+  if (status === 'FULL') return { label: '即将满员', color: '#FF9800' }
+  if (status === 'ENDED') return { label: '已结束', color: '#999' }
+  return { label: status, color: '#999' }
+}
 
 export default function Venue() {
   const { id } = useParams<{ id: string }>()
@@ -51,40 +56,34 @@ export default function Venue() {
       .finally(() => setLoading(false))
   }, [id])
 
-  const statusInfo = (status: string) => {
-    if (status === 'PUBLISHED') return { label: '报名中', color: '#8B5CF6' }
-    if (status === 'FULL') return { label: '报名已满', color: '#999' }
-    return { label: '已结束', color: '#999' }
-  }
-
   if (loading) return (
-    <div className="page-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-      <div className="spinner" />
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#F7F7F7', fontFamily: "'Inter', -apple-system, sans-serif" }}>
+      <div style={{ width: 24, height: 24, border: '2px solid #E0D8CC', borderTop: `2px solid ${ACCENT}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
     </div>
   )
 
   if (!venue) return (
-    <div className="page-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-      <div className="empty-state">场所不存在</div>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#F7F7F7', fontFamily: "'Inter', -apple-system, sans-serif", color: '#999' }}>
+      场所不存在
     </div>
   )
 
   return (
-    <div className="page-container">
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      background: '#F7F7F7',
+    }}>
       {/* Cover */}
-      <div style={{ position: 'relative', height: 240, flexShrink: 0 }}>
+      <div style={{ position: 'relative', height: 220, flexShrink: 0 }}>
         {venue.coverUrl ? (
-          <img src={venue.coverUrl} alt={venue.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <LazyImage src={venue.coverUrl} alt={venue.name} />
         ) : (
-          <div style={{
-            width: '100%',
-            height: '100%',
-            background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${ACCENT}, #8B7355)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
               <polyline points="9 22 9 12 15 12 15 22" />
             </svg>
@@ -95,18 +94,13 @@ export default function Venue() {
           <button
             onClick={() => navigate(-1)}
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: '50%',
-              background: 'rgba(255,255,255,0.85)',
-              backdropFilter: 'blur(8px)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#333',
+              width: 36, height: 36, borderRadius: '50%', border: 'none',
+              background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer',
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
@@ -114,94 +108,111 @@ export default function Venue() {
       </div>
 
       {/* Venue Info */}
-      <div style={{ padding: '24px 16px 0' }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A', letterSpacing: -0.5 }}>
-          {venue.name}
-        </h1>
-
+      <div style={{ padding: '20px 16px 0' }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>{venue.name}</h1>
         {(venue.city || venue.address) && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, color: '#666', fontSize: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 8, color: '#999', fontSize: 13 }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-              <circle cx="12" cy="10" r="3" />
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
             </svg>
             <span>{[venue.city, venue.address].filter(Boolean).join(' · ')}</span>
           </div>
         )}
-
         {venue.description && (
-          <p style={{ marginTop: 14, fontSize: 14, color: '#666', lineHeight: 1.6 }}>
-            {venue.description}
-          </p>
+          <p style={{ marginTop: 12, fontSize: 13, color: '#666', lineHeight: 1.6 }}>{venue.description}</p>
         )}
       </div>
 
-      {/* Upcoming events */}
-      <div style={{ padding: '28px 16px 32px' }}>
-        <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', letterSpacing: -0.3, marginBottom: 14 }}>
-          近期活动
-        </h2>
+      {/* Events - same card style as Discover page */}
+      <div style={{ padding: '20px 16px 32px' }}>
+        <h2 style={{ fontSize: 16, fontWeight: 600, color: '#1A1A1A', margin: '0 0 14px' }}>近期活动</h2>
         {events.length === 0 ? (
-          <div className="empty-state">暂无近期活动</div>
+          <div style={{ textAlign: 'center', color: '#999', fontSize: 14, padding: '32px 0' }}>暂无近期活动</div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {events.map((ev, i) => {
-              const { label } = statusInfo(ev.status)
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {events.map((ev, idx) => {
+              const { label, color } = statusMap(ev.status)
               const eventDate = ev.date || ev.startTime
+              const signupCount = ev._count?.signups ?? 0
+              const signups = (ev as any).signups as { user: { id: string; avatarUrl?: string } }[] | undefined
               return (
                 <div
                   key={ev.id}
-                  onClick={() => navigate(`/event/${ev.id}`)}
                   style={{
-                    borderRadius: 16,
-                    background: EVENT_GRADIENTS[i % EVENT_GRADIENTS.length],
-                    padding: '18px 18px 16px',
-                    cursor: 'pointer',
-                    position: 'relative',
-                    overflow: 'hidden',
+                    background: '#fff', borderRadius: 12, padding: 16,
+                    display: 'flex', flexDirection: 'column', gap: 10,
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ fontSize: 16, fontWeight: 600, color: '#fff', flex: 1, lineHeight: 1.3, paddingRight: 8 }}>
-                      {ev.title}
-                    </div>
-                    <span style={{
-                      padding: '3px 10px',
-                      borderRadius: 9999,
-                      fontSize: 11,
-                      fontWeight: 600,
-                      background: 'rgba(255,255,255,0.2)',
-                      color: '#fff',
-                      flexShrink: 0,
-                      marginTop: 2,
-                    }}>
-                      {label}
-                    </span>
-                  </div>
-                  {ev.description && (
-                    <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', marginTop: 8, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {ev.description}
-                    </p>
-                  )}
-                  <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                  {/* Title */}
+                  <div style={{ fontSize: 16, fontWeight: 600, color: '#1A1A1A' }}>{ev.title}</div>
+
+                  {/* Info row */}
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                     {eventDate && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'rgba(255,255,255,0.85)' }}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                          <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" />
-                          <line x1="3" y1="10" x2="21" y2="10" />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
                         </svg>
-                        <span>{dayjs(eventDate).format('MM月DD日 HH:mm')}</span>
+                        <span style={{ fontSize: 11, color: '#999' }}>{dayjs(eventDate).format('M月D日 HH:mm')}</span>
                       </div>
                     )}
-                    {ev.hostName && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'rgba(255,255,255,0.85)' }}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <div style={{ width: 6, height: 6, borderRadius: 3, background: color }} />
+                      <span style={{ fontSize: 11, fontWeight: 500, color }}>{label}</span>
+                    </div>
+                    {venue && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
                         </svg>
-                        <span>{ev.hostName}</span>
+                        <span style={{ fontSize: 11, color: '#999' }}>{venue.name}</span>
                       </div>
                     )}
+                  </div>
+
+                  {/* Cover image */}
+                  {ev.coverUrl ? (
+                    <LazyImage src={ev.coverUrl} alt={ev.title} style={{ width: '100%', height: 160, borderRadius: 8 }} />
+                  ) : (
+                    <div style={{
+                      width: '100%', height: 160, borderRadius: 8,
+                      background: `linear-gradient(135deg, ${AVATAR_COLORS[idx % AVATAR_COLORS.length]}, ${AVATAR_COLORS[(idx + 2) % AVATAR_COLORS.length]})`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <span style={{ fontSize: 28, color: 'rgba(255,255,255,0.6)', fontWeight: 700 }}>{ev.title.slice(0, 2)}</span>
+                    </div>
+                  )}
+
+                  {/* Bottom row: avatars + signup button */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ position: 'relative', width: signups && signups.length > 0 ? (Math.min(signups.length, 3) - 1) * 20 + 28 : 0, height: 28 }}>
+                        {signups?.slice(0, 3).map((s, i) => (
+                          <div key={s.user.id} style={{
+                            position: 'absolute', left: i * 20, top: 0,
+                            width: 28, height: 28, borderRadius: '50%',
+                            background: AVATAR_COLORS[i % AVATAR_COLORS.length],
+                            border: '2px solid #fff',
+                            overflow: 'hidden',
+                          }}>
+                            {s.user.avatarUrl && <img src={s.user.avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                          </div>
+                        ))}
+                      </div>
+                      {signupCount > 0 && (
+                        <span style={{ fontSize: 12, color: '#999' }}>{signupCount}人已报名</span>
+                      )}
+                    </div>
+                    <div
+                      onClick={() => navigate(`/event/${ev.id}`)}
+                      style={{
+                        padding: '8px 20px', borderRadius: 20,
+                        background: ACCENT, color: '#fff',
+                        fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                      }}
+                    >
+                      立即报名
+                    </div>
                   </div>
                 </div>
               )
