@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { getProfile, getMySignups, UserProfile, SignupRecord } from '../services/user'
-import { TabBar } from './Home'
-
-const TAG_COLORS = ['#8B5CF6', '#EC4899', '#F97316', '#06B6D4']
+import TabBar from '../components/TabBar'
 
 export default function Profile() {
   const navigate = useNavigate()
@@ -29,55 +27,147 @@ export default function Profile() {
       .finally(() => setLoading(false))
   }, [isLoggedIn])
 
-  const handleLogout = () => {
-    localStorage.removeItem('h5_token')
-    navigate('/')
-  }
-
-  // Normalize profile fields: API may return nickname or name
   const displayName = profile?.nickname || profile?.name
   const displayAvatar = profile?.avatarUrl || profile?.avatar
 
+  const genderIcon = profile?.gender === '男'
+    ? '\u2642\uFE0F'
+    : profile?.gender === '女'
+      ? '\u2640\uFE0F'
+      : null
+
+  const tags = [
+    genderIcon ? `${genderIcon} ${profile?.gender}` : profile?.gender,
+    profile?.mbti,
+    profile?.zodiac,
+    profile?.generation,
+  ].filter(Boolean) as string[]
+
   return (
-    <div className="page-container page-with-tabs">
-      {/* Cover gradient */}
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      background: '#F7F7F7',
+      position: 'relative',
+    }}>
+      {/* Background landscape layer */}
       <div style={{
-        height: 180,
-        background: 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 60%, #F97316 100%)',
-        position: 'relative',
-        flexShrink: 0,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 260,
+        background: 'linear-gradient(135deg, #D4B896 0%, #A8C4B8 50%, #8B9EAF 100%)',
+        filter: 'saturate(0.6)',
+        zIndex: 0,
+      }} />
+      {/* Gradient overlay: transparent to #F7F7F7 */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 260,
+        background: 'linear-gradient(to bottom, transparent 40%, #F7F7F7 100%)',
+        zIndex: 1,
       }} />
 
-      {/* Avatar — overlapping cover */}
+      {/* Status Bar */}
+      <div style={{
+        height: 44,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 16px',
+        background: 'transparent',
+        position: 'relative',
+        zIndex: 2,
+      }}>
+        <span style={{ fontSize: 15, fontWeight: 600, color: '#000' }}>9:41</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          {/* Signal */}
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+            <rect x="0" y="8" width="3" height="4" rx="0.5" fill="#000" />
+            <rect x="4.5" y="5" width="3" height="7" rx="0.5" fill="#000" />
+            <rect x="9" y="2" width="3" height="10" rx="0.5" fill="#000" />
+            <rect x="13.5" y="0" width="2.5" height="12" rx="0.5" fill="#000" fillOpacity="0.3" />
+          </svg>
+          {/* WiFi */}
+          <svg width="15" height="12" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12.55a11 11 0 0 1 14.08 0" />
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+            <circle cx="12" cy="20" r="1" fill="#000" stroke="none" />
+          </svg>
+          {/* Battery */}
+          <svg width="24" height="12" viewBox="0 0 24 12" fill="none">
+            <rect x="0" y="0.5" width="20" height="11" rx="2" stroke="#000" strokeWidth="1" />
+            <rect x="2" y="2.5" width="14" height="7" rx="1" fill="#000" />
+            <rect x="21" y="3.5" width="2.5" height="5" rx="1" fill="#000" fillOpacity="0.3" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Nav Bar */}
+      <div style={{
+        height: 44,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 16px',
+        background: 'transparent',
+        position: 'relative',
+        zIndex: 2,
+      }}>
+        <span style={{ fontSize: 20, fontWeight: 700, color: '#1A1A1A' }}>我的</span>
+        {/* Mini-program capsule */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          background: '#F0F0F0',
+          borderRadius: 16,
+          padding: '5px 12px',
+        }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="1" />
+            <circle cx="19" cy="12" r="1" />
+            <circle cx="5" cy="12" r="1" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Profile Header */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
-        alignItems: isLoggedIn ? 'flex-start' : 'center',
-        padding: isLoggedIn ? '0 20px' : '0',
-        marginTop: -40,
+        alignItems: 'center',
+        padding: '20px 16px 24px',
         position: 'relative',
-        zIndex: 1,
+        zIndex: 2,
       }}>
+        {/* Avatar */}
         <div style={{
-          width: 80,
-          height: 80,
+          width: 72,
+          height: 72,
           borderRadius: '50%',
-          background: displayAvatar ? undefined : 'linear-gradient(135deg, #7C3AED, #DB2777)',
           border: '3px solid #fff',
           overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: 30,
+          background: displayAvatar ? '#eee' : 'linear-gradient(135deg, #C9A96E, #E8D5B0)',
+          fontSize: 28,
           color: '#fff',
           fontWeight: 700,
-          boxShadow: '0 2px 12px rgba(0,0,0,0.12)',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.1)',
+          flexShrink: 0,
         }}>
           {displayAvatar ? (
             <img src={displayAvatar} alt={displayName ?? ''} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
             isLoggedIn ? (displayName?.[0] ?? '?') : (
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
@@ -86,63 +176,74 @@ export default function Profile() {
         </div>
 
         {/* Name */}
-        <div style={{ marginTop: 10, textAlign: isLoggedIn ? 'left' : 'center' }}>
-          <div style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A' }}>
-            {displayName ?? (isLoggedIn ? '加载中…' : '未登录')}
-          </div>
-          {profile?.city && (
-            <div style={{ fontSize: 12, color: '#999', marginTop: 2, display: 'flex', alignItems: 'center', gap: 3, justifyContent: isLoggedIn ? 'flex-start' : 'center' }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
-              </svg>
-              {profile.city}
-            </div>
-          )}
+        <div style={{ fontSize: 20, fontWeight: 700, color: '#1A1A1A', marginTop: 12, textAlign: 'center' }}>
+          {displayName ?? (isLoggedIn ? '加载中...' : '未登录')}
         </div>
+
+        {/* City */}
+        {profile?.city && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginTop: 4 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            <span style={{ fontSize: 13, color: '#999' }}>{profile.city}</span>
+          </div>
+        )}
+
+        {/* Tags */}
+        {isLoggedIn && profile && tags.length > 0 && (
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginTop: 12 }}>
+            {tags.map((tag, i) => (
+              <span key={i} style={{
+                padding: '4px 10px',
+                borderRadius: 12,
+                background: '#F0F0F0',
+                fontSize: 11,
+                fontWeight: 500,
+                color: '#666',
+              }}>
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Profile section */}
-      <div style={{ padding: '0 20px' }}>
-        {/* Tags */}
-        {isLoggedIn && profile && (
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14, marginBottom: 16 }}>
-            {[profile.gender, profile.mbti, profile.zodiac, profile.generation]
-              .filter(Boolean)
-              .map((tag, i) => (
-                <span key={i} style={{
-                  padding: '4px 12px',
-                  borderRadius: 9999,
-                  fontSize: 12,
-                  fontWeight: 500,
-                  background: `${TAG_COLORS[i % TAG_COLORS.length]}18`,
-                  color: TAG_COLORS[i % TAG_COLORS.length],
-                }}>
-                  {tag}
-                </span>
-              ))}
-          </div>
-        )}
-
-        {/* Bio */}
-        {profile?.bio && (
-          <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 24, marginTop: isLoggedIn && !profile.gender ? 14 : 0 }}>
-            {profile.bio}
-          </p>
-        )}
-
+      {/* Content Area */}
+      <div style={{
+        flex: 1,
+        background: '#F7F7F7',
+        padding: '0 16px 120px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 16,
+        position: 'relative',
+        zIndex: 2,
+      }}>
         {/* Not logged in state */}
         {!isLoggedIn && !loading && (
-          <div style={{ textAlign: 'center', padding: '24px 0 40px' }}>
-            <p style={{ fontSize: 15, color: '#666', marginBottom: 24 }}>登录后查看完整个人资料</p>
+          <div style={{
+            background: '#fff',
+            borderRadius: 12,
+            padding: '40px 16px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 16,
+          }}>
+            <p style={{ fontSize: 14, color: '#999', margin: 0 }}>登录后查看完整个人资料</p>
             <button
               onClick={() => navigate('/login')}
               style={{
-                padding: '12px 40px',
-                borderRadius: 14,
-                background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+                padding: '12px 32px',
+                borderRadius: 24,
+                background: '#C9A96E',
                 color: '#fff',
                 fontSize: 15,
                 fontWeight: 600,
+                border: 'none',
+                cursor: 'pointer',
               }}
             >
               去登录
@@ -150,91 +251,152 @@ export default function Profile() {
           </div>
         )}
 
-        {/* My signups */}
+        {/* Bio Card */}
         {isLoggedIn && (
-          <div style={{ marginTop: 8 }}>
-            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', marginBottom: 14 }}>
-              我参与的
-            </h3>
+          <div style={{
+            background: '#fff',
+            borderRadius: 12,
+            padding: 16,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>个人简介</span>
+              <button
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+                <span style={{ fontSize: 13, fontWeight: 500, color: '#C9A96E' }}>编辑</span>
+              </button>
+            </div>
+            <p style={{ fontSize: 13, color: '#666', lineHeight: 1.6, margin: 0 }}>
+              {profile?.bio || '暂无简介'}
+            </p>
+          </div>
+        )}
+
+        {/* My Signups Card */}
+        {isLoggedIn && (
+          <div style={{
+            background: '#fff',
+            borderRadius: 12,
+            padding: 16,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 14,
+          }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>我参与的</span>
+
             {loading ? (
-              <div className="spinner" />
+              <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>
+                <div style={{
+                  width: 24,
+                  height: 24,
+                  border: '2px solid #F0F0F0',
+                  borderTopColor: '#C9A96E',
+                  borderRadius: '50%',
+                  animation: 'spin 0.8s linear infinite',
+                }} />
+              </div>
             ) : signups.length === 0 ? (
-              <div className="empty-state">还没有参与过活动</div>
+              <div style={{ textAlign: 'center', padding: 20 }}>
+                <span style={{ fontSize: 14, color: '#999' }}>还没有参与过活动</span>
+              </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {signups.map((s) => {
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {signups.map((s, index) => {
                   const eventDate = s.event.date || s.event.startTime
                   const venueName = s.event.venue?.name ?? ''
                   const venueCity = s.event.venue?.city ?? ''
-                  const locationText = [venueCity, venueName].filter(Boolean).join(' · ')
+                  const dateStr = eventDate ? dayjs(eventDate).format('MM月DD日') : ''
+                  const locationText = [dateStr, venueCity, venueName].filter(Boolean).join(' \u00B7 ')
                   return (
-                    <div
-                      key={s.id}
-                      onClick={() => navigate(`/event/${s.eventId}`)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 12,
-                        padding: '12px 14px',
-                        background: '#F5F5F7',
-                        borderRadius: 14,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <div style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 10,
-                        background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
-                        flexShrink: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'rgba(255,255,255,0.8)',
-                        fontSize: 11,
-                        fontWeight: 600,
-                        textAlign: 'center',
-                        lineHeight: 1.3,
-                        padding: '4px',
-                      }}>
-                        {eventDate && (
-                          <span>{dayjs(eventDate).format('MM/DD')}</span>
-                        )}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {s.event.title}
+                    <div key={s.id}>
+                      <div
+                        onClick={() => navigate(`/event/${s.eventId}`)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 12,
+                          padding: '10px 0',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {/* Date box */}
+                        <div style={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: 8,
+                          background: '#FDF6EC',
+                          flexShrink: 0,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}>
+                          {eventDate && (
+                            <>
+                              <span style={{ fontSize: 11, fontWeight: 500, color: '#C9A96E', lineHeight: 1.2 }}>
+                                {dayjs(eventDate).format('M')}月
+                              </span>
+                              <span style={{ fontSize: 16, fontWeight: 700, color: '#C9A96E', lineHeight: 1.2 }}>
+                                {dayjs(eventDate).format('D')}
+                              </span>
+                            </>
+                          )}
                         </div>
-                        <div style={{ fontSize: 12, color: '#999', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {eventDate && dayjs(eventDate).format('MM月DD日')}
-                          {locationText && ` · ${locationText}`}
+
+                        {/* Event info */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{
+                            fontSize: 14,
+                            fontWeight: 500,
+                            color: '#1A1A1A',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}>
+                            {s.event.title}
+                          </div>
+                          <div style={{
+                            fontSize: 11,
+                            color: '#999',
+                            marginTop: 3,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}>
+                            {locationText}
+                          </div>
                         </div>
+
+                        {/* Chevron right */}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CCC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
                       </div>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#CCC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="9 18 15 12 9 6" />
-                      </svg>
+
+                      {/* Divider */}
+                      {index < signups.length - 1 && (
+                        <div style={{ height: 0.5, background: '#F0F0F0' }} />
+                      )}
                     </div>
                   )
                 })}
               </div>
             )}
-
-            {/* Logout */}
-            <button
-              onClick={handleLogout}
-              style={{
-                marginTop: 32,
-                width: '100%',
-                padding: '13px',
-                borderRadius: 14,
-                background: '#F5F5F7',
-                color: '#999',
-                fontSize: 15,
-                fontWeight: 500,
-              }}
-            >
-              退出登录
-            </button>
           </div>
         )}
       </div>

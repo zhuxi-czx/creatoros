@@ -2,6 +2,8 @@ import {
   Controller,
   Get,
   Post,
+  Put,
+  Delete,
   Body,
   Param,
   Query,
@@ -12,10 +14,16 @@ import {
 import { VenueService } from './venue.service';
 import { AdminGuard } from '../auth/admin.guard';
 import { CreateVenueDto } from './dto/create-venue.dto';
+import { UpdateVenueDto } from './dto/update-venue.dto';
 
 @Controller('api/venues')
 export class VenueController {
   constructor(private readonly venueService: VenueService) {}
+
+  @Get()
+  async getVenues() {
+    return this.venueService.getAllVenues();
+  }
 
   @Get(':id')
   async getVenueById(@Param('id') id: string) {
@@ -45,5 +53,15 @@ export class AdminVenueController {
   @Get()
   async getAllVenues() {
     return this.venueService.getAllVenues();
+  }
+
+  @Put(':id')
+  async updateVenue(@Param('id') id: string, @Body() dto: UpdateVenueDto) {
+    return this.venueService.updateVenue(id, dto);
+  }
+
+  @Delete(':id')
+  async deleteVenue(@Param('id') id: string) {
+    return this.venueService.deleteVenue(id);
   }
 }

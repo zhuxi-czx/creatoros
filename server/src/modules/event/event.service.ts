@@ -39,6 +39,12 @@ export class EventService {
               city: true,
             },
           },
+          signups: {
+            where: { status: 'CONFIRMED' },
+            take: 5,
+            orderBy: { createdAt: 'asc' },
+            select: { user: { select: { id: true, avatarUrl: true } } },
+          },
           _count: {
             select: { signups: { where: { status: 'CONFIRMED' } } },
           },

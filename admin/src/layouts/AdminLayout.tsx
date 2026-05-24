@@ -3,6 +3,8 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Button, Typography, Avatar, Dropdown, Space, Drawer } from 'antd'
 import {
   CalendarOutlined,
+  PictureOutlined,
+  EnvironmentOutlined,
   UserOutlined,
   LogoutOutlined,
   MenuOutlined
@@ -14,6 +16,8 @@ const { Text } = Typography
 
 const menuItems = [
   { key: '/events', icon: <CalendarOutlined />, label: '活动管理' },
+  { key: '/banners', icon: <PictureOutlined />, label: 'Banner管理' },
+  { key: '/venues', icon: <EnvironmentOutlined />, label: '场馆管理' },
   { key: '/users', icon: <UserOutlined />, label: '用户管理' }
 ]
 
