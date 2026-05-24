@@ -7,6 +7,9 @@ export interface Venue {
   city: string
   description?: string
   coverUrl?: string
+  imageUrls?: string[]
+  autoplay?: boolean
+  interval?: number
   _count?: { events: number }
 }
 

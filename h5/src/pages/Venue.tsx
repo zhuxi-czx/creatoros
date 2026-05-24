@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import api from '../services/api'
 import { Event } from '../services/event'
 import LazyImage from '../components/LazyImage'
+import ImageCarousel from '../components/ImageCarousel'
 
 interface VenueDetail {
   id: string
@@ -12,6 +13,9 @@ interface VenueDetail {
   city?: string
   description?: string
   coverUrl?: string
+  imageUrls?: string[]
+  autoplay?: boolean
+  interval?: number
 }
 
 interface VenueEventsResponse {
@@ -122,6 +126,20 @@ export default function Venue() {
           <p style={{ marginTop: 12, fontSize: 13, color: '#666', lineHeight: 1.6 }}>{venue.description}</p>
         )}
       </div>
+
+      {/* Venue Images Carousel */}
+      {venue.imageUrls && venue.imageUrls.length > 0 && (
+        <div style={{ padding: '20px 16px 0' }}>
+          <h2 style={{ fontSize: 16, fontWeight: 600, color: '#1A1A1A', margin: '0 0 12px' }}>场馆详情</h2>
+          <ImageCarousel
+            images={venue.imageUrls}
+            autoplay={venue.autoplay}
+            interval={venue.interval || 3000}
+            height={200}
+            borderRadius={8}
+          />
+        </div>
+      )}
 
       {/* Events - same card style as Discover page */}
       <div style={{ padding: '20px 16px 32px' }}>

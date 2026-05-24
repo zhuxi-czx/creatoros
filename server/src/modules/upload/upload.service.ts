@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as sharp from 'sharp';
+import sharp = require('sharp');
 
 // Recommended aspect ratios
 const ASPECT_RATIOS = {

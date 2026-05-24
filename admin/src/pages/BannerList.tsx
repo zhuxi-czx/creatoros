@@ -25,6 +25,7 @@ export default function BannerList() {
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
   const [autoplay, setAutoplay] = useState(true)
+  const [interval, setInterval_] = useState(3)
   const [form] = Form.useForm()
 
   useEffect(() => { loadData() }, [])
@@ -33,7 +34,12 @@ export default function BannerList() {
     try {
       setLoading(true)
       const data = await getBanners()
-      setBanners(Array.isArray(data) ? data : [])
+      const list = Array.isArray(data) ? data : []
+      setBanners(list)
+      if (list.length > 0) {
+        setAutoplay(list[0].autoplay !== false)
+        setInterval_(list[0].interval ? list[0].interval / 1000 : 3)
+      }
     } catch {
       message.error('加载Banner列表失败')
     } finally {
@@ -272,6 +278,45 @@ export default function BannerList() {
         />
       </Card>
 
+      {/* Global Carousel Settings */}
+      {banners.length > 1 && (
+        <Card bordered={false} style={{ borderRadius: 12, marginTop: 16 }}
+          styles={{ body: { padding: isMobile ? 12 : 24 } }}
+          title={<Title level={5} style={{ margin: 0 }}>轮播设置</Title>}
+        >
+          <Space size={24} wrap>
+            <Space>
+              <Text>开启轮播</Text>
+              <Switch checked={autoplay} onChange={async (val) => {
+                setAutoplay(val)
+                try {
+                  await Promise.all(banners.map(b => updateBanner(b.id, { autoplay: val })))
+                  message.success('轮播设置已更新')
+                } catch { message.error('更新失败') }
+              }} />
+            </Space>
+            {autoplay && (
+              <Space>
+                <Text>轮播时长(秒)</Text>
+                <InputNumber value={interval} min={1} max={30} step={0.5} style={{ width: 100 }}
+                  onChange={async (val) => {
+                    const v = val || 3
+                    setInterval_(v)
+                    try {
+                      await Promise.all(banners.map(b => updateBanner(b.id, { interval: Math.round(v * 1000) })))
+                      message.success('轮播时长已更新')
+                    } catch { message.error('更新失败') }
+                  }}
+                />
+              </Space>
+            )}
+          </Space>
+          <div style={{ marginTop: 8, fontSize: 12, color: '#999' }}>
+            设置后所有 Banner 图片将按此配置在首页自动轮播
+          </div>
+        </Card>
+      )}
+
       <Modal
         title={editing ? '编辑 Banner' : '新增 Banner'}
         open={modalOpen}
@@ -354,17 +399,6 @@ export default function BannerList() {
           <Form.Item name="subtitle" label="副标题">
             <Input placeholder="请输入副标题（可选）" />
           </Form.Item>
-
-          <Space size={16}>
-            <Form.Item name="autoplay" label="开启轮播" valuePropName="checked" initialValue={true}>
-              <Switch onChange={val => setAutoplay(val)} />
-            </Form.Item>
-            {autoplay && (
-              <Form.Item name="interval" label="轮播时长(秒)" initialValue={3}>
-                <InputNumber min={1} max={30} step={0.5} style={{ width: 120 }} />
-              </Form.Item>
-            )}
-          </Space>
 
           <Form.Item name="sortOrder" label="排序" initialValue={0}>
             <InputNumber min={0} style={{ width: '100%' }} />
