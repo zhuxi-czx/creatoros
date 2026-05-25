@@ -4,6 +4,7 @@ import Taro from '@tarojs/taro'
 import { getVenueDetail, getVenueEvents } from '../../services/venue'
 import type { Venue } from '../../services/venue'
 import type { Event } from '../../services/event'
+import { resolveImageUrl } from '../../services/api'
 import EventCard from '../../components/EventCard'
 import './index.scss'
 
@@ -55,7 +56,7 @@ export default function VenuePage() {
         {/* Hero */}
         <View className='venue-hero'>
           {venue?.coverUrl ? (
-            <Image className='hero-cover' src={venue.coverUrl} mode='aspectFill' lazyLoad />
+            <Image className='hero-cover' src={resolveImageUrl(venue.coverUrl)} mode='aspectFill' lazyLoad />
           ) : (
             <View className='hero-gradient'>
               <Text className='hero-icon'>🏠</Text>

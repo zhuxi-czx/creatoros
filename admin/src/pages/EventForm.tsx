@@ -10,6 +10,7 @@ import {
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { createEvent, updateEvent, updateEventStatus, getEventDetail, getVenues, uploadImage, type EventFormData } from '../services/event'
+import { resolveImageUrl } from '../services/api'
 
 const { Title } = Typography
 const { TextArea } = Input
@@ -203,7 +204,7 @@ export default function EventForm() {
                     }}
                   >
                     <Image
-                      src={url}
+                      src={resolveImageUrl(url)}
                       width={80}
                       height={50}
                       style={{ objectFit: 'cover', borderRadius: 6, flexShrink: 0 }}

@@ -36,4 +36,16 @@ api.interceptors.response.use(
   }
 )
 
+/** Resolve image URL: converts relative paths to absolute for display */
+export function resolveImageUrl(url: string | undefined): string {
+  if (!url) return ''
+  if (url.startsWith('/uploads/')) {
+    const serverBase = import.meta.env.VITE_API_URL
+      ? import.meta.env.VITE_API_URL.replace(/\/api$/, '')
+      : `${window.location.protocol}//${window.location.hostname}:4000`
+    return `${serverBase}${url}`
+  }
+  return url
+}
+
 export default api

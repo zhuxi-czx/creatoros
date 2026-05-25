@@ -310,6 +310,21 @@ export class EventService {
     return updated;
   }
 
+  async adminCopyEvent(id: string) {
+    const event = await this.prisma.event.findUnique({ where: { id } });
+    if (!event) throw new NotFoundException('Event not found');
+
+    const { id: _, createdAt, updatedAt, status, ...data } = event;
+    return this.prisma.event.create({
+      data: {
+        ...data,
+        title: data.title + ' (副本)',
+        status: 'DRAFT',
+      },
+      include: { venue: true },
+    });
+  }
+
   async adminGetStats() {
     const [
       totalUsers,

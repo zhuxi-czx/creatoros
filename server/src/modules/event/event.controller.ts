@@ -99,6 +99,12 @@ export class EventController {
   }
 
   @UseGuards(AdminGuard)
+  @Post('api/admin/events/:id/copy')
+  async adminCopyEvent(@Param('id') id: string) {
+    return this.eventService.adminCopyEvent(id);
+  }
+
+  @UseGuards(AdminGuard)
   @Put('api/admin/events/:id/status')
   async adminUpdateEventStatus(
     @Param('id') id: string,

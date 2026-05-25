@@ -22,8 +22,7 @@ export class UploadService {
   }
 
   getFileUrl(filename: string): string {
-    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 4000}`;
-    return `${baseUrl}/uploads/${filename}`;
+    return `/uploads/${filename}`;
   }
 
   async processImage(filePath: string, type: string = 'default'): Promise<{ mainPath: string; thumbPath: string }> {

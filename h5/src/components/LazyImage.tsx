@@ -10,6 +10,11 @@ interface LazyImageProps {
 const fixSrc = (url: string) => {
   if (typeof window === 'undefined' || !url) return url
   const host = `${window.location.protocol}//${window.location.hostname}:4000`
+  // Handle relative paths (new format)
+  if (url.startsWith('/uploads/')) {
+    return `${host}${url}`
+  }
+  // Backward compatibility: rewrite old absolute URLs
   return url
     .replace('https://121.196.149.0:4443', host)
     .replace('http://121.196.149.0:4000', host)

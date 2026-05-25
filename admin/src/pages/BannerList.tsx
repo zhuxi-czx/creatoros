@@ -10,6 +10,7 @@ import {
 import type { ColumnsType } from 'antd/es/table'
 import { getBanners, createBanner, updateBanner, deleteBanner, type Banner, type BannerFormData } from '../services/banner'
 import { uploadImage } from '../services/event'
+import { resolveImageUrl } from '../services/api'
 
 const { Title } = Typography
 const { useBreakpoint } = Grid
@@ -171,7 +172,7 @@ export default function BannerList() {
           <Space size={4} align="center">
             {first && (
               <Image
-                src={first}
+                src={resolveImageUrl(first)}
                 width={48}
                 height={30}
                 style={{ objectFit: 'cover', borderRadius: 4 }}
@@ -337,7 +338,7 @@ export default function BannerList() {
                     }}
                   >
                     <Image
-                      src={url}
+                      src={resolveImageUrl(url)}
                       width={80}
                       height={50}
                       style={{ objectFit: 'cover', borderRadius: 6, flexShrink: 0 }}

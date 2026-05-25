@@ -10,6 +10,7 @@ import {
 import type { ColumnsType } from 'antd/es/table'
 import { getVenues, createVenue, updateVenue, deleteVenue, type Venue, type VenueFormData } from '../services/venue'
 import { uploadImage } from '../services/event'
+import { resolveImageUrl } from '../services/api'
 
 const { Title, Text } = Typography
 const { TextArea } = Input
@@ -152,7 +153,7 @@ export default function VenueList() {
     {
       title: '封面', dataIndex: 'coverUrl', key: 'coverUrl', width: 80,
       render: (url: string) => url ? (
-        <Image src={url} width={60} height={45} style={{ objectFit: 'cover', borderRadius: 4 }} preview={false} />
+        <Image src={resolveImageUrl(url)} width={60} height={45} style={{ objectFit: 'cover', borderRadius: 4 }} preview={false} />
       ) : <Text type="secondary">-</Text>
     },
     { title: '名称', dataIndex: 'name', key: 'name', ellipsis: true, render: (n: string) => <Text strong>{n}</Text> },
@@ -214,7 +215,7 @@ export default function VenueList() {
             </div>
             {coverUrl && (
               <div style={{ marginTop: 8, position: 'relative', display: 'inline-block' }}>
-                <Image src={coverUrl} width={160} height={120} style={{ objectFit: 'cover', borderRadius: 8 }} />
+                <Image src={resolveImageUrl(coverUrl)} width={160} height={120} style={{ objectFit: 'cover', borderRadius: 8 }} />
                 <Button size="small" danger style={{ position: 'absolute', top: 4, right: 4 }}
                   icon={<DeleteOutlined />} onClick={() => setCoverUrl('')} />
               </div>
@@ -235,7 +236,7 @@ export default function VenueList() {
               <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {imageUrls.map((url, index) => (
                   <div key={`${url}-${index}`} style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fafafa', padding: 8, borderRadius: 8 }}>
-                    <Image src={url} width={80} height={45} style={{ objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} preview={false} />
+                    <Image src={resolveImageUrl(url)} width={80} height={45} style={{ objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} preview={false} />
                     <Text style={{ flex: 1, fontSize: 12 }} type="secondary">第{index + 1}张</Text>
                     <Button size="small" icon={<ArrowUpOutlined />} disabled={index === 0} onClick={() => moveImage(index, 'up')} />
                     <Button size="small" icon={<ArrowDownOutlined />} disabled={index === imageUrls.length - 1} onClick={() => moveImage(index, 'down')} />

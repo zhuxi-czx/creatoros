@@ -4,6 +4,7 @@ import Taro from '@tarojs/taro'
 import { getEventDetail, signup, cancelSignup, getEventSignups } from '../../services/event'
 import type { Event, Participant } from '../../services/event'
 import { useAuthStore } from '../../stores/useAuthStore'
+import { resolveImageUrl } from '../../services/api'
 import { formatDate } from '../../utils'
 import './index.scss'
 
@@ -101,7 +102,7 @@ export default function EventDetail() {
         {/* Cover */}
         <View className='cover-section'>
           {event.coverUrl ? (
-            <Image className='cover-image' src={event.coverUrl} mode='aspectFill' lazyLoad />
+            <Image className='cover-image' src={resolveImageUrl(event.coverUrl)} mode='aspectFill' lazyLoad />
           ) : (
             <View
               className='cover-gradient'

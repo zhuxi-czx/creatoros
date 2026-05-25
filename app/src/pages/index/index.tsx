@@ -7,6 +7,7 @@ import { getFeaturedEvents } from '../../services/event'
 import type { Banner } from '../../services/banner'
 import type { Venue } from '../../services/venue'
 import type { Event } from '../../services/event'
+import { resolveImageUrl } from '../../services/api'
 import './index.scss'
 
 const FEATURE_ICONS = [
@@ -85,7 +86,7 @@ export default function Index() {
               <SwiperItem key={banner.id} className='banner-item'>
                 <Image
                   className='banner-image'
-                  src={banner.imageUrl}
+                  src={resolveImageUrl(banner.imageUrl)}
                   mode='aspectFill'
                   lazyLoad
                 />
@@ -141,7 +142,7 @@ export default function Index() {
                     {venue.coverUrl ? (
                       <Image
                         className='venue-cover-img'
-                        src={venue.coverUrl}
+                        src={resolveImageUrl(venue.coverUrl)}
                         mode='aspectFill'
                         lazyLoad
                       />
@@ -179,7 +180,7 @@ export default function Index() {
                   {ev.coverUrl ? (
                     <Image
                       className='event-thumb-img'
-                      src={ev.coverUrl}
+                      src={resolveImageUrl(ev.coverUrl)}
                       mode='aspectFill'
                       lazyLoad
                     />

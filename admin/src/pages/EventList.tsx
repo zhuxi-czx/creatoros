@@ -5,12 +5,12 @@ import {
   message, Select, Grid
 } from 'antd'
 import {
-  PlusOutlined, EditOutlined,
+  PlusOutlined, EditOutlined, CopyOutlined,
   CalendarOutlined, UserOutlined, FireOutlined, CheckCircleOutlined
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { getEvents, getStats, updateEventStatus, type Event } from '../services/event'
+import { getEvents, getStats, updateEventStatus, copyEvent, type Event } from '../services/event'
 
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid
@@ -55,6 +55,16 @@ export default function EventList() {
       loadData()
     } catch (err) {
       message.error('状态更新失败')
+    }
+  }
+
+  const handleCopyEvent = async (id: string) => {
+    try {
+      await copyEvent(id)
+      message.success('活动已复制')
+      loadData()
+    } catch (err) {
+      message.error('复制活动失败')
     }
   }
 
@@ -105,6 +115,11 @@ export default function EventList() {
             onClick={() => navigate(`/events/${record.id}/edit`)}
           >
             {!isMobile && '编辑'}
+          </Button>
+          <Button type="link" size="small" icon={<CopyOutlined />}
+            onClick={() => handleCopyEvent(record.id)}
+          >
+            {!isMobile && '复制'}
           </Button>
           <Button type="link" size="small"
             onClick={() => navigate(`/events/${record.id}/signups`)}

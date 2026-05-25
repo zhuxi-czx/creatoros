@@ -1,5 +1,6 @@
 import { View, Text, Image } from '@tarojs/components'
 import type { Event } from '../../services/event'
+import { resolveImageUrl } from '../../services/api'
 import { formatDate } from '../../utils'
 import './index.scss'
 
@@ -70,7 +71,7 @@ export default function EventCard({ event, onClick }: EventCardProps) {
       {/* Cover */}
       <View className='card-cover'>
         {event.coverUrl ? (
-          <Image className='cover-image' src={event.coverUrl} mode='aspectFill' lazyLoad />
+          <Image className='cover-image' src={resolveImageUrl(event.coverUrl)} mode='aspectFill' lazyLoad />
         ) : (
           <View
             className='cover-placeholder'

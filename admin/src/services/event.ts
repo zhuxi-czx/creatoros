@@ -65,6 +65,10 @@ export async function updateEventStatus(id: string, status: string): Promise<Eve
   return api.put(`/admin/events/${id}/status`, { status }) as any
 }
 
+export async function copyEvent(id: string): Promise<Event> {
+  return api.post(`/admin/events/${id}/copy`) as any
+}
+
 export async function getStats(): Promise<any> {
   return api.get('/admin/stats') as any
 }
