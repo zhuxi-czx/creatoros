@@ -56,7 +56,6 @@ export default function BannerList() {
       form.setFieldsValue({
         title: record.title,
         subtitle: record.subtitle,
-        sortOrder: record.sortOrder,
         enabled: record.enabled,
       })
     } else {
@@ -64,7 +63,7 @@ export default function BannerList() {
       setImageUrls([])
       setAutoplay(true)
       form.resetFields()
-      form.setFieldsValue({ sortOrder: 0, enabled: true })
+      form.setFieldsValue({ enabled: true })
     }
     setModalOpen(true)
   }
@@ -81,7 +80,7 @@ export default function BannerList() {
         title: values.title,
         subtitle: values.subtitle,
         imageUrls,
-        sortOrder: values.sortOrder,
+        sortOrder: editing ? editing.sortOrder : banners.length,
         enabled: values.enabled,
       }
       if (editing) {
@@ -107,6 +106,22 @@ export default function BannerList() {
       loadData()
     } catch {
       message.error('删除失败')
+    }
+  }
+
+  const handleMoveBanner = async (index: number, direction: 'up' | 'down') => {
+    const target = direction === 'up' ? index - 1 : index + 1
+    if (target < 0 || target >= banners.length) return
+    try {
+      const a = banners[index]
+      const b = banners[target]
+      await Promise.all([
+        updateBanner(a.id, { sortOrder: b.sortOrder ?? target }),
+        updateBanner(b.id, { sortOrder: a.sortOrder ?? index }),
+      ])
+      loadData()
+    } catch {
+      message.error('排序失败')
     }
   }
 
@@ -198,9 +213,21 @@ export default function BannerList() {
     } as any] : []),
     {
       title: '排序',
-      dataIndex: 'sortOrder',
-      key: 'sortOrder',
-      width: 70,
+      key: 'sort',
+      width: 80,
+      render: (_: any, record: Banner) => {
+        const idx = banners.findIndex(b => b.id === record.id)
+        return (
+          <Space size={2}>
+            <Button type="text" size="small" icon={<ArrowUpOutlined />}
+              disabled={idx === 0}
+              onClick={() => handleMoveBanner(idx, 'up')} />
+            <Button type="text" size="small" icon={<ArrowDownOutlined />}
+              disabled={idx === banners.length - 1}
+              onClick={() => handleMoveBanner(idx, 'down')} />
+          </Space>
+        )
+      }
     },
     {
       title: '启用',
@@ -383,9 +410,6 @@ export default function BannerList() {
             <Input placeholder="请输入副标题（可选）" />
           </Form.Item>
 
-          <Form.Item name="sortOrder" label="排序" initialValue={0}>
-            <InputNumber min={0} style={{ width: '100%' }} />
-          </Form.Item>
           <Form.Item name="enabled" label="启用" valuePropName="checked" initialValue={true}>
             <Switch />
           </Form.Item>
