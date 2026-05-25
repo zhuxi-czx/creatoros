@@ -191,9 +191,35 @@ export default function EventDetail() {
         </h1>
 
         {event.description && (
-          <p style={{ marginTop: 12, fontSize: 14, color: '#666', lineHeight: 1.7 }}>
+          <p style={{ marginTop: 12, fontSize: 14, color: '#666', lineHeight: 1.7, whiteSpace: 'pre-line' }}>
             {event.description}
           </p>
+        )}
+
+        {/* Structured sections */}
+        {(event as any).highlights && (
+          <div style={{ marginTop: 20, padding: 16, background: '#FDF8F0', borderRadius: 12 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: '#C9A96E', marginBottom: 8 }}>✨ 活动亮点</h3>
+            <p style={{ fontSize: 14, color: '#666', lineHeight: 1.7, whiteSpace: 'pre-line', margin: 0 }}>
+              {(event as any).highlights}
+            </p>
+          </div>
+        )}
+        {(event as any).schedule && (
+          <div style={{ marginTop: 12, padding: 16, background: '#F5F5F5', borderRadius: 12 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: '#1A1A1A', marginBottom: 8 }}>📋 活动流程</h3>
+            <p style={{ fontSize: 14, color: '#666', lineHeight: 1.7, whiteSpace: 'pre-line', margin: 0 }}>
+              {(event as any).schedule}
+            </p>
+          </div>
+        )}
+        {(event as any).notes && (
+          <div style={{ marginTop: 12, padding: 16, background: '#FFF5F5', borderRadius: 12 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: '#E74C3C', marginBottom: 8 }}>📌 注意事项</h3>
+            <p style={{ fontSize: 14, color: '#666', lineHeight: 1.7, whiteSpace: 'pre-line', margin: 0 }}>
+              {(event as any).notes}
+            </p>
+          </div>
         )}
 
         {/* Info rows */}
@@ -218,11 +244,25 @@ export default function EventDetail() {
             <DetailRow icon={<UserIcon />} label="主办方">{event.hostName}</DetailRow>
           )}
           <DetailRow icon={<TicketIcon />} label="费用">{priceDisplay}</DetailRow>
-          {event.maxParticipants && (
-            <DetailRow icon={<UsersIcon />} label="名额">
-              {signupCount}/{event.maxParticipants} 人
-            </DetailRow>
-          )}
+          {(event.maxCapacity || event.maxParticipants) && (() => {
+            const max = event.maxCapacity || event.maxParticipants || 0
+            const remain = max - signupCount
+            return (
+              <DetailRow icon={<UsersIcon />} label="名额">
+                <span>{signupCount}/{max} 人</span>
+                {remain > 0 && remain <= 5 && (
+                  <span style={{ color: '#EF4444', fontWeight: 600, marginLeft: 8, fontSize: 13 }}>
+                    仅剩{remain}个名额
+                  </span>
+                )}
+                {remain > 5 && (
+                  <span style={{ color: '#999', marginLeft: 8, fontSize: 13 }}>
+                    剩余{remain}个名额
+                  </span>
+                )}
+              </DetailRow>
+            )
+          })()}
         </div>
 
         {/* Participants */}

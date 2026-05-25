@@ -305,9 +305,16 @@ export default function Discover() {
                         </>
                       )}
                     </div>
-                    {signupCount > 0 && (
-                      <span style={{ fontSize: 12, color: '#999' }}>{signupCount}人已报名</span>
-                    )}
+                    {(() => {
+                      const max = ev.maxCapacity || ev.maxParticipants || 0
+                      const remain = max > 0 ? max - signupCount : 0
+                      return (
+                        <span style={{ fontSize: 12, color: remain > 0 && remain <= 5 ? '#EF4444' : '#999' }}>
+                          {signupCount > 0 ? `${signupCount}人已报名` : ''}
+                          {remain > 0 && remain <= 5 ? ` · 仅剩${remain}个名额` : ''}
+                        </span>
+                      )
+                    })()}
                   </div>
 
                   {/* Right: signup button */}

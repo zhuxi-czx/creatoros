@@ -4,6 +4,9 @@ export interface Event {
   id: string
   title: string
   description?: string
+  highlights?: string
+  schedule?: string
+  notes?: string
   coverUrl?: string
   imageUrls?: string[]
   autoplay?: boolean
@@ -28,6 +31,9 @@ export interface EventFormData {
   imageUrls?: string[]
   autoplay?: boolean
   interval?: number
+  highlights?: string
+  schedule?: string
+  notes?: string
   date: string
   venueId: string
   hostName?: string

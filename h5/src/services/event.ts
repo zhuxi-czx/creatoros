@@ -24,7 +24,11 @@ export interface Event {
   hostName?: string
   hostAvatar?: string
   price?: number
+  maxCapacity?: number
   maxParticipants?: number
+  highlights?: string
+  schedule?: string
+  notes?: string
   currentParticipants?: number
   status: 'PUBLISHED' | 'DRAFT' | 'FULL' | 'ONGOING' | 'ENDED' | 'CANCELLED'
   tags?: string[]

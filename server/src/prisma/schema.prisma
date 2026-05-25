@@ -76,6 +76,9 @@ model Event {
   id          String      @id @default(cuid())
   title       String
   description String?
+  highlights  String?
+  schedule    String?
+  notes       String?
   coverUrl    String?
   imageUrls   String[]    @default([])
   autoplay    Boolean     @default(true)

@@ -50,6 +50,9 @@ export default function EventForm() {
       form.setFieldsValue({
         title: event.title,
         description: event.description,
+        highlights: event.highlights,
+        schedule: event.schedule,
+        notes: event.notes,
         hostName: event.hostName,
         maxCapacity: event.maxCapacity,
         price: event.price ? event.price / 100 : 0,
@@ -121,6 +124,9 @@ export default function EventForm() {
     const data: EventFormData = {
       title: values.title as string,
       description: values.description as string,
+      highlights: values.highlights as string || undefined,
+      schedule: values.schedule as string || undefined,
+      notes: values.notes as string || undefined,
       date: (values.date as dayjs.Dayjs)?.toISOString(),
       venueId: (values.venueId as string) || 'default',
       hostName: values.hostName as string,
@@ -269,7 +275,16 @@ export default function EventForm() {
           </Form.Item>
 
           <Form.Item label="活动描述" name="description">
-            <TextArea placeholder="请输入活动描述" rows={4} maxLength={500} showCount />
+            <TextArea placeholder="请输入活动描述" rows={3} maxLength={500} showCount />
+          </Form.Item>
+          <Form.Item label="活动亮点" name="highlights">
+            <TextArea placeholder="活动特色和亮点，每行一个（可选）" rows={3} maxLength={500} showCount />
+          </Form.Item>
+          <Form.Item label="活动流程" name="schedule">
+            <TextArea placeholder="活动时间安排和流程（可选）" rows={3} maxLength={500} showCount />
+          </Form.Item>
+          <Form.Item label="注意事项" name="notes">
+            <TextArea placeholder="参与者须知、费用说明等（可选）" rows={3} maxLength={500} showCount />
           </Form.Item>
 
           <Form.Item label="活动时间" name="date" rules={[{ required: true, message: '请选择活动时间' }]}>

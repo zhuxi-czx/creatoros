@@ -20,6 +20,18 @@ export class CreateEventDto {
 
   @IsOptional()
   @IsString()
+  highlights?: string;
+
+  @IsOptional()
+  @IsString()
+  schedule?: string;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
+
+  @IsOptional()
+  @IsString()
   coverUrl?: string;
 
   @IsOptional()
