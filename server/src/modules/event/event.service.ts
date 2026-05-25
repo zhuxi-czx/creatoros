@@ -326,43 +326,51 @@ export class EventService {
   }
 
   async adminGetStats() {
-    const [
-      totalUsers,
-      totalEvents,
-      totalSignups,
-      activeEvents,
-      activeSignups,
-    ] = await Promise.all([
+    const [totalUsers, totalEvents, totalSignups, activeEvents, activeSignups] = await Promise.all([
       this.prisma.user.count(),
       this.prisma.event.count(),
-      this.prisma.signup.count(),
-      this.prisma.event.count({
-        where: { status: { in: ['PUBLISHED', 'FULL', 'ONGOING'] } },
-      }),
+      this.prisma.signup.count({ where: { status: 'CONFIRMED' } }),
+      this.prisma.event.count({ where: { status: { in: ['PUBLISHED', 'FULL', 'ONGOING'] } } }),
       this.prisma.signup.count({ where: { status: 'CONFIRMED' } }),
     ]);
 
-    const recentEvents = await this.prisma.event.findMany({
+    // Signups per day (last 14 days)
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+    const recentSignups = await this.prisma.signup.groupBy({
+      by: ['createdAt'],
+      where: { createdAt: { gte: fourteenDaysAgo } },
+      _count: true,
+    });
+
+    // Top events by signups
+    const topEvents = await this.prisma.event.findMany({
       take: 5,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { signups: { _count: 'desc' } },
       select: {
         id: true,
         title: true,
         date: true,
         status: true,
-        _count: {
-          select: { signups: { where: { status: 'CONFIRMED' } } },
-        },
+        maxCapacity: true,
+        _count: { select: { signups: { where: { status: 'CONFIRMED' } } } },
+      },
+    });
+
+    // Recent events
+    const recentEvents = await this.prisma.event.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true, title: true, date: true, status: true,
+        _count: { select: { signups: { where: { status: 'CONFIRMED' } } } },
       },
     });
 
     return {
-      totalUsers,
-      totalEvents,
-      totalSignups,
-      activeEvents,
-      activeSignups,
-      recentEvents,
+      totalUsers, totalEvents, totalSignups, activeEvents, activeSignups,
+      topEvents, recentEvents,
     };
   }
 }

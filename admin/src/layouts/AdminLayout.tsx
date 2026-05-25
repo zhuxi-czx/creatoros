@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Button, Typography, Avatar, Dropdown, Space, Drawer } from 'antd'
 import {
+  DashboardOutlined,
   CalendarOutlined,
   PictureOutlined,
   EnvironmentOutlined,
@@ -15,6 +16,7 @@ const { Header, Content } = Layout
 const { Text } = Typography
 
 const menuItems = [
+  { key: '/', icon: <DashboardOutlined />, label: '数据概览' },
   { key: '/events', icon: <CalendarOutlined />, label: '活动管理' },
   { key: '/banners', icon: <PictureOutlined />, label: 'Banner管理' },
   { key: '/venues', icon: <EnvironmentOutlined />, label: '场馆管理' },
@@ -48,7 +50,9 @@ export default function AdminLayout() {
     navigate('/login')
   }
 
-  const selectedKey = menuItems.find(item => location.pathname.startsWith(item.key))?.key || '/events'
+  const selectedKey = location.pathname === '/' || location.pathname === '/dashboard'
+    ? '/'
+    : menuItems.find(item => item.key !== '/' && location.pathname.startsWith(item.key))?.key || '/'
 
   const siderContent = (
     <>

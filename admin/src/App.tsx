@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import AdminLayout from './layouts/AdminLayout'
 import Login from './pages/Login'
+import Dashboard from './pages/Dashboard'
 import EventList from './pages/EventList'
 import EventForm from './pages/EventForm'
 import EventSignups from './pages/EventSignups'
@@ -29,7 +30,8 @@ export default function App() {
           </RequireAuth>
         }
       >
-        <Route index element={<Navigate to="/events" replace />} />
+        <Route index element={<Dashboard />} />
+        <Route path="dashboard" element={<Dashboard />} />
         <Route path="events" element={<EventList />} />
         <Route path="events/create" element={<EventForm />} />
         <Route path="events/:id/edit" element={<EventForm />} />
