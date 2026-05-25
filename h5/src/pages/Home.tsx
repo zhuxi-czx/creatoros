@@ -29,6 +29,7 @@ export default function Home() {
   const [venues, setVenues] = useState<Venue[]>([])
   const [featured, setFeatured] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
+  const [fetched, setFetched] = useState(false)
   const [currentBanner, setCurrentBanner] = useState(0)
   const bannerRef = useRef<HTMLDivElement>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -41,7 +42,7 @@ export default function Home() {
     if (cachedBanners) setBanners(cachedBanners)
     if (cachedVenues) setVenues(cachedVenues)
     if (cachedFeatured) setFeatured(cachedFeatured)
-    if (cachedBanners && cachedVenues && cachedFeatured) setLoading(false)
+    if (cachedBanners && cachedVenues && cachedFeatured) { setLoading(false); setFetched(true) }
 
     // Always fetch fresh data in background
     Promise.allSettled([getBanners(), getVenues(), getFeaturedEvents()])
@@ -49,6 +50,7 @@ export default function Home() {
         if (b.status === 'fulfilled') { setBanners(b.value); setCache('banners', b.value, 120000) }
         if (v.status === 'fulfilled') { setVenues(v.value); setCache('venues', v.value, 120000) }
         if (f.status === 'fulfilled') { setFeatured(f.value); setCache('featured', f.value, 60000) }
+        setFetched(true)
       })
       .finally(() => setLoading(false))
   }, [])
@@ -441,6 +443,15 @@ export default function Home() {
                       }}>
                         {ev.title}
                       </div>
+                    </div>
+                  ))}
+                </div>
+              ) : !fetched ? (
+                <div style={{ display: 'flex', gap: 10, padding: '0 16px' }}>
+                  {[0,1,2].map(i => (
+                    <div key={i} style={{ flexShrink: 0, width: 140 }}>
+                      <div style={{ width: 140, height: 180, borderRadius: 8, background: '#F0EBE3' }} />
+                      <div style={{ width: 100, height: 14, background: '#F0EBE3', borderRadius: 4, marginTop: 8 }} />
                     </div>
                   ))}
                 </div>

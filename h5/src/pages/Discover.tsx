@@ -145,6 +145,21 @@ export default function Discover() {
           <div style={{ textAlign: 'center', padding: 40, color: '#999', fontSize: 14 }}>
             暂无活动
           </div>
+        ) : events.length === 0 && !fetched ? (
+          [0, 1].map(i => (
+            <div key={i} style={{ background: '#fff', borderRadius: 12, padding: 16, display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+              <div style={{ width: '60%', height: 18, background: '#F0EBE3', borderRadius: 4 }} />
+              <div style={{ display: 'flex', gap: 12 }}>
+                <div style={{ width: 80, height: 14, background: '#F0EBE3', borderRadius: 4 }} />
+                <div style={{ width: 50, height: 14, background: '#F0EBE3', borderRadius: 4 }} />
+              </div>
+              <div style={{ width: '100%', height: 160, background: '#F0EBE3', borderRadius: 8 }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ width: 100, height: 14, background: '#F0EBE3', borderRadius: 4 }} />
+                <div style={{ width: 80, height: 32, background: '#F0EBE3', borderRadius: 20 }} />
+              </div>
+            </div>
+          ))
         ) : (
           events.map((ev, idx) => {
             const status = getStatusInfo(ev.status)
