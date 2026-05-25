@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Card, Table, Button, Tag, Space, Typography, Statistic, Row, Col,
-  message, Select, Grid
+  message, Select, Grid, Popconfirm
 } from 'antd'
 import {
   PlusOutlined, EditOutlined, CopyOutlined,
@@ -21,7 +21,7 @@ const STATUS_MAP: Record<string, { color: string; label: string }> = {
   FULL: { color: 'red', label: '报名已满' },
   ONGOING: { color: 'blue', label: '进行中' },
   ENDED: { color: 'default', label: '已结束' },
-  CANCELLED: { color: 'orange', label: '已取消' },
+  CANCELLED: { color: 'orange', label: '已下架' },
 }
 
 export default function EventList() {
@@ -77,6 +77,7 @@ export default function EventList() {
       title: '活动名称',
       dataIndex: 'title',
       key: 'title',
+      width: 180,
       ellipsis: true,
       render: (title: string) => <Text strong>{title}</Text>
     },
@@ -84,54 +85,56 @@ export default function EventList() {
       title: '时间',
       dataIndex: 'date',
       key: 'date',
-      width: 140,
+      width: 110,
       render: (date: string) => dayjs(date).format('MM-DD HH:mm')
     } as any] : []),
     {
       title: '报名',
       key: 'signups',
-      width: isMobile ? 60 : 90,
+      width: 70,
       render: (_: any, record: Event) => (
         <Text>{record._count?.signups || 0}/{record.maxCapacity}</Text>
       )
     },
     {
       title: '状态',
-      dataIndex: 'status',
       key: 'status',
-      width: isMobile ? 70 : 90,
-      render: (status: string) => {
-        const s = STATUS_MAP[status] || { color: 'default', label: status }
-        return <Tag color={s.color}>{s.label}</Tag>
+      width: 120,
+      render: (_: any, record: Event) => {
+        const s = STATUS_MAP[record.status] || { color: 'default', label: record.status }
+        return (
+          <Space size={4}>
+            <Tag color={s.color}>{s.label}</Tag>
+            {record.featured && <Tag color="purple">精选</Tag>}
+          </Space>
+        )
       }
     },
     {
       title: '操作',
       key: 'actions',
-      width: isMobile ? 100 : 200,
+      width: isMobile ? 120 : 160,
+      fixed: 'right' as const,
       render: (_: any, record: Event) => (
-        <Space size={4}>
+        <Space size={0} wrap>
           <Button type="link" size="small" icon={<EditOutlined />}
             onClick={() => navigate(`/events/${record.id}/edit`)}
-          >
-            {!isMobile && '编辑'}
-          </Button>
+          >编辑</Button>
           <Button type="link" size="small" icon={<CopyOutlined />}
             onClick={() => handleCopyEvent(record.id)}
-          >
-            {!isMobile && '复制'}
-          </Button>
+          >复制</Button>
           <Button type="link" size="small"
             onClick={() => navigate(`/events/${record.id}/signups`)}
-          >
-            报名{!isMobile && '详情'}
-          </Button>
-          {record.status === 'DRAFT' && (
-            <Button type="link" size="small"
-              onClick={() => handleStatusChange(record.id, 'PUBLISHED')}
-            >
-              发布
-            </Button>
+          >报名</Button>
+          {['DRAFT', 'CANCELLED'].includes(record.status) && (
+            <Popconfirm title="确定发布该活动？" onConfirm={() => handleStatusChange(record.id, 'PUBLISHED')}>
+              <Button type="link" size="small">发布</Button>
+            </Popconfirm>
+          )}
+          {['PUBLISHED', 'FULL', 'ONGOING'].includes(record.status) && (
+            <Popconfirm title="确定下架该活动？下架后用户端将不再展示" onConfirm={() => handleStatusChange(record.id, 'CANCELLED')}>
+              <Button type="link" size="small" danger>下架</Button>
+            </Popconfirm>
           )}
         </Space>
       )
@@ -199,7 +202,7 @@ export default function EventList() {
           loading={loading}
           size={isMobile ? 'small' : 'middle'}
           pagination={{ pageSize: 10, showSizeChanger: false, size: 'small' }}
-          scroll={isMobile ? { x: 400 } : undefined}
+          scroll={{ x: 600 }}
         />
       </Card>
     </div>

@@ -32,9 +32,12 @@ export default function Discover() {
       .finally(() => setLoading(false))
   }, [])
 
-  const getStatusInfo = (status: string) => {
-    if (status === 'PUBLISHED') return { dot: '#4CAF50', label: '报名中' }
-    if (status === 'FULL') return { dot: '#FF9800', label: '即将满员' }
+  const getStatusInfo = (ev: Event) => {
+    const eventDate = ev.date || ev.startTime
+    if (eventDate && new Date(eventDate) < new Date()) return { dot: '#999', label: '已结束' }
+    if (ev.status === 'PUBLISHED') return { dot: '#4CAF50', label: '报名中' }
+    if (ev.status === 'FULL') return { dot: '#FF9800', label: '即将满员' }
+    if (ev.status === 'ENDED') return { dot: '#999', label: '已结束' }
     return { dot: '#999', label: '已结束' }
   }
 
@@ -162,7 +165,7 @@ export default function Discover() {
           ))
         ) : (
           events.map((ev, idx) => {
-            const status = getStatusInfo(ev.status)
+            const status = getStatusInfo(ev)
             const signupCount = ev._count?.signups ?? ev.currentParticipants ?? 0
             const signups = (ev as any).signups as { user: { id: string; avatarUrl?: string } }[] | undefined
             const avatarList = signups?.slice(0, 3) ?? []

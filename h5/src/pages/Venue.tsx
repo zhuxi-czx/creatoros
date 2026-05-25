@@ -29,11 +29,13 @@ const ACCENT = '#C9A96E'
 
 const AVATAR_COLORS = ['#C9A96E', '#8B7355', '#A0926B', '#7B6B4E', '#B8956A', '#D4B896']
 
-const statusMap = (status: string) => {
-  if (status === 'PUBLISHED') return { label: '报名中', color: '#4CAF50' }
-  if (status === 'FULL') return { label: '即将满员', color: '#FF9800' }
-  if (status === 'ENDED') return { label: '已结束', color: '#999' }
-  return { label: status, color: '#999' }
+const statusMap = (ev: Event) => {
+  const eventDate = ev.date || ev.startTime
+  if (eventDate && new Date(eventDate) < new Date()) return { label: '已结束', color: '#999' }
+  if (ev.status === 'PUBLISHED') return { label: '报名中', color: '#4CAF50' }
+  if (ev.status === 'FULL') return { label: '即将满员', color: '#FF9800' }
+  if (ev.status === 'ENDED') return { label: '已结束', color: '#999' }
+  return { label: ev.status, color: '#999' }
 }
 
 export default function Venue() {
@@ -149,7 +151,7 @@ export default function Venue() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {events.map((ev, idx) => {
-              const { label, color } = statusMap(ev.status)
+              const { label, color } = statusMap(ev)
               const eventDate = ev.date || ev.startTime
               const signupCount = ev._count?.signups ?? 0
               const signups = (ev as any).signups as { user: { id: string; avatarUrl?: string } }[] | undefined
