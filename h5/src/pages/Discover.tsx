@@ -173,6 +173,7 @@ export default function Discover() {
             return (
               <div
                 key={ev.id}
+                className="tap-card"
                 onClick={() => navigate(`/event/${ev.id}`)}
                 style={{
                   background: '#fff',

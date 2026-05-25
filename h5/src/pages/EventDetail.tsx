@@ -329,15 +329,16 @@ export default function EventDetail() {
         maxWidth: 430,
         padding: '12px 16px',
         paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0))',
-        background: '#fff',
+        background: 'rgba(255,255,255,0.95)',
+        backdropFilter: 'blur(12px)',
         borderTop: '1px solid #F0F0F0',
         zIndex: 100,
       }}>
         {isEnded ? (
           <div style={{
             width: '100%',
-            padding: '14px',
-            borderRadius: 14,
+            padding: '15px',
+            borderRadius: 24,
             background: '#F5F5F7',
             color: '#999',
             fontSize: 16,
@@ -346,12 +347,14 @@ export default function EventDetail() {
           }}>活动已结束</div>
         ) : !isLoggedIn ? (
           <button
+            className="tap-card"
             onClick={() => navigate('/login')}
             style={{
               width: '100%',
-              padding: '14px',
-              borderRadius: 14,
-              background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+              padding: '15px',
+              borderRadius: 24,
+              background: 'linear-gradient(135deg, #C9A96E, #B8956A)',
+              boxShadow: '0 4px 16px rgba(201, 169, 110, 0.4)',
               color: '#fff',
               fontSize: 16,
               fontWeight: 600,
@@ -362,8 +365,8 @@ export default function EventDetail() {
         ) : isFull && !isSignedUp ? (
           <div style={{
             width: '100%',
-            padding: '14px',
-            borderRadius: 14,
+            padding: '15px',
+            borderRadius: 24,
             background: '#F5F5F7',
             color: '#999',
             fontSize: 16,
@@ -372,18 +375,20 @@ export default function EventDetail() {
           }}>报名已满</div>
         ) : (
           <button
+            className="tap-card"
             onClick={handleSignup}
             disabled={actionLoading}
             style={{
               width: '100%',
-              padding: '14px',
-              borderRadius: 14,
-              background: isSignedUp ? '#F5F5F7' : 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+              padding: '15px',
+              borderRadius: 24,
+              background: isSignedUp ? '#F5F5F7' : 'linear-gradient(135deg, #C9A96E, #B8956A)',
+              boxShadow: isSignedUp ? 'none' : '0 4px 16px rgba(201, 169, 110, 0.4)',
               color: isSignedUp ? '#666' : '#fff',
               fontSize: 16,
               fontWeight: 600,
               opacity: actionLoading ? 0.6 : 1,
-              transition: 'opacity 0.15s',
+              transition: 'all 0.2s ease',
             }}
           >
             {actionLoading ? '处理中...' : isSignedUp ? '取消报名' : '立即报名'}

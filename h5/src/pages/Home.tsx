@@ -308,6 +308,7 @@ export default function Home() {
                   ) : venues.map((venue, i) => (
                     <div
                       key={venue.id}
+                      className="tap-card"
                       onClick={() => navigate(`/venue/${venue.id}`)}
                       style={{
                         flexShrink: 0,
@@ -397,6 +398,7 @@ export default function Home() {
                   {featured.map((ev, i) => (
                     <div
                       key={ev.id}
+                      className="tap-card"
                       onClick={() => navigate(`/event/${ev.id}`)}
                       style={{
                         flexShrink: 0,

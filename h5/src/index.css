@@ -224,3 +224,17 @@ img {
   font-size: 0.875rem;
   gap: 8px;
 }
+
+/* Tap feedback for all interactive elements */
+[onclick], button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Clickable card press effect */
+.tap-card {
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.tap-card:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
