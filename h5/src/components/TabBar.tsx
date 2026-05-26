@@ -53,7 +53,7 @@ export default function TabBar({ active }: TabBarProps) {
       right: 0,
       width: '100%',
       background: '#fff',
-      padding: '12px 21px 21px 21px',
+      padding: '12px 21px calc(12px + env(safe-area-inset-bottom, 8px)) 21px',
       zIndex: 100,
     }}>
       <div style={{

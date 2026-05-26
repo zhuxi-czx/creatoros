@@ -123,7 +123,7 @@ export default function Home() {
         overflowY: 'auto',
         background: '#F7F7F7',
         WebkitOverflowScrolling: 'touch',
-        paddingBottom: 100,
+        paddingBottom: 'calc(100px + env(safe-area-inset-bottom, 0px))',
       }}>
         {/* Banner Carousel - always reserve 180px */}
         <div style={{ position: 'relative', height: 180, background: '#F0EBE3' }}>

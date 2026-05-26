@@ -23,8 +23,10 @@
   --max-width: 430px;
 }
 
-/* Typography scale (Major Third 1.333) */
-html { font-size: 100%; /* 16px base */ }
+/* Responsive scaling: design base 390px */
+html {
+  font-size: 16px;
+}
 
 html, body {
   height: 100%;
@@ -36,6 +38,20 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
   line-height: 1.5;
+}
+
+/* Viewport-based scaling for all inline px values */
+@media (max-width: 350px) {
+  #root { zoom: 0.88; }
+}
+@media (min-width: 351px) and (max-width: 374px) {
+  #root { zoom: 0.94; }
+}
+@media (min-width: 430px) and (max-width: 500px) {
+  #root { zoom: 1.05; }
+}
+@media (min-width: 501px) {
+  #root { zoom: 1; max-width: 430px; margin: 0 auto; }
 }
 
 h1, h2, h3, h4, h5 {

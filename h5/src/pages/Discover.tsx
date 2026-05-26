@@ -122,7 +122,7 @@ export default function Discover() {
       <div style={{
         flex: 1,
         overflowY: 'auto',
-        padding: '8px 16px 100px 16px',
+        padding: '8px 16px calc(100px + env(safe-area-inset-bottom, 0px)) 16px',
         display: 'flex',
         flexDirection: 'column',
         gap: 16,
