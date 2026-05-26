@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import LazyImage from './LazyImage'
+import ImageViewer from './ImageViewer'
 
 interface ImageCarouselProps {
   images: string[]
@@ -13,6 +14,7 @@ export default function ImageCarousel({ images, autoplay = false, interval = 300
   const scrollRef = useRef<HTMLDivElement>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [viewerOpen, setViewerOpen] = useState(false)
 
   const scrollToIndex = useCallback((index: number) => {
     if (scrollRef.current) {
@@ -54,9 +56,12 @@ export default function ImageCarousel({ images, autoplay = false, interval = 300
 
   if (images.length === 1) {
     return (
-      <div style={{ width: '100%', height, borderRadius, overflow: 'hidden' }}>
-        <LazyImage src={images[0]} alt="" />
-      </div>
+      <>
+        <div style={{ width: '100%', height, borderRadius, overflow: 'hidden', cursor: 'pointer' }} onClick={() => setViewerOpen(true)}>
+          <LazyImage src={images[0]} alt="" />
+        </div>
+        {viewerOpen && <ImageViewer images={images} initialIndex={0} onClose={() => setViewerOpen(false)} />}
+      </>
     )
   }
 
@@ -79,11 +84,13 @@ export default function ImageCarousel({ images, autoplay = false, interval = 300
         {images.map((url, i) => (
           <div
             key={i}
+            onClick={() => setViewerOpen(true)}
             style={{
               flexShrink: 0,
               width: '100%',
               height: '100%',
               scrollSnapAlign: 'start',
+              cursor: 'pointer',
             }}
           >
             <LazyImage src={url} alt={`slide ${i + 1}`} />
@@ -112,6 +119,7 @@ export default function ImageCarousel({ images, autoplay = false, interval = 300
           />
         ))}
       </div>
+      {viewerOpen && <ImageViewer images={images} initialIndex={currentIndex} onClose={() => setViewerOpen(false)} />}
     </div>
   )
 }

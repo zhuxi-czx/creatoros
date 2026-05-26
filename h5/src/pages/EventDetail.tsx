@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { getEventDetail, getEventSignups, signup, cancelSignup, Event, Participant } from '../services/event'
 import ImageCarousel from '../components/ImageCarousel'
-import LazyImage from '../components/LazyImage'
 
 const AVATAR_COLORS = ['#8B5CF6', '#EC4899', '#F97316', '#06B6D4', '#10B981', '#EF4444']
 
@@ -134,15 +133,13 @@ export default function EventDetail() {
     <div className="page-container" style={{ paddingBottom: 90 }}>
       {/* Cover */}
       <div style={{ position: 'relative', height: 260, flexShrink: 0 }}>
-        {event.imageUrls && event.imageUrls.length > 1 ? (
+        {(event.imageUrls && event.imageUrls.length > 0) || event.coverUrl ? (
           <ImageCarousel
-            images={event.imageUrls}
-            autoplay={event.autoplay}
+            images={event.imageUrls && event.imageUrls.length > 0 ? event.imageUrls : [event.coverUrl!]}
+            autoplay={event.imageUrls && event.imageUrls.length > 1 ? event.autoplay : false}
             interval={event.interval || 3000}
             height={260}
           />
-        ) : event.coverUrl || (event.imageUrls && event.imageUrls.length === 1) ? (
-          <LazyImage src={event.imageUrls?.[0] || event.coverUrl || ''} alt={event.title} />
         ) : (
           <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #8B5CF6, #EC4899)' }} />
         )}
