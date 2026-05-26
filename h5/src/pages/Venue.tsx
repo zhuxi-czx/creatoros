@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import api from '../services/api'
@@ -45,33 +45,58 @@ export default function Venue() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const fetchData = useCallback(async (retry = 0) => {
     if (!id) return
-    setLoading(true)
-    Promise.allSettled([
-      api.get(`/venues/${id}`) as unknown as Promise<VenueDetail>,
-      api.get(`/venues/${id}/events`) as unknown as Promise<VenueEventsResponse>,
-    ])
-      .then(([venueResult, eventsResult]) => {
-        if (venueResult.status === 'fulfilled') setVenue(venueResult.value)
-        if (eventsResult.status === 'fulfilled') {
-          const data = eventsResult.value
-          setEvents(Array.isArray(data) ? data : (data as VenueEventsResponse).data ?? [])
-        }
-      })
-      .finally(() => setLoading(false))
+    try {
+      const [venueResult, eventsResult] = await Promise.allSettled([
+        api.get(`/venues/${id}`) as unknown as Promise<VenueDetail>,
+        api.get(`/venues/${id}/events`) as unknown as Promise<VenueEventsResponse>,
+      ])
+      if (venueResult.status === 'fulfilled') {
+        setVenue(venueResult.value)
+      } else if (retry < 2) {
+        await new Promise(r => setTimeout(r, 1000))
+        return fetchData(retry + 1)
+      }
+      if (eventsResult.status === 'fulfilled') {
+        const data = eventsResult.value
+        setEvents(Array.isArray(data) ? data : (data as VenueEventsResponse).data ?? [])
+      }
+    } catch {
+      if (retry < 2) {
+        await new Promise(r => setTimeout(r, 1000))
+        return fetchData(retry + 1)
+      }
+    } finally {
+      setLoading(false)
+    }
   }, [id])
 
+  useEffect(() => {
+    setLoading(true)
+    fetchData()
+  }, [fetchData])
+
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#F7F7F7', fontFamily: "'Inter', -apple-system, sans-serif" }}>
-      <div style={{ width: 24, height: 24, border: '2px solid #E0D8CC', borderTop: `2px solid ${ACCENT}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+    <div style={{ minHeight: '100vh', background: '#F7F7F7', fontFamily: "'Inter', -apple-system, sans-serif" }}>
+      <div style={{ height: 220, background: '#F0EBE3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 24, height: 24, border: '2px solid #E0D8CC', borderTop: `2px solid ${ACCENT}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+      </div>
+      <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ width: '50%', height: 22, background: '#F0EBE3', borderRadius: 6 }} />
+        <div style={{ width: '70%', height: 14, background: '#F0EBE3', borderRadius: 4 }} />
+        <div style={{ width: '90%', height: 60, background: '#F0EBE3', borderRadius: 8 }} />
+      </div>
     </div>
   )
 
   if (!venue) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#F7F7F7', fontFamily: "'Inter', -apple-system, sans-serif", color: '#999' }}>
-      场所不存在
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#F7F7F7', fontFamily: "'Inter', -apple-system, sans-serif", gap: 16 }}>
+      <span style={{ fontSize: 16, color: '#999' }}>场所不存在或加载失败</span>
+      <button onClick={() => { setLoading(true); fetchData() }} style={{ padding: '8px 24px', borderRadius: 20, background: ACCENT, color: '#fff', border: 'none', fontSize: 14, cursor: 'pointer' }}>
+        重试
+      </button>
     </div>
   )
 
