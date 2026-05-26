@@ -161,8 +161,12 @@ export default function EventForm() {
     }
   }
 
+  const [showPreview, setShowPreview] = useState(false)
+  const h5Base = `${window.location.protocol}//${window.location.hostname}:4002`
+
   return (
-    <div style={{ maxWidth: 680, margin: '0 auto' }}>
+    <div style={{ display: 'flex', gap: 24, maxWidth: showPreview ? 1100 : 680, margin: '0 auto' }}>
+    <div style={{ flex: 1, minWidth: 0 }}>
       <Space style={{ marginBottom: 24 }}>
         <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate('/events')} />
         <Title level={4} style={{ margin: 0 }}>{isEdit ? '编辑活动' : '新建活动'}</Title>
@@ -317,10 +321,25 @@ export default function EventForm() {
 
           <Divider />
 
+          {/* Preview toggle */}
+          {isEdit && (
+            <Form.Item>
+              <Button
+                type={showPreview ? 'default' : 'dashed'}
+                onClick={() => setShowPreview(!showPreview)}
+                style={{ width: '100%' }}
+              >
+                {showPreview ? '关闭预览' : '📱 手机预览'}
+              </Button>
+            </Form.Item>
+          )}
+
           <Form.Item style={{ marginBottom: 0 }}>
             <Space>
               <Button onClick={() => navigate('/events')}>取消</Button>
-              <Button htmlType="submit" icon={<SaveOutlined />} loading={loading}>保存草稿</Button>
+              <Button icon={<SaveOutlined />} loading={loading} htmlType="submit">
+                保存草稿
+              </Button>
               <Button
                 type="primary" icon={<SendOutlined />} loading={loading}
                 onClick={() => form.validateFields().then(values => handleSubmit(values, true))}
@@ -332,6 +351,46 @@ export default function EventForm() {
           </Form.Item>
         </Form>
       </Card>
+    </div>
+
+    {/* Phone Preview Panel */}
+    {showPreview && isEdit && (
+      <div style={{ width: 375, flexShrink: 0, position: 'sticky', top: 24, alignSelf: 'flex-start' }}>
+        <div style={{
+          background: '#1A1A1A',
+          borderRadius: 40,
+          padding: '48px 12px 12px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+          position: 'relative',
+        }}>
+          {/* Phone notch */}
+          <div style={{
+            position: 'absolute',
+            top: 16,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 80,
+            height: 6,
+            borderRadius: 3,
+            background: '#333',
+          }} />
+          <iframe
+            src={`${h5Base}/event/${id}`}
+            style={{
+              width: '100%',
+              height: 667,
+              border: 'none',
+              borderRadius: 28,
+              background: '#fff',
+            }}
+            title="预览"
+          />
+        </div>
+        <div style={{ textAlign: 'center', marginTop: 8, fontSize: 12, color: '#999' }}>
+          H5 实时预览（保存后刷新生效）
+        </div>
+      </div>
+    )}
     </div>
   )
 }
