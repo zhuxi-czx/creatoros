@@ -5,6 +5,7 @@ import api from '../services/api'
 import { Event } from '../services/event'
 import LazyImage from '../components/LazyImage'
 import ImageCarousel from '../components/ImageCarousel'
+import ImageViewer from '../components/ImageViewer'
 
 interface VenueDetail {
   id: string
@@ -44,6 +45,7 @@ export default function Venue() {
   const [venue, setVenue] = useState<VenueDetail | null>(null)
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
+  const [coverViewerOpen, setCoverViewerOpen] = useState(false)
 
   const fetchData = useCallback(async (retry = 0) => {
     if (!id) return
@@ -109,7 +111,8 @@ export default function Venue() {
       background: '#F7F7F7',
     }}>
       {/* Cover */}
-      <div style={{ position: 'relative', height: 220, flexShrink: 0 }}>
+      <div style={{ position: 'relative', height: 220, flexShrink: 0, cursor: venue.coverUrl ? 'pointer' : 'default' }}
+        onClick={() => venue.coverUrl && setCoverViewerOpen(true)}>
         {venue.coverUrl ? (
           <LazyImage src={venue.coverUrl} alt={venue.name} />
         ) : (
@@ -183,9 +186,12 @@ export default function Venue() {
               return (
                 <div
                   key={ev.id}
+                  className="tap-card"
+                  onClick={() => navigate(`/event/${ev.id}`)}
                   style={{
                     background: '#fff', borderRadius: 12, padding: 16,
                     display: 'flex', flexDirection: 'column', gap: 10,
+                    cursor: 'pointer',
                   }}
                 >
                   {/* Title */}
@@ -265,6 +271,15 @@ export default function Venue() {
           </div>
         )}
       </div>
+
+      {/* Cover Image Viewer */}
+      {coverViewerOpen && venue.coverUrl && (
+        <ImageViewer
+          images={[venue.coverUrl, ...(venue.imageUrls || [])]}
+          initialIndex={0}
+          onClose={() => setCoverViewerOpen(false)}
+        />
+      )}
     </div>
   )
 }
