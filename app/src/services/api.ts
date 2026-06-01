@@ -1,6 +1,7 @@
 import Taro from '@tarojs/taro'
 
-const SERVER_HOST = 'http://121.196.149.0:4000'
+// 生产服务器（116 在跑）。域名备案通过后改为 https://<域名> 并去掉端口。
+const SERVER_HOST = 'http://116.62.188.30:4000'
 const BASE_URL = `${SERVER_HOST}/api`
 
 /** Resolve image URL: converts relative paths to absolute, rewrites legacy hosts */
@@ -12,7 +13,7 @@ export function resolveImageUrl(url: string | undefined): string {
   }
   // Backward compatibility: rewrite old absolute URLs
   return url
-    .replace('http://116.62.188.30:4000', SERVER_HOST)
+    .replace('http://121.196.149.0:4000', SERVER_HOST)
     .replace('https://121.196.149.0:4443', SERVER_HOST)
 }
 

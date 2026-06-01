@@ -206,7 +206,7 @@ Users ←── Signups ──→ Events ──→ Venues
 
 | 项目 | 值 |
 |------|------|
-| AppID | wxe06a5dc36a7f7550 |
+| AppID | wx1155fe9224e648e8 |
 | 主体 | 企业 |
 | 状态 | 待域名备案后上线 |
 
