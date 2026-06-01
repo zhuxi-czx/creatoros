@@ -6,7 +6,10 @@ import 'reflect-metadata';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // rawBody: 微信支付回调验签需要原始请求体
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
+  });
 
   // Enable CORS
   const corsOrigin = process.env.CORS_ORIGIN

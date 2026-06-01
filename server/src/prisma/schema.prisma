@@ -33,6 +33,14 @@ enum SignupStatus {
   CANCELLED
 }
 
+enum OrderStatus {
+  PENDING    // 已下单待支付
+  PAID       // 支付成功
+  CLOSED     // 超时/主动关单
+  REFUNDING  // 退款中（本期不实现，占位）
+  REFUNDED   // 已退款（本期不实现，占位）
+}
+
 model User {
   id         String     @id @default(cuid())
   openId     String     @unique
@@ -52,6 +60,7 @@ model User {
   updatedAt  DateTime   @updatedAt
 
   signups Signup[]
+  orders  Order[]
 }
 
 model Venue {
@@ -95,6 +104,7 @@ model Event {
 
   venue   Venue    @relation(fields: [venueId], references: [id])
   signups Signup[]
+  orders  Order[]
 
   @@index([status])
   @@index([featured])
@@ -105,15 +115,42 @@ model Signup {
   userId    String
   eventId   String
   status    SignupStatus @default(CONFIRMED)
+  orderId   String?     @unique   // 付费报名关联订单；免费报名为 null
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
-  user  User  @relation(fields: [userId], references: [id])
-  event Event @relation(fields: [eventId], references: [id])
+  user  User   @relation(fields: [userId], references: [id])
+  event Event  @relation(fields: [eventId], references: [id])
+  order Order? @relation(fields: [orderId], references: [id])
 
   @@unique([userId, eventId])
   @@index([eventId])
   @@index([userId])
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  outTradeNo    String      @unique          // 商户订单号
+  userId        String
+  eventId       String
+  amount        Int                          // 支付金额（分），下单时锁定
+  status        OrderStatus @default(PENDING)
+  transactionId String?                      // 微信支付订单号（回调返回）
+  prepayId      String?                      // 预支付会话标识
+  expiresAt     DateTime                     // 超时时间（下单 + 15min），过期不再占名额
+  paidAt        DateTime?
+  closedAt      DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id])
+  event  Event   @relation(fields: [eventId], references: [id])
+  signup Signup?
+
+  @@index([userId])
+  @@index([eventId])
+  @@index([status])
+  @@index([status, expiresAt])
 }
 
 model Banner {

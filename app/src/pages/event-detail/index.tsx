@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import { getEventDetail, signup, cancelSignup, getEventSignups } from '../../services/event'
+import { getEventDetail, signup, cancelSignup, getEventSignups, checkout, getOrder } from '../../services/event'
 import type { Event, Participant } from '../../services/event'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { resolveImageUrl } from '../../services/api'
@@ -60,6 +60,27 @@ export default function EventDetail() {
           _count: { signups: (event._count?.signups ?? 1) - 1 }
         })
         Taro.showToast({ title: '已取消报名', icon: 'success' })
+      } else if ((event.price ?? 0) > 0) {
+        // 付费活动：下单 → 拉起微信支付 → 轮询确认报名
+        const { orderId, payParams } = await checkout(id)
+        await Taro.requestPayment({
+          timeStamp: payParams.timeStamp,
+          nonceStr: payParams.nonceStr,
+          package: payParams.package,
+          signType: payParams.signType as any,
+          paySign: payParams.paySign,
+        })
+        const paid = await pollOrderPaid(orderId)
+        if (paid) {
+          setEvent({
+            ...event,
+            isSignedUp: true,
+            _count: { signups: (event._count?.signups ?? 0) + 1 }
+          })
+          Taro.showToast({ title: '报名成功', icon: 'success' })
+        } else {
+          Taro.showToast({ title: '支付确认中，请稍后刷新', icon: 'none' })
+        }
       } else {
         await signup(id)
         setEvent({
@@ -69,11 +90,30 @@ export default function EventDetail() {
         })
         Taro.showToast({ title: '报名成功', icon: 'success' })
       }
-    } catch (err) {
-      Taro.showToast({ title: '操作失败', icon: 'none' })
+    } catch (err: any) {
+      // 用户取消支付不弹错误
+      if (err?.errMsg && err.errMsg.indexOf('cancel') !== -1) {
+        Taro.showToast({ title: '已取消支付', icon: 'none' })
+      } else {
+        Taro.showToast({ title: '操作失败', icon: 'none' })
+      }
     } finally {
       setSigning(false)
     }
+  }
+
+  // 支付后轮询订单状态（回调可能略有延迟），最多约 6 秒
+  const pollOrderPaid = async (orderId: string): Promise<boolean> => {
+    for (let i = 0; i < 6; i++) {
+      try {
+        const order = await getOrder(orderId)
+        if (order.paid) return true
+      } catch (e) {
+        // 忽略单次失败，继续轮询
+      }
+      await new Promise((r) => setTimeout(r, 1000))
+    }
+    return false
   }
 
   if (loading) {
@@ -161,7 +201,7 @@ export default function EventDetail() {
               <View className='info-content'>
                 <Text className='info-label'>费用</Text>
                 <Text className='info-value'>
-                  {event.price === 0 ? '免费' : `¥${event.price}`}
+                  {event.price === 0 ? '免费' : `¥${(event.price! / 100).toFixed(0)}`}
                 </Text>
               </View>
             </View>
@@ -207,7 +247,13 @@ export default function EventDetail() {
           onClick={handleSignup}
         >
           <Text className='action-btn-text'>
-            {signing ? '处理中...' : event.isSignedUp ? '取消报名' : '立即报名'}
+            {signing
+              ? '处理中...'
+              : event.isSignedUp
+              ? '取消报名'
+              : (event.price ?? 0) > 0
+              ? `立即报名 ¥${(event.price! / 100).toFixed(0)}`
+              : '立即报名'}
           </Text>
         </View>
       </View>

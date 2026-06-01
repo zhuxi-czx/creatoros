@@ -65,3 +65,35 @@ export const signup = (eventId: string): Promise<void> =>
 
 export const cancelSignup = (eventId: string): Promise<void> =>
   request<void>(`/events/${eventId}/signup`, 'DELETE')
+
+// ===== 付费报名（微信支付）=====
+
+export interface PayParams {
+  appId: string
+  timeStamp: string
+  nonceStr: string
+  package: string
+  signType: string
+  paySign: string
+}
+
+export interface CheckoutResponse {
+  orderId: string
+  payParams: PayParams
+}
+
+export interface OrderStatus {
+  id: string
+  status: string
+  amount: number
+  paid: boolean
+  signupStatus: string | null
+}
+
+/** 付费活动下单，返回 wx.requestPayment 所需参数。 */
+export const checkout = (eventId: string): Promise<CheckoutResponse> =>
+  request<CheckoutResponse>(`/events/${eventId}/checkout`, 'POST')
+
+/** 查询订单/报名状态（支付后轮询）。 */
+export const getOrder = (orderId: string): Promise<OrderStatus> =>
+  request<OrderStatus>(`/orders/${orderId}`)

@@ -12,6 +12,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   readonly event: PrismaClient['event'];
   readonly signup: PrismaClient['signup'];
   readonly banner: PrismaClient['banner'];
+  readonly order: PrismaClient['order'];
 
   constructor() {
     const connectionString = process.env.DATABASE_URL;
@@ -26,6 +27,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     this.event = this.client.event;
     this.signup = this.client.signup;
     this.banner = this.client.banner;
+    this.order = this.client.order;
   }
 
   async onModuleInit() {
