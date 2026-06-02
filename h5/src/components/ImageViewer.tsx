@@ -11,9 +11,6 @@ const fixSrc = (url: string) => {
   const host = `${window.location.protocol}//${window.location.hostname}:4000`
   if (url.startsWith('/uploads/')) return `${host}${url}`
   return url
-    .replace('https://121.196.149.0:4443', host)
-    .replace('http://121.196.149.0:4000', host)
-    .replace('http://116.62.188.30:4000', host)
 }
 
 export default function ImageViewer({ images, initialIndex, onClose }: ImageViewerProps) {
