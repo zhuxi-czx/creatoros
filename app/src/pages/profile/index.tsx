@@ -76,8 +76,8 @@ export default function Profile() {
   return (
     <View className='profile-page'>
 
-      {/* Gradient background */}
-      <View className='profile-bg' />
+      {/* 风景背景图（对齐设计稿）+ 渐变压暗保证白色文字可读 */}
+      <Image className='profile-bg' src='/assets/profile-bg.jpg' mode='aspectFill' />
       <View className='profile-bg-overlay' />
 
       {/* Profile Header */}
