@@ -1,7 +1,9 @@
 import axios from 'axios'
 
 const baseURL = import.meta.env.VITE_API_URL || (
-  import.meta.env.DEV ? '/api' : `${window.location.protocol}//${window.location.hostname}:4000/api`
+  import.meta.env.DEV || window.location.hostname.endsWith('creatorbar.cn')
+    ? '/api' // 域名下走同源（nginx 443 代理到 4000）
+    : `${window.location.protocol}//${window.location.hostname}:4000/api` // IP:4001 访问
 )
 
 const api = axios.create({
@@ -42,7 +44,9 @@ export function resolveImageUrl(url: string | undefined): string {
   if (url.startsWith('/uploads/')) {
     const serverBase = import.meta.env.VITE_API_URL
       ? import.meta.env.VITE_API_URL.replace(/\/api$/, '')
-      : `${window.location.protocol}//${window.location.hostname}:4000`
+      : window.location.hostname.endsWith('creatorbar.cn')
+        ? '' // 域名下同源
+        : `${window.location.protocol}//${window.location.hostname}:4000`
     return `${serverBase}${url}`
   }
   return url
