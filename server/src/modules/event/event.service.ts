@@ -41,8 +41,8 @@ export class EventService {
           },
           signups: {
             where: { status: 'CONFIRMED' },
-            take: 5,
-            orderBy: { createdAt: 'asc' },
+            take: 3,
+            orderBy: { createdAt: 'desc' },
             select: { user: { select: { id: true, avatarUrl: true } } },
           },
           _count: {

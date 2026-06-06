@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useDidShow } from '@tarojs/taro'
 import { getEvents } from '../../services/event'
 import type { Event } from '../../services/event'
 import EventCard from '../../components/EventCard'
@@ -16,6 +16,16 @@ export default function Discover() {
   useEffect(() => {
     loadEvents()
   }, [selectedTag])
+
+  // 从活动详情报名后返回，刷新列表以更新报名头像/人数
+  const firstShow = useRef(true)
+  useDidShow(() => {
+    if (firstShow.current) {
+      firstShow.current = false
+      return
+    }
+    loadEvents()
+  })
 
   const loadEvents = async () => {
     try {

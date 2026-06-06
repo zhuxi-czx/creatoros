@@ -108,7 +108,7 @@ export default function EventCard({ event, onClick }: EventCardProps) {
                   }}
                 >
                   {s.user.avatarUrl ? (
-                    <Image className='avatar-img' src={s.user.avatarUrl} mode='aspectFill' />
+                    <Image className='avatar-img' src={resolveImageUrl(s.user.avatarUrl)} mode='aspectFill' />
                   ) : null}
                 </View>
               ))
