@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { View, Text, Image, ScrollView } from '@tarojs/components'
+import { View, Text, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { wxLogin } from '../../services/auth'
@@ -116,8 +116,8 @@ export default function Profile() {
         )}
       </View>
 
-      {/* Content Area */}
-      <ScrollView scrollY className='profile-content'>
+      {/* Content Area（整页原生滚动，不用固定高度 ScrollView）*/}
+      <View className='profile-content'>
         {/* Not logged in */}
         {!token && (
           <View className='login-card'>
@@ -210,7 +210,7 @@ export default function Profile() {
             <Text className='logout-text'>退出登录</Text>
           </View>
         )}
-      </ScrollView>
+      </View>
 
     </View>
   )
