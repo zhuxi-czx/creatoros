@@ -163,7 +163,10 @@ export default function EventForm() {
   }
 
   const [showPreview, setShowPreview] = useState(false)
-  const h5Base = `${window.location.protocol}//${window.location.hostname}:4002`
+  // 域名(HTTPS)下预览指向 H5 域名，避免 HTTPS 页面嵌 HTTP iframe 被拦；IP 下走 :4002
+  const h5Base = window.location.hostname.endsWith('creatorbar.cn')
+    ? 'https://creatorbar.cn'
+    : `${window.location.protocol}//${window.location.hostname}:4002`
 
   return (
     <div style={{ display: 'flex', gap: 24, maxWidth: showPreview ? 1100 : 680, margin: '0 auto' }}>
