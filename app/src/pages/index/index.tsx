@@ -17,6 +17,7 @@ const LUCIDE_PATHS: Record<string, string> = {
   'calendar-check': '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/>',
   'rocket': '<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>',
   'wand-sparkles': '<path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/>',
+  'chevron-right': '<path d="m9 18 6-6-6-6"/>',
 }
 
 function lucideUri(name: string, color: string): string {
@@ -136,7 +137,7 @@ export default function Index() {
       {/* Venue Cards */}
       {(venues.length > 0 || loading) && (
         <View className='venue-section'>
-          <ScrollView scrollX className='venue-scroll' enableFlex>
+          <View className='venue-grid'>
             {loading && venues.length === 0 ? (
               <>
                 <View className='venue-card-skeleton' />
@@ -153,7 +154,10 @@ export default function Index() {
                 >
                   <View className='venue-card-header'>
                     <Text className='venue-card-name'>{venue.name}</Text>
-                    <Text className='venue-card-arrow'>{'>'}</Text>
+                    <View
+                      className='venue-card-arrow'
+                      style={{ backgroundImage: `url("${lucideUri('chevron-right', '#C9A96E')}")` }}
+                    />
                   </View>
                   <View className='venue-card-cover'>
                     {venue.coverUrl ? (
@@ -175,7 +179,7 @@ export default function Index() {
                 </View>
               ))
             )}
-          </ScrollView>
+          </View>
         </View>
       )}
 

@@ -114,33 +114,30 @@ $accent: #C9A96E;
   padding: 32rpx 0 0;
 }
 
-.venue-scroll {
+// 设计稿：2 张并排填满；3+ 自动换行成 2 列网格
+.venue-grid {
   display: flex;
+  flex-wrap: wrap;
+  gap: 24rpx;
   padding: 0 32rpx;
-  white-space: nowrap;
 }
 
 .venue-card {
-  flex-shrink: 0;
-  width: 320rpx;
+  width: calc(50% - 12rpx);
   height: 320rpx;
   background: #fff;
   border-radius: 24rpx;
   overflow: hidden;
-  margin-right: 24rpx;
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
   transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
 .venue-card-skeleton {
-  flex-shrink: 0;
-  width: 320rpx;
+  width: calc(50% - 12rpx);
   height: 320rpx;
   background: #fff;
   border-radius: 24rpx;
-  margin-right: 24rpx;
-  display: inline-block;
 }
 
 .venue-card-header {
@@ -162,10 +159,13 @@ $accent: #C9A96E;
 }
 
 .venue-card-arrow {
-  font-size: 28rpx;
-  color: $accent;
+  width: 36rpx;
+  height: 36rpx;
   flex-shrink: 0;
   margin-left: 8rpx;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .venue-card-cover {
