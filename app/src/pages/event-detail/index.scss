@@ -287,3 +287,96 @@ $accent: #C9A96E;
     color: #666;
   }
 }
+
+/* 报名详情弹窗 */
+.signup-modal-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.signup-modal {
+  width: 600rpx;
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 56rpx 48rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32rpx;
+}
+.sm-check {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  background: #C9A96E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sm-check-icon {
+  width: 60rpx;
+  height: 60rpx;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.sm-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin-top: -8rpx;
+}
+.sm-sub {
+  font-size: 26rpx;
+  color: #999;
+  margin-top: -20rpx;
+}
+.sm-info {
+  width: 100%;
+  background: #F7F7F7;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  box-sizing: border-box;
+}
+.sm-row {
+  display: flex;
+  flex-direction: row;
+  gap: 20rpx;
+}
+.sm-label {
+  font-size: 26rpx;
+  color: #999;
+  flex-shrink: 0;
+}
+.sm-value {
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #1A1A1A;
+  flex: 1;
+}
+.sm-ok {
+  width: 100%;
+  height: 88rpx;
+  border-radius: 44rpx;
+  background: #C9A96E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+.sm-ok-text {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #fff;
+}
+.sm-cancel {
+  font-size: 26rpx;
+  color: #BBB;
+}

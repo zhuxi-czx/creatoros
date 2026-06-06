@@ -24,6 +24,7 @@ export default function EventDetail() {
   const [participants, setParticipants] = useState<Participant[]>([])
   const [loading, setLoading] = useState(true)
   const [signing, setSigning] = useState(false)
+  const [showInfo, setShowInfo] = useState(false)
 
   useEffect(() => {
     if (id) loadEvent()
@@ -61,6 +62,11 @@ export default function EventDetail() {
 
   const handleSignup = async () => {
     if (!event || !id) return
+    // 已报名 → 弹出报名详情弹窗（不再直接取消）
+    if (event.isSignedUp) {
+      setShowInfo(true)
+      return
+    }
     try {
       setSigning(true)
       // 未登录：先静默微信登录（引导登录），成功后继续报名
@@ -73,15 +79,7 @@ export default function EventDetail() {
           return
         }
       }
-      if (event.isSignedUp) {
-        await cancelSignup(id)
-        setEvent({
-          ...event,
-          isSignedUp: false,
-          _count: { signups: (event._count?.signups ?? 1) - 1 }
-        })
-        Taro.showToast({ title: '已取消报名', icon: 'success' })
-      } else if ((event.price ?? 0) > 0) {
+      if ((event.price ?? 0) > 0) {
         // 付费活动：下单 → 拉起微信支付 → 轮询确认报名
         const { orderId, payParams } = await checkout(id)
         await Taro.requestPayment({
@@ -120,6 +118,23 @@ export default function EventDetail() {
       }
     } finally {
       setSigning(false)
+    }
+  }
+
+  // 弹窗内取消报名
+  const handleCancel = async () => {
+    if (!id || !event) return
+    try {
+      await cancelSignup(id)
+      setEvent({
+        ...event,
+        isSignedUp: false,
+        _count: { signups: (event._count?.signups ?? 1) - 1 }
+      })
+      setShowInfo(false)
+      Taro.showToast({ title: '已取消报名', icon: 'success' })
+    } catch (err) {
+      Taro.showToast({ title: '操作失败', icon: 'none' })
     }
   }
 
@@ -311,13 +326,43 @@ export default function EventDetail() {
             {signing
               ? '处理中...'
               : event.isSignedUp
-              ? '取消报名'
+              ? '已报名'
               : (event.price ?? 0) > 0
               ? `立即报名 · ¥${(event.price! / 100).toFixed(0)}`
               : '立即报名 · 免费'}
           </Text>
         </View>
       </View>
+
+      {/* 报名详情弹窗 */}
+      {showInfo && (
+        <View className='signup-modal-mask' onClick={() => setShowInfo(false)}>
+          <View className='signup-modal' onClick={(e) => e.stopPropagation()}>
+            <View className='sm-check'>
+              <View
+                className='sm-check-icon'
+                style={{ backgroundImage: `url("${lucideUri('check', '#ffffff')}")` }}
+              />
+            </View>
+            <Text className='sm-title'>报名成功</Text>
+            <Text className='sm-sub'>已加入活动，记得准时到场</Text>
+            <View className='sm-info'>
+              <View className='sm-row'>
+                <Text className='sm-label'>时间</Text>
+                <Text className='sm-value'>{formatDate(event.date || event.startTime)}</Text>
+              </View>
+              <View className='sm-row'>
+                <Text className='sm-label'>地点</Text>
+                <Text className='sm-value'>{event.venue?.name || event.location || '待定'}</Text>
+              </View>
+            </View>
+            <View className='sm-ok' onClick={() => setShowInfo(false)}>
+              <Text className='sm-ok-text'>知道了</Text>
+            </View>
+            <Text className='sm-cancel' onClick={handleCancel}>取消报名</Text>
+          </View>
+        </View>
+      )}
     </View>
   )
 }
