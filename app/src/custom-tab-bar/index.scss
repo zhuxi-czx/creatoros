@@ -6,7 +6,7 @@
   right: 0;
   width: 100%;
   background: #fff;
-  padding: 24rpx 42rpx calc(24rpx + env(safe-area-inset-bottom, 16rpx)) 42rpx;
+  padding: 20rpx 42rpx calc(8rpx + env(safe-area-inset-bottom, 12rpx)) 42rpx;
   z-index: 100;
   box-sizing: border-box;
 }

@@ -86,7 +86,7 @@ export default function Index() {
               <SwiperItem key={banner.id} className='banner-item'>
                 <Image
                   className='banner-image'
-                  src={resolveImageUrl(banner.imageUrl)}
+                  src={resolveImageUrl(banner.imageUrls?.[0])}
                   mode='aspectFill'
                   lazyLoad
                 />
@@ -132,6 +132,8 @@ export default function Index() {
                 <View
                   key={venue.id}
                   className='venue-card'
+                  hoverClass='card-hover'
+                  hoverStayTime={80}
                   onClick={() => handleVenueTap(venue.id)}
                 >
                   <View className='venue-card-header'>
@@ -169,11 +171,13 @@ export default function Index() {
           <Text className='section-more' onClick={handleMore}>查看更多</Text>
         </View>
         {featured.length > 0 ? (
-          <ScrollView scrollX className='events-scroll' enableFlex>
+          <ScrollView scrollX className={`events-scroll ${featured.length <= 2 ? 'fill' : ''}`} enableFlex>
             {featured.map((ev, i) => (
               <View
                 key={ev.id}
                 className='event-thumb'
+                hoverClass='card-hover'
+                hoverStayTime={80}
                 onClick={() => handleEventTap(ev.id)}
               >
                 <View className='event-thumb-cover'>

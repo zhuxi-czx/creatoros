@@ -4,7 +4,11 @@ export interface Banner {
   id: string
   title: string
   subtitle?: string
-  imageUrl: string
+  imageUrls: string[]
+  autoplay?: boolean
+  interval?: number
+  sortOrder?: number
+  enabled?: boolean
 }
 
 export const getBanners = (): Promise<Banner[]> =>

@@ -18,6 +18,13 @@ export interface Event {
   endTime?: string
   location?: string
   coverUrl?: string
+  coverColor?: string
+  imageUrls?: string[]
+  autoplay?: boolean
+  interval?: number
+  highlights?: string
+  schedule?: string
+  notes?: string
   hostName?: string
   hostAvatar?: string
   price?: number

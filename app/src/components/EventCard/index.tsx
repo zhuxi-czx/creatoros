@@ -44,7 +44,7 @@ export default function EventCard({ event, onClick }: EventCardProps) {
   const displayDate = formattedDate && formattedTime ? `${formattedDate} ${formattedTime}` : formattedDate
 
   return (
-    <View className='event-card' onClick={onClick}>
+    <View className='event-card' onClick={onClick} hoverClass='card-hover' hoverStayTime={80}>
       {/* Title */}
       <Text className='card-title'>{event.title}</Text>
 

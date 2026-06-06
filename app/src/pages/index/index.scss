@@ -136,6 +136,7 @@ $accent: #C9A96E;
   margin-right: 24rpx;
   display: inline-flex;
   flex-direction: column;
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
 .venue-card-skeleton {
@@ -225,15 +226,27 @@ $accent: #C9A96E;
   white-space: nowrap;
 }
 
+// ≤2 张：平分填满（1 张满宽，2 张各半），无右侧大空白
+.events-scroll.fill {
+  gap: 20rpx;
+  .event-thumb {
+    flex: 1 1 0;
+    width: auto;
+    margin-right: 0;
+  }
+}
+
+// ≥3 张：固定宽度，第 3 张露一角提示可右滑
 .event-thumb {
   flex-shrink: 0;
   width: 280rpx;
   margin-right: 20rpx;
   display: inline-block;
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
 .event-thumb-cover {
-  width: 280rpx;
+  width: 100%;
   height: 360rpx;
   border-radius: 16rpx;
   overflow: hidden;

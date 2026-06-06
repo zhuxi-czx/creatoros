@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { View, Text, Image, ScrollView } from '@tarojs/components'
+import { View, Text, Image, ScrollView, Swiper, SwiperItem } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { getEventDetail, signup, cancelSignup, getEventSignups, checkout, getOrder } from '../../services/event'
 import type { Event, Participant } from '../../services/event'
@@ -136,13 +136,46 @@ export default function EventDetail() {
   const status = getStatusInfo(event.status)
   const signupCount = event._count?.signups ?? event.currentParticipants ?? 0
 
+  // 详情多图：优先 imageUrls，回退 coverUrl
+  const detailImages = (
+    event.imageUrls && event.imageUrls.length > 0
+      ? event.imageUrls
+      : event.coverUrl
+      ? [event.coverUrl]
+      : []
+  ).map(resolveImageUrl)
+
+  const previewImages = (urls: string[], current: string) => {
+    Taro.previewImage({ current, urls })
+  }
+
   return (
     <View className='detail-page'>
       <ScrollView scrollY className='scroll-view'>
-        {/* Cover */}
+        {/* Cover：多图轮播 + 点击全屏预览 */}
         <View className='cover-section'>
-          {event.coverUrl ? (
-            <Image className='cover-image' src={resolveImageUrl(event.coverUrl)} mode='aspectFill' lazyLoad />
+          {detailImages.length > 0 ? (
+            <Swiper
+              className='cover-swiper'
+              autoplay={event.autoplay !== false && detailImages.length > 1}
+              interval={event.interval || 3000}
+              circular
+              indicatorDots={detailImages.length > 1}
+              indicatorActiveColor='#fff'
+              indicatorColor='rgba(255,255,255,0.4)'
+            >
+              {detailImages.map((img, i) => (
+                <SwiperItem key={i}>
+                  <Image
+                    className='cover-image'
+                    src={img}
+                    mode='aspectFill'
+                    lazyLoad
+                    onClick={() => previewImages(detailImages, img)}
+                  />
+                </SwiperItem>
+              ))}
+            </Swiper>
           ) : (
             <View
               className='cover-gradient'

@@ -30,3 +30,9 @@ $text-primary: #1A1A1A;
 $text-secondary: #666666;
 $text-hint: #999999;
 $border-color: #F0F0F0;
+
+/* 全局卡片按压反馈（hover-class），对齐 H5 .tap-card:active 的 scale(0.97) */
+.card-hover {
+  transform: scale(0.97);
+  opacity: 0.94;
+}

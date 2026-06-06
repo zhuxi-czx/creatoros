@@ -8,6 +8,7 @@ $accent: #C9A96E;
   display: flex;
   flex-direction: column;
   gap: 20rpx;
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
 .card-title {
