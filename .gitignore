@@ -9,3 +9,6 @@ ecosystem.config.js
 uploads/
 app/.swc/
 tmp-exports/
+
+# TypeScript 构建缓存
+*.tsbuildinfo

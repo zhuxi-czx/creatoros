@@ -6,6 +6,15 @@ type: project
 
 CreatorOS 小程序上架前置准备（截至 2026-05-30）
 
+**HTTPS 已就绪（2026-06-06，commit 2059589）：**
+- 域名 `creatorbar.cn` 备案通过 + DNS 已解析到 116.62.188.30（apex+www）
+- Let's Encrypt 证书签发（webroot，有效期至 2026-09-04，certbot 自动续期）
+- nginx `/etc/nginx/conf.d/creatorbar.conf`：443 反代 `/api`→4000、`/uploads`→4000、`/`→H5静态(h5/dist)，80→443 跳转。**独立 conf，未碰其他项目**
+- 阿里云安全组已放行 443（外部 https 直通）
+- 前端接口全切到 `https://creatorbar.cn`（Taro+H5+图片host）；H5 已重新构建部署到服务器
+- 小程序合法域名 = `https://creatorbar.cn`；支付 notify_url = `https://creatorbar.cn/api/pay/notify`
+- ⚠️ 改 nginx 后用 `nginx -t && nginx -s reload`；nginx 1.24 不支持 `http2 on;`，用 `listen 443 ssl http2;`
+
 **审核中（外部阻塞）：**
 - 域名备案（企业主体，已提交）— 阻塞 HTTPS、合法域名、支付 notify_url
 - 微信支付商户号申请（已提交）— 阻塞支付配置填入与联调
@@ -16,7 +25,16 @@ CreatorOS 小程序上架前置准备（截至 2026-05-30）
 
 **微信支付决策（已定 2026-06-01）：**
 - 退款本期不做（走线下，协议写明不可线上退款）/ 用 wechatpay-node-v3 / 15分钟关单 / 新增每5分钟关单任务
-- 本期范围：下单+支付+确认报名+超时关单。代码框架可先写，商户号下来填配置+联调
+- 本期范围：下单+支付+确认报名+超时关单
+
+**支付框架已开发完成（2026-06-01，commit 4fa95bd，在本地 main 未push）：**
+- 后端 server/src/modules/payment/：WechatPayService(懒加载)+OrderService+OrderController+每5分钟Cron
+- Order 模型 + Signup.orderId；迁移 server/prisma/migrations/20260601_add_order_model（非破坏性，已审）
+- 前端 Taro 详情页按 price 分流付费流程；main.ts 启用 rawBody
+- 关键：schema 在 src/prisma/，prisma 用 prisma.config.ts；generate 必须 --schema 或靠 config
+- 关键：PrismaService 手动暴露 delegate（加 Order 时要在 prisma.service.ts 补 order）
+- **未端到端测试**（缺商户号）。待商户号：填 .env(§8) + 部署迁移 + 联调回调
+- ⚠️ 部署时迁移与代码要一起上：cron 每5分钟查 Order 表，表不存在会持续报错
 
 **关键技术事实：**
 - `Event.price` 单位是**分**，与微信支付一致，无需换算
