@@ -1,7 +1,7 @@
 import Taro from '@tarojs/taro'
 
-// 生产服务器（116 在跑）。域名备案通过后改为 https://<域名> 并去掉端口。
-const SERVER_HOST = 'http://116.62.188.30:4000'
+// 生产域名（HTTPS，nginx 443 反代到 4000）。小程序合法域名即此。
+const SERVER_HOST = 'https://creatorbar.cn'
 const BASE_URL = `${SERVER_HOST}/api`
 
 /** 图片统一存相对路径 /uploads/...，拼到 SERVER_HOST。 */

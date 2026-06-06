@@ -9,7 +9,7 @@ interface LazyImageProps {
 
 const fixSrc = (url: string) => {
   if (typeof window === 'undefined' || !url) return url
-  const host = `${window.location.protocol}//${window.location.hostname}:4000`
+  const host = 'https://creatorbar.cn'
   // 图片统一存相对路径 /uploads/...，拼到 API host
   if (url.startsWith('/uploads/')) {
     return `${host}${url}`

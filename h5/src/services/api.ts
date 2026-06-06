@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: `${window.location.protocol}//${window.location.hostname}:4000/api`,
+  baseURL: 'https://creatorbar.cn/api',
   timeout: 8000,
   headers: {
     'Content-Type': 'application/json',

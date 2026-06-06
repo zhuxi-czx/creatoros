@@ -114,7 +114,7 @@ WX_PAY_MCH_ID=                  # 商户号
 WX_PAY_API_V3_KEY=              # APIv3 密钥
 WX_PAY_SERIAL_NO=               # 商户证书序列号
 WX_PAY_PRIVATE_KEY_PATH=        # 商户私钥 apiclient_key.pem 路径
-WX_PAY_NOTIFY_URL=https://<域名>/api/pay/notify   # 需 HTTPS，依赖备案
+WX_PAY_NOTIFY_URL=https://creatorbar.cn/api/pay/notify   # HTTPS 已就绪（nginx 443→4000）
 ```
 
 ⚠️ `notify_url` 必须是 **HTTPS 已备案域名** → 与「域名去 IP 化 + HTTPS」轨道强相关；可先开发，回调联调需等备案。

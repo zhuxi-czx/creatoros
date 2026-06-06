@@ -8,7 +8,7 @@ interface ImageViewerProps {
 
 const fixSrc = (url: string) => {
   if (typeof window === 'undefined' || !url) return url
-  const host = `${window.location.protocol}//${window.location.hostname}:4000`
+  const host = 'https://creatorbar.cn'
   if (url.startsWith('/uploads/')) return `${host}${url}`
   return url
 }
