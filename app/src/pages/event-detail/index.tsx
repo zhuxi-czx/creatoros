@@ -5,6 +5,7 @@ import { lucideUri } from '../../utils/lucide'
 import { getEventDetail, signup, cancelSignup, getEventSignups, checkout, getOrder } from '../../services/event'
 import type { Event, Participant } from '../../services/event'
 import { useAuthStore } from '../../stores/useAuthStore'
+import { wxLogin } from '../../services/auth'
 import { resolveImageUrl } from '../../services/api'
 import { formatDate } from '../../utils'
 import './index.scss'
@@ -18,7 +19,7 @@ function getStatusInfo(status: string) {
 
 export default function EventDetail() {
   const { id } = Taro.getCurrentInstance().router?.params || {}
-  const { token } = useAuthStore()
+  const { token, login } = useAuthStore()
   const [event, setEvent] = useState<Event | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [loading, setLoading] = useState(true)
@@ -59,13 +60,19 @@ export default function EventDetail() {
   }
 
   const handleSignup = async () => {
-    if (!token) {
-      Taro.showToast({ title: '请先登录', icon: 'none' })
-      return
-    }
     if (!event || !id) return
     try {
       setSigning(true)
+      // 未登录：先静默微信登录（引导登录），成功后继续报名
+      if (!token) {
+        try {
+          const res = await wxLogin()
+          login(res.accessToken, res.user)
+        } catch (e) {
+          Taro.showToast({ title: '登录失败，请重试', icon: 'none' })
+          return
+        }
+      }
       if (event.isSignedUp) {
         await cancelSignup(id)
         setEvent({

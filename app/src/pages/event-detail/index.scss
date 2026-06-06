@@ -34,6 +34,8 @@ $accent: #C9A96E;
 .scroll-view {
   flex: 1;
   overflow: hidden;
+  box-sizing: border-box;
+  padding-bottom: 190rpx; // 给固定底栏留出空间，内容不被遮挡
 }
 
 // Cover
@@ -247,16 +249,22 @@ $accent: #C9A96E;
 
 // Bottom Action
 .bottom-action {
-  padding: 24rpx 32rpx;
-  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  padding: 16rpx 32rpx;
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom, 16rpx));
   background: #fff;
-  border-top: 1rpx solid #F0F0F0;
+  box-shadow: 0 -2rpx 16rpx rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
 }
 
 .action-btn {
   background: $accent;
-  border-radius: 24rpx;
-  height: 100rpx;
+  border-radius: 48rpx; // 药丸
+  height: 96rpx;
   display: flex;
   align-items: center;
   justify-content: center;
