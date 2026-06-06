@@ -371,29 +371,31 @@ export default function EventForm() {
       <div style={{ width: 375, flexShrink: 0, position: 'sticky', top: 24, alignSelf: 'flex-start' }}>
         <div style={{
           background: '#1A1A1A',
-          borderRadius: 40,
-          padding: '48px 12px 12px',
+          borderRadius: 48,
+          padding: 12,
           boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
           position: 'relative',
         }}>
-          {/* Phone notch */}
+          {/* Dynamic Island（悬浮于内容顶部，模拟真机）*/}
           <div style={{
             position: 'absolute',
-            top: 16,
+            top: 24,
             left: '50%',
             transform: 'translateX(-50%)',
-            width: 80,
-            height: 6,
-            borderRadius: 3,
-            background: '#333',
+            width: 88,
+            height: 24,
+            borderRadius: 14,
+            background: '#000',
+            zIndex: 2,
           }} />
           <iframe
             src={`${h5Base}/event/${id}`}
             style={{
+              display: 'block',
               width: '100%',
-              height: 667,
+              height: 760, // 现代 iPhone 屏幕比例（约 390×844）
               border: 'none',
-              borderRadius: 28,
+              borderRadius: 36,
               background: '#fff',
             }}
             title="预览"
