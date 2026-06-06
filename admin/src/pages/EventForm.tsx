@@ -32,7 +32,7 @@ export default function EventForm() {
     if (isEdit && id) {
       loadEvent(id)
     } else {
-      form.setFieldsValue({ autoplay: false, interval: 3 })
+      form.setFieldsValue({ autoplay: false, interval: 3, isFree: true })
     }
   }, [id])
 
@@ -55,6 +55,7 @@ export default function EventForm() {
         notes: event.notes,
         hostName: event.hostName,
         maxCapacity: event.maxCapacity,
+        isFree: !event.price,
         price: event.price ? event.price / 100 : 0,
         date: event.date ? dayjs(event.date) : undefined,
         venueId: event.venueId,
@@ -131,7 +132,7 @@ export default function EventForm() {
       venueId: (values.venueId as string) || 'default',
       hostName: values.hostName as string,
       maxCapacity: values.maxCapacity as number,
-      price: ((values.price as number) || 0) * 100,
+      price: values.isFree ? 0 : ((values.price as number) || 0) * 100,
       coverUrl: imageUrls[0] || undefined,
       imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
       autoplay: imageUrls.length > 1 ? (values.autoplay as boolean) : undefined,
@@ -310,8 +311,17 @@ export default function EventForm() {
             <Form.Item label="人数上限" name="maxCapacity" rules={[{ required: true, message: '请输入' }]} style={{ flex: 1, marginBottom: 16 }}>
               <InputNumber placeholder="30" min={1} style={{ width: '100%' }} />
             </Form.Item>
-            <Form.Item label="费用 (元)" name="price" style={{ flex: 1, marginBottom: 16 }}>
-              <InputNumber placeholder="0" min={0} style={{ width: '100%' }} />
+            <Form.Item label="免费报名" name="isFree" valuePropName="checked" style={{ flex: 1, marginBottom: 16 }}>
+              <Switch checkedChildren="免费" unCheckedChildren="付费" />
+            </Form.Item>
+            <Form.Item noStyle shouldUpdate={(prev, cur) => prev.isFree !== cur.isFree}>
+              {({ getFieldValue }) =>
+                getFieldValue('isFree') ? null : (
+                  <Form.Item label="费用 (元)" name="price" style={{ flex: 1, marginBottom: 16 }}>
+                    <InputNumber placeholder="0" min={0} style={{ width: '100%' }} />
+                  </Form.Item>
+                )
+              }
             </Form.Item>
           </div>
 
