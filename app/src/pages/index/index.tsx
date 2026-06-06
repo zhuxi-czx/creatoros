@@ -171,7 +171,7 @@ export default function Index() {
           <Text className='section-more' onClick={handleMore}>查看更多</Text>
         </View>
         {featured.length > 0 ? (
-          <ScrollView scrollX className={`events-scroll ${featured.length <= 2 ? 'fill' : ''}`} enableFlex>
+          <ScrollView scrollX className='events-scroll' enableFlex>
             {featured.map((ev, i) => (
               <View
                 key={ev.id}

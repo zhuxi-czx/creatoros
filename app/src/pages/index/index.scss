@@ -226,17 +226,7 @@ $accent: #C9A96E;
   white-space: nowrap;
 }
 
-// ≤2 张：平分填满（1 张满宽，2 张各半），无右侧大空白
-.events-scroll.fill {
-  gap: 20rpx;
-  .event-thumb {
-    flex: 1 1 0;
-    width: auto;
-    margin-right: 0;
-  }
-}
-
-// ≥3 张：固定宽度，第 3 张露一角提示可右滑
+// 对齐 H5：固定 140px×180px 窄竖图缩略图（rpx = 2×px），自然露出第 3 张
 .event-thumb {
   flex-shrink: 0;
   width: 280rpx;
@@ -246,7 +236,7 @@ $accent: #C9A96E;
 }
 
 .event-thumb-cover {
-  width: 100%;
+  width: 280rpx;
   height: 360rpx;
   border-radius: 16rpx;
   overflow: hidden;
