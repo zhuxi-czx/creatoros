@@ -10,10 +10,11 @@
 
 | 端 | 地址 | 说明 |
 |---|------|------|
-| 用户端 H5 | http://116.62.188.30:4002 | 手机浏览器访问 |
-| 管理后台 | http://116.62.188.30:4001 | admin / （密码见服务器 ecosystem.config.js） |
-| API Server | http://116.62.188.30:4000/api | RESTful API |
-| 健康检查 | http://116.62.188.30:4000/api/health | 服务状态 |
+| 用户端 H5 | https://creatorbar.cn | 手机浏览器访问 |
+| 管理后台 | https://admin.creatorbar.cn | admin / （密码见服务器 ecosystem.config.js） |
+| API Server | https://creatorbar.cn/api | RESTful API |
+| 健康检查 | https://creatorbar.cn/api/health | 服务状态 |
+| 小程序 API | https://creatorbar.cn（合法域名） | request / uploadFile 域名 |
 
 ## 已完成功能
 
