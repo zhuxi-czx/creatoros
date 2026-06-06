@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { View, Text, Image, ScrollView, Swiper, SwiperItem } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import { View, Text, Image, ScrollView, Swiper, SwiperItem, Button } from '@tarojs/components'
+import Taro, { useShareAppMessage, useShareTimeline } from '@tarojs/taro'
+import { lucideUri } from '../../utils/lucide'
 import { getEventDetail, signup, cancelSignup, getEventSignups, checkout, getOrder } from '../../services/event'
 import type { Event, Participant } from '../../services/event'
 import { useAuthStore } from '../../stores/useAuthStore'
@@ -26,6 +27,19 @@ export default function EventDetail() {
   useEffect(() => {
     if (id) loadEvent()
   }, [id])
+
+  // 微信转发到对话框（小程序卡片：标题 + 封面图 + 落地路径）
+  useShareAppMessage(() => ({
+    title: event?.title || 'CreatorOS · 一起来玩',
+    path: `/pages/event-detail/index?id=${id}`,
+    imageUrl: event?.coverUrl ? resolveImageUrl(event.coverUrl) : undefined,
+  }))
+
+  // 分享到朋友圈
+  useShareTimeline(() => ({
+    title: event?.title || 'CreatorOS · 一起来玩',
+    query: `id=${id}`,
+  }))
 
   const loadEvent = async () => {
     try {
@@ -188,12 +202,19 @@ export default function EventDetail() {
             </View>
             <Text className='cover-title'>{event.title}</Text>
           </View>
+          {/* 分享浮钮：点按拉起微信转发 */}
+          <Button className='cover-share-btn' openType='share'>
+            <View
+              className='cover-share-icon'
+              style={{ backgroundImage: `url("${lucideUri('share-2', '#ffffff')}")` }}
+            />
+          </Button>
         </View>
 
         {/* Info Card */}
         <View className='info-card'>
           <View className='info-row'>
-            <Text className='info-icon'>📅</Text>
+            <View className='info-icon-svg' style={{ backgroundImage: `url("${lucideUri('calendar', '#C9A96E')}")` }} />
             <View className='info-content'>
               <Text className='info-label'>时间</Text>
               <Text className='info-value'>
@@ -202,7 +223,7 @@ export default function EventDetail() {
             </View>
           </View>
           <View className='info-row'>
-            <Text className='info-icon'>📍</Text>
+            <View className='info-icon-svg' style={{ backgroundImage: `url("${lucideUri('map-pin', '#C9A96E')}")` }} />
             <View className='info-content'>
               <Text className='info-label'>地点</Text>
               <Text className='info-value'>
@@ -212,7 +233,7 @@ export default function EventDetail() {
           </View>
           {event.hostName && (
             <View className='info-row'>
-              <Text className='info-icon'>👤</Text>
+              <View className='info-icon-svg' style={{ backgroundImage: `url("${lucideUri('user', '#C9A96E')}")` }} />
               <View className='info-content'>
                 <Text className='info-label'>主办方</Text>
                 <Text className='info-value'>{event.hostName}</Text>
@@ -220,7 +241,7 @@ export default function EventDetail() {
             </View>
           )}
           <View className='info-row'>
-            <Text className='info-icon'>👥</Text>
+            <View className='info-icon-svg' style={{ backgroundImage: `url("${lucideUri('users', '#C9A96E')}")` }} />
             <View className='info-content'>
               <Text className='info-label'>已报名</Text>
               <Text className='info-value'>
@@ -230,7 +251,7 @@ export default function EventDetail() {
           </View>
           {event.price !== undefined && event.price !== null && (
             <View className='info-row'>
-              <Text className='info-icon'>💰</Text>
+              <View className='info-icon-svg' style={{ backgroundImage: `url("${lucideUri('ticket', '#C9A96E')}")` }} />
               <View className='info-content'>
                 <Text className='info-label'>费用</Text>
                 <Text className='info-value'>
@@ -285,8 +306,8 @@ export default function EventDetail() {
               : event.isSignedUp
               ? '取消报名'
               : (event.price ?? 0) > 0
-              ? `立即报名 ¥${(event.price! / 100).toFixed(0)}`
-              : '立即报名'}
+              ? `立即报名 · ¥${(event.price! / 100).toFixed(0)}`
+              : '立即报名 · 免费'}
           </Text>
         </View>
       </View>
