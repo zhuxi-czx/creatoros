@@ -117,16 +117,70 @@ $accent: #C9A96E;
 .login-card {
   background: #fff;
   border-radius: 24rpx;
-  padding: 80rpx 32rpx;
+  padding: 56rpx 48rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32rpx;
+  gap: 20rpx;
 }
 
 .login-hint {
   font-size: 28rpx;
   color: #999;
+  margin-bottom: 8rpx;
+}
+
+// 微信头像选择按钮（重置 Button 默认样式）
+.avatar-picker {
+  width: 140rpx;
+  height: 140rpx;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  background: transparent;
+  line-height: 1;
+  overflow: hidden;
+
+  &::after { border: none; }
+}
+.avatar-preview {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+}
+.avatar-placeholder {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  background: #F2EFE9;
+  border: 2rpx dashed #D8C9A8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.avatar-plus {
+  font-size: 56rpx;
+  color: $accent;
+  line-height: 1;
+}
+.avatar-tip {
+  font-size: 22rpx;
+  color: #999;
+}
+.nickname-input {
+  width: 100%;
+  height: 80rpx;
+  background: #F7F7F7;
+  border-radius: 16rpx;
+  padding: 0 24rpx;
+  box-sizing: border-box;
+  font-size: 28rpx;
+  color: #1A1A1A;
+  text-align: center;
+}
+.skip-hint {
+  font-size: 22rpx;
+  color: #BBB;
 }
 
 .login-btn {

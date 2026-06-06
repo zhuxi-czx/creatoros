@@ -42,3 +42,33 @@ export async function request<T = any>(url: string, method: 'GET' | 'POST' | 'PU
     })
   })
 }
+
+export interface UploadResult {
+  url: string
+  thumbUrl: string
+}
+
+/** 上传图片（如微信头像临时文件）。需在微信后台配置 uploadFile 合法域名。 */
+export function uploadImage(filePath: string, type = 'default'): Promise<UploadResult> {
+  const token = Taro.getStorageSync('h5_token')
+  return new Promise((resolve, reject) => {
+    Taro.uploadFile({
+      url: `${BASE_URL}/upload/image?type=${type}`,
+      filePath,
+      name: 'file',
+      header: token ? { Authorization: `Bearer ${token}` } : {},
+      success: (res) => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          try {
+            resolve(JSON.parse(res.data) as UploadResult)
+          } catch {
+            reject(new Error('上传响应解析失败'))
+          }
+        } else {
+          reject(new Error('上传失败'))
+        }
+      },
+      fail: (err) => reject(new Error(err.errMsg || '上传失败')),
+    })
+  })
+}

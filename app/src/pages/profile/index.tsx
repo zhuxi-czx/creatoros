@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react'
-import { View, Text, Image } from '@tarojs/components'
+import { View, Text, Image, Button, Input } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { wxLogin } from '../../services/auth'
-import { getMySignups } from '../../services/user'
+import { getMySignups, updateProfile } from '../../services/user'
+import { uploadImage } from '../../services/api'
 import type { SignupRecord } from '../../services/user'
 import './index.scss'
 
 export default function Profile() {
-  const { token, user, login, logout } = useAuthStore()
+  const { token, user, login, logout, updateUser } = useAuthStore()
   const [signups, setSignups] = useState<SignupRecord[]>([])
   const [loading, setLoading] = useState(false)
   const [loggingIn, setLoggingIn] = useState(false)
+  const [tempAvatar, setTempAvatar] = useState('')
+  const [nickname, setNickname] = useState('')
 
   useEffect(() => {
     if (token) {
@@ -31,11 +34,38 @@ export default function Profile() {
     }
   }
 
+  const onChooseAvatar = (e: any) => {
+    const url = e?.detail?.avatarUrl
+    if (url) setTempAvatar(url)
+  }
+
   const handleLogin = async () => {
     try {
       setLoggingIn(true)
+      // 1. 微信登录拿账号
       const res = await wxLogin()
       login(res.accessToken, res.user)
+
+      // 2. 若用户选了头像/填了昵称，上传并保存（可跳过）
+      if (tempAvatar || nickname) {
+        let avatarUrl = res.user.avatarUrl
+        if (tempAvatar) {
+          try {
+            const up = await uploadImage(tempAvatar, 'avatar')
+            avatarUrl = up.url
+          } catch (e) {
+            // 头像上传失败不阻断登录
+          }
+        }
+        try {
+          const updated = await updateProfile({
+            ...(avatarUrl ? { avatarUrl } : {}),
+            ...(nickname ? { nickname } : {}),
+          })
+          updateUser(updated)
+        } catch (e) { /* 保存失败不阻断登录 */ }
+      }
+
       Taro.showToast({ title: '登录成功', icon: 'success' })
     } catch (err) {
       Taro.showToast({ title: '登录失败', icon: 'none' })
@@ -121,15 +151,38 @@ export default function Profile() {
         {/* Not logged in */}
         {!token && (
           <View className='login-card'>
-            <Text className='login-hint'>登录后查看完整个人资料</Text>
+            <Text className='login-hint'>登录后报名活动，展示你的头像</Text>
+
+            {/* 微信头像选择（可跳过）*/}
+            <Button className='avatar-picker' openType='chooseAvatar' onChooseAvatar={onChooseAvatar}>
+              {tempAvatar ? (
+                <Image className='avatar-preview' src={tempAvatar} mode='aspectFill' />
+              ) : (
+                <View className='avatar-placeholder'>
+                  <Text className='avatar-plus'>＋</Text>
+                </View>
+              )}
+            </Button>
+            <Text className='avatar-tip'>点击选择微信头像</Text>
+
+            {/* 昵称（type=nickname 自动联想微信昵称）*/}
+            <Input
+              className='nickname-input'
+              type='nickname'
+              placeholder='点击填写昵称'
+              value={nickname}
+              onInput={(e) => setNickname(e.detail.value)}
+            />
+
             <View
               className={`login-btn ${loggingIn ? 'loading' : ''}`}
               onClick={handleLogin}
             >
               <Text className='login-btn-text'>
-                {loggingIn ? '登录中...' : '微信一键登录'}
+                {loggingIn ? '登录中...' : '微信登录'}
               </Text>
             </View>
+            <Text className='skip-hint'>不设置也可直接登录，稍后可在编辑资料补充</Text>
           </View>
         )}
 
