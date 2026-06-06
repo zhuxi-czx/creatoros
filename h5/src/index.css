@@ -6,6 +6,17 @@
   padding: 0;
 }
 
+/* 隐藏滚动条（移动端应用，桌面/后台预览 iframe 下也不显示宽滚动条）*/
+* {
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE/Edge */
+}
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 :root {
   --color-text: #1A1A1A;
   --color-secondary: #666;
