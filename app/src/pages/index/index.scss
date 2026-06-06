@@ -94,19 +94,13 @@ $accent: #C9A96E;
   gap: 16rpx;
 }
 
-.feature-icon-wrap {
-  width: 96rpx;
-  height: 96rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(201, 169, 110, 0.1);
-  border-radius: 50%;
-}
-
-.feature-icon-img {
+// 设计稿：28px lucide 线性图标，金色，无圆形背景
+.feature-icon {
   width: 56rpx;
   height: 56rpx;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .feature-label {

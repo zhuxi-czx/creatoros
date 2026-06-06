@@ -10,11 +10,25 @@ import type { Event } from '../../services/event'
 import { resolveImageUrl } from '../../services/api'
 import './index.scss'
 
+// 设计稿功能区用 lucide 线性图标（28px、金色 #C9A96E、无圆形背景）
+// 小程序无 lucide 字体，用同款 SVG 路径以 data-URI 背景图渲染
+const LUCIDE_PATHS: Record<string, string> = {
+  'message-circle': '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+  'calendar-check': '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/>',
+  'rocket': '<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>',
+  'wand-sparkles': '<path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/>',
+}
+
+function lucideUri(name: string, color: string): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${LUCIDE_PATHS[name]}</svg>`
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`
+}
+
 const FEATURE_ICONS = [
-  { label: '主题分享', icon: '/assets/icon-chat.png' },
-  { label: '活动策划', icon: '/assets/icon-calendar.png' },
-  { label: 'PlanF', icon: '/assets/icon-rocket.png' },
-  { label: 'Creator', icon: '/assets/icon-star.png' },
+  { label: '主题分享', icon: 'message-circle' },
+  { label: '活动策划', icon: 'calendar-check' },
+  { label: 'PlanF', icon: 'rocket' },
+  { label: 'Creator', icon: 'wand-sparkles' },
 ]
 
 const VENUE_COLORS = [
@@ -109,10 +123,11 @@ export default function Index() {
       {/* Feature Icons Row */}
       <View className='feature-card'>
         {FEATURE_ICONS.map((item, i) => (
-          <View key={i} className='feature-item'>
-            <View className='feature-icon-wrap'>
-              <Image className='feature-icon-img' src={item.icon} mode='aspectFit' />
-            </View>
+          <View key={i} className='feature-item' hoverClass='card-hover' hoverStayTime={80}>
+            <View
+              className='feature-icon'
+              style={{ backgroundImage: `url("${lucideUri(item.icon, '#C9A96E')}")` }}
+            />
             <Text className='feature-label'>{item.label}</Text>
           </View>
         ))}
