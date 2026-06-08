@@ -217,7 +217,7 @@ Users ←── Signups ──→ Events ──→ Venues
 
 | 项目 | 值 |
 |------|------|
-| AppID | wx1155fe9224e648e8 |
+| AppID | wx0e0e6af43303ee67 |
 | 主体 | 企业（已认证） |
 | 合法域名 | https://creatorbar.cn |
 | 状态 | 免费报名 MVP 就绪，待平台资质/审核上线 |
