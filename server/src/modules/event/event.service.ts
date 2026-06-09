@@ -17,7 +17,8 @@ export class EventService {
     const skip = (page - 1) * limit;
 
     const where: any = {
-      status: { in: ['PUBLISHED', 'FULL', 'ONGOING'] },
+      // 上架即展示（含已结束 ENDED）；下架为 CANCELLED、草稿为 DRAFT 才隐藏
+      status: { in: ['PUBLISHED', 'FULL', 'ONGOING', 'ENDED'] },
     };
 
     if (city) {
@@ -66,7 +67,7 @@ export class EventService {
     const events = await this.prisma.event.findMany({
       where: {
         featured: true,
-        status: { in: ['PUBLISHED', 'FULL', 'ONGOING'] },
+        status: { in: ['PUBLISHED', 'FULL', 'ONGOING', 'ENDED'] },
       },
       orderBy: { date: 'asc' },
       take: 10,

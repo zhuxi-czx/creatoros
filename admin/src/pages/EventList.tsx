@@ -131,7 +131,7 @@ export default function EventList() {
               <Button type="link" size="small">发布</Button>
             </Popconfirm>
           )}
-          {['PUBLISHED', 'FULL', 'ONGOING'].includes(record.status) && (
+          {['PUBLISHED', 'FULL', 'ONGOING', 'ENDED'].includes(record.status) && (
             <Popconfirm title="确定下架该活动？下架后用户端将不再展示" onConfirm={() => handleStatusChange(record.id, 'CANCELLED')}>
               <Button type="link" size="small" danger>下架</Button>
             </Popconfirm>

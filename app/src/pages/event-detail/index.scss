@@ -273,6 +273,10 @@ $accent: #C9A96E;
     background: #F0F0F0;
   }
 
+  &.disabled {
+    background: #E8E8E8;
+  }
+
   &.loading {
     opacity: 0.7;
   }
@@ -285,6 +289,10 @@ $accent: #C9A96E;
 
   .signed & {
     color: #666;
+  }
+
+  .disabled & {
+    color: #999;
   }
 }
 

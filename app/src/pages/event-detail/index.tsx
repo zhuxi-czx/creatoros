@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { View, Text, Image, ScrollView, Swiper, SwiperItem, Button } from '@tarojs/components'
 import Taro, { useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { lucideUri } from '../../utils/lucide'
+import { getEventDisplay } from '../../utils/eventStatus'
 import { getEventDetail, signup, cancelSignup, getEventSignups, checkout, getOrder } from '../../services/event'
 import type { Event, Participant } from '../../services/event'
 import { useAuthStore } from '../../stores/useAuthStore'
@@ -9,13 +10,6 @@ import { wxLogin } from '../../services/auth'
 import { resolveImageUrl } from '../../services/api'
 import { formatDate } from '../../utils'
 import './index.scss'
-
-function getStatusInfo(status: string) {
-  if (status === 'PUBLISHED') return { label: '报名中', color: '#4CAF50' }
-  if (status === 'FULL') return { label: '已满员', color: '#FF9800' }
-  if (status === 'ONGOING') return { label: '进行中', color: '#FF9800' }
-  return { label: '已结束', color: '#999' }
-}
 
 export default function EventDetail() {
   const { id } = Taro.getCurrentInstance().router?.params || {}
@@ -65,6 +59,12 @@ export default function EventDetail() {
     // 已报名 → 弹出报名详情弹窗（不再直接取消）
     if (event.isSignedUp) {
       setShowInfo(true)
+      return
+    }
+    // 报名结束/已结束 → 不可报名
+    const disp = getEventDisplay(event.date || event.startTime, event._count?.signups ?? 0, event.maxCapacity || event.maxParticipants)
+    if (disp.state !== 'OPEN') {
+      Taro.showToast({ title: disp.state === 'ENDED' ? '活动已结束' : '报名已结束', icon: 'none' })
       return
     }
     try {
@@ -169,8 +169,9 @@ export default function EventDetail() {
     )
   }
 
-  const status = getStatusInfo(event.status)
   const signupCount = event._count?.signups ?? event.currentParticipants ?? 0
+  const status = getEventDisplay(event.date || event.startTime, signupCount, event.maxCapacity || event.maxParticipants)
+  const signupClosed = status.state !== 'OPEN' // 报名结束/已结束 → 不能报名
 
   // 详情多图：优先 imageUrls，回退 coverUrl
   const detailImages = (
@@ -319,7 +320,7 @@ export default function EventDetail() {
       {/* Bottom Action */}
       <View className='bottom-action'>
         <View
-          className={`action-btn ${event.isSignedUp ? 'signed' : ''} ${signing ? 'loading' : ''}`}
+          className={`action-btn ${event.isSignedUp ? 'signed' : ''} ${!event.isSignedUp && signupClosed ? 'disabled' : ''} ${signing ? 'loading' : ''}`}
           onClick={handleSignup}
         >
           <Text className='action-btn-text'>
@@ -327,6 +328,8 @@ export default function EventDetail() {
               ? '处理中...'
               : event.isSignedUp
               ? '已报名'
+              : signupClosed
+              ? (status.state === 'ENDED' ? '活动已结束' : '报名已结束')
               : (event.price ?? 0) > 0
               ? `立即报名 · ¥${(event.price! / 100).toFixed(0)}`
               : '立即报名 · 免费'}

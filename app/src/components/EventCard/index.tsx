@@ -2,6 +2,7 @@ import { View, Text, Image } from '@tarojs/components'
 import type { Event } from '../../services/event'
 import { resolveImageUrl } from '../../services/api'
 import { formatDate } from '../../utils'
+import { getEventDisplay } from '../../utils/eventStatus'
 import './index.scss'
 
 const AVATAR_COLORS = ['#8B5CF6', '#EC4899', '#F97316', '#06B6D4', '#10B981', '#3B82F6']
@@ -17,13 +18,6 @@ interface EventCardProps {
   onClick?: () => void
 }
 
-function getStatusInfo(status: string) {
-  if (status === 'PUBLISHED') return { dot: '#4CAF50', label: '报名中' }
-  if (status === 'FULL') return { dot: '#FF9800', label: '即将满员' }
-  if (status === 'ONGOING') return { dot: '#FF9800', label: '进行中' }
-  return { dot: '#999', label: '已结束' }
-}
-
 function hashId(id: string): number {
   let hash = 0
   for (let i = 0; i < id.length; i++) {
@@ -33,8 +27,8 @@ function hashId(id: string): number {
 }
 
 export default function EventCard({ event, onClick }: EventCardProps) {
-  const status = getStatusInfo(event.status)
   const signupCount = event._count?.signups ?? event.currentParticipants ?? 0
+  const status = getEventDisplay(event.date || event.startTime, signupCount, event.maxCapacity || event.maxParticipants)
   const colorIndex = hashId(event.id)
   const signupAvatars = event.signups?.slice(0, 3) ?? []
   const dateStr = event.date || event.startTime
@@ -57,8 +51,8 @@ export default function EventCard({ event, onClick }: EventCardProps) {
           </View>
         )}
         <View className='info-item'>
-          <View className='status-dot' style={{ background: status.dot }} />
-          <Text className='info-label' style={{ color: status.dot }}>{status.label}</Text>
+          <View className='status-dot' style={{ background: status.color }} />
+          <Text className='info-label' style={{ color: status.color }}>{status.label}</Text>
         </View>
         {(event.venue?.name || event.location) && (
           <View className='info-item'>
