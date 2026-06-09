@@ -53,6 +53,13 @@ export default function UserList() {
         </Space>
       )
     },
+    {
+      title: '手机号',
+      dataIndex: 'phone',
+      key: 'phone',
+      width: 120,
+      render: (phone: string) => phone || <Text type="secondary">-</Text>
+    },
     ...(!isMobile ? [{
       title: '标签',
       key: 'tags',
