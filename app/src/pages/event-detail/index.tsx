@@ -304,7 +304,7 @@ export default function EventDetail() {
                 <View key={p.id} className='participant-item'>
                   <View className='participant-avatar'>
                     {p.avatarUrl ? (
-                      <Image className='participant-avatar-img' src={p.avatarUrl} mode='aspectFill' />
+                      <Image className='participant-avatar-img' src={resolveImageUrl(p.avatarUrl)} mode='aspectFill' />
                     ) : (
                       <Text className='participant-letter'>
                         {(p.nickname || '?')[0]}

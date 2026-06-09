@@ -3,6 +3,7 @@ import { View, Text, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useAuthStore } from '../../stores/useAuthStore'
 import PhoneLoginSheet from '../../components/PhoneLoginSheet'
+import { resolveImageUrl } from '../../services/api'
 import { getMySignups } from '../../services/user'
 import type { SignupRecord } from '../../services/user'
 import './index.scss'
@@ -72,7 +73,7 @@ export default function Profile() {
         {/* Avatar */}
         <View className='avatar-wrap'>
           {user?.avatarUrl ? (
-            <Image className='avatar-img' src={user.avatarUrl} mode='aspectFill' />
+            <Image className='avatar-img' src={resolveImageUrl(user.avatarUrl)} mode='aspectFill' />
           ) : (
             <Text className='avatar-letter'>
               {token ? (displayName[0] || '?') : '👤'}
