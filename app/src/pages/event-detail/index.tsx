@@ -38,9 +38,9 @@ export default function EventDetail() {
     query: `id=${id}`,
   }))
 
-  const loadEvent = async () => {
+  const loadEvent = async (silent = false) => {
     try {
-      setLoading(true)
+      if (!silent) setLoading(true)
       const userId = Taro.getStorageSync('user')?.id
       const [ev, signups] = await Promise.allSettled([
         getEventDetail(id!, userId),
@@ -49,9 +49,9 @@ export default function EventDetail() {
       if (ev.status === 'fulfilled') setEvent(ev.value)
       if (signups.status === 'fulfilled') setParticipants(signups.value)
     } catch (err) {
-      Taro.showToast({ title: '加载失败', icon: 'none' })
+      if (!silent) Taro.showToast({ title: '加载失败', icon: 'none' })
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }
 
@@ -93,22 +93,14 @@ export default function EventDetail() {
         })
         const paid = await pollOrderPaid(orderId)
         if (paid) {
-          setEvent({
-            ...event,
-            isSignedUp: true,
-            _count: { signups: (event._count?.signups ?? 0) + 1 }
-          })
+          await loadEvent(true) // 同步报名状态/人数/参与者
           Taro.showToast({ title: '报名成功', icon: 'success' })
         } else {
           Taro.showToast({ title: '支付确认中，请稍后刷新', icon: 'none' })
         }
       } else {
         await signup(id)
-        setEvent({
-          ...event,
-          isSignedUp: true,
-          _count: { signups: (event._count?.signups ?? 0) + 1 }
-        })
+        await loadEvent(true) // 同步报名状态/人数/参与者
         Taro.showToast({ title: '报名成功', icon: 'success' })
       }
     } catch (err: any) {
@@ -128,12 +120,8 @@ export default function EventDetail() {
     if (!id || !event) return
     try {
       await cancelSignup(id)
-      setEvent({
-        ...event,
-        isSignedUp: false,
-        _count: { signups: (event._count?.signups ?? 1) - 1 }
-      })
       setShowInfo(false)
+      await loadEvent(true) // 重新同步报名状态/人数/参与者列表
       Taro.showToast({ title: '已取消报名', icon: 'success' })
     } catch (err) {
       Taro.showToast({ title: '操作失败', icon: 'none' })
