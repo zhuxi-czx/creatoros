@@ -9,9 +9,11 @@ interface Props {
   visible: boolean
   onClose: () => void
   onSuccess?: () => void
+  /** 在带底部 TabBar 的页面（如"我的"）使用时设为 true，避免被原生 TabBar 遮挡 */
+  tabBar?: boolean
 }
 
-export default function PhoneLoginSheet({ visible, onClose, onSuccess }: Props) {
+export default function PhoneLoginSheet({ visible, onClose, onSuccess, tabBar }: Props) {
   const { login } = useAuthStore()
 
   const handleGetPhone = async (e: any) => {
@@ -41,7 +43,7 @@ export default function PhoneLoginSheet({ visible, onClose, onSuccess }: Props) 
 
   return (
     <View className='login-sheet-mask' onClick={onClose}>
-      <View className='login-sheet' onClick={(e) => e.stopPropagation()}>
+      <View className={`login-sheet ${tabBar ? 'with-tabbar' : ''}`} onClick={(e) => e.stopPropagation()}>
         <View className='ls-handle' />
         <View className='ls-close' onClick={onClose} style={{ backgroundImage: `url("${lucideUri('x', '#cccccc')}")` }} />
 

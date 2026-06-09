@@ -200,6 +200,7 @@ export default function Profile() {
         visible={showLogin}
         onClose={() => setShowLogin(false)}
         onSuccess={loadSignups}
+        tabBar
       />
     </View>
   )

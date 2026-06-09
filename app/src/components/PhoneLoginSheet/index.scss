@@ -17,6 +17,11 @@
   flex-direction: column;
   align-items: center;
   gap: 24rpx;
+
+  // tab 页（我的）：额外抬高，避开原生药丸 TabBar
+  &.with-tabbar {
+    padding-bottom: calc(180rpx + env(safe-area-inset-bottom, 24rpx));
+  }
 }
 
 .ls-handle {
