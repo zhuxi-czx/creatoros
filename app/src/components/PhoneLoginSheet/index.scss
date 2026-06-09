@@ -1,0 +1,116 @@
+.login-sheet-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.login-sheet {
+  position: relative;
+  background: #fff;
+  border-radius: 48rpx 48rpx 0 0;
+  padding: 36rpx 56rpx calc(40rpx + env(safe-area-inset-bottom, 24rpx));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.ls-handle {
+  width: 64rpx;
+  height: 8rpx;
+  border-radius: 4rpx;
+  background: #E5E5E5;
+}
+
+.ls-close {
+  position: absolute;
+  top: 32rpx;
+  right: 36rpx;
+  width: 44rpx;
+  height: 44rpx;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.ls-logo-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+
+.ls-logo {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 24rpx;
+  background: #C9A96E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ls-logo-text {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #fff;
+}
+
+.ls-app {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #1A1A1A;
+}
+
+.ls-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #1A1A1A;
+}
+
+.ls-sub {
+  font-size: 26rpx;
+  color: #999;
+  text-align: center;
+  line-height: 1.5;
+  max-width: 560rpx;
+}
+
+.ls-phone-btn {
+  width: 100%;
+  height: 100rpx;
+  border-radius: 50rpx;
+  background: #07C160;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  margin-top: 8rpx;
+
+  &::after { border: none; }
+}
+
+.ls-phone-icon {
+  width: 40rpx;
+  height: 40rpx;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.ls-phone-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #fff;
+}
+
+.ls-agree {
+  font-size: 22rpx;
+  color: #BBB;
+}

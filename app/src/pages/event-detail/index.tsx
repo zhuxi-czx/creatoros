@@ -6,19 +6,20 @@ import { getEventDisplay } from '../../utils/eventStatus'
 import { getEventDetail, signup, cancelSignup, getEventSignups, checkout, getOrder } from '../../services/event'
 import type { Event, Participant } from '../../services/event'
 import { useAuthStore } from '../../stores/useAuthStore'
-import { wxLogin } from '../../services/auth'
+import PhoneLoginSheet from '../../components/PhoneLoginSheet'
 import { resolveImageUrl } from '../../services/api'
 import { formatDate } from '../../utils'
 import './index.scss'
 
 export default function EventDetail() {
   const { id } = Taro.getCurrentInstance().router?.params || {}
-  const { token, login } = useAuthStore()
+  const { token } = useAuthStore()
   const [event, setEvent] = useState<Event | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [loading, setLoading] = useState(true)
   const [signing, setSigning] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
+  const [showLogin, setShowLogin] = useState(false)
 
   useEffect(() => {
     if (id) loadEvent()
@@ -67,18 +68,19 @@ export default function EventDetail() {
       Taro.showToast({ title: disp.state === 'ENDED' ? '活动已结束' : '报名已结束', icon: 'none' })
       return
     }
+    // 未登录 → 弹手机号快捷登录，登录成功后继续报名
+    if (!token) {
+      setShowLogin(true)
+      return
+    }
+    doSignup()
+  }
+
+  // 实际报名（已确保登录、可报名）
+  const doSignup = async () => {
+    if (!event || !id) return
     try {
       setSigning(true)
-      // 未登录：先静默微信登录（引导登录），成功后继续报名
-      if (!token) {
-        try {
-          const res = await wxLogin()
-          login(res.accessToken, res.user)
-        } catch (e) {
-          Taro.showToast({ title: '登录失败，请重试', icon: 'none' })
-          return
-        }
-      }
       if ((event.price ?? 0) > 0) {
         // 付费活动：下单 → 拉起微信支付 → 轮询确认报名
         const { orderId, payParams } = await checkout(id)
@@ -366,6 +368,13 @@ export default function EventDetail() {
           </View>
         </View>
       )}
+
+      {/* 手机号快捷登录弹窗 */}
+      <PhoneLoginSheet
+        visible={showLogin}
+        onClose={() => setShowLogin(false)}
+        onSuccess={doSignup}
+      />
     </View>
   )
 }

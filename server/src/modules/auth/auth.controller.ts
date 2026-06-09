@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { WxLoginDto } from './dto/wx-login.dto';
+import { PhoneLoginDto } from './dto/phone-login.dto';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
@@ -18,6 +19,11 @@ export class AuthController {
   @Post('wx-login')
   async wxLogin(@Body() wxLoginDto: WxLoginDto) {
     return this.authService.wxLogin(wxLoginDto);
+  }
+
+  @Post('phone-login')
+  async phoneLogin(@Body() dto: PhoneLoginDto) {
+    return this.authService.phoneLogin(dto.loginCode, dto.phoneCode);
   }
 
   @Post('admin-login')
