@@ -97,3 +97,48 @@
     }
   }
 }
+
+/* 头像选择 */
+.avatar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 0 4px;
+}
+.avatar-btn {
+  width: 80px;
+  height: 80px;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  background: transparent;
+  line-height: normal;
+  overflow: hidden;
+
+  &::after { border: none; }
+}
+.avatar-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+.avatar-ph {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #F2EFE9;
+  border: 1px dashed #D8C9A8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.avatar-ph-text {
+  font-size: 32px;
+  color: #C9A96E;
+  line-height: 1;
+}
+.avatar-tip {
+  font-size: 12px;
+  color: #999;
+}
