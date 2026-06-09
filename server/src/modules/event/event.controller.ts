@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Delete,
   Body,
   Param,
   Query,
@@ -111,5 +112,11 @@ export class EventController {
     @Body() dto: UpdateEventStatusDto,
   ) {
     return this.eventService.adminUpdateEventStatus(id, dto);
+  }
+
+  @UseGuards(AdminGuard)
+  @Delete('api/admin/events/:id')
+  async adminDeleteEvent(@Param('id') id: string) {
+    return this.eventService.adminDeleteEvent(id);
   }
 }

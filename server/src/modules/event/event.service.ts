@@ -311,6 +311,28 @@ export class EventService {
     return updated;
   }
 
+  // 删除活动：仅「已下架(CANCELLED) + 已结束」可删，级联删除订单/报名
+  async adminDeleteEvent(id: string) {
+    const event = await this.prisma.event.findUnique({ where: { id } });
+    if (!event) throw new NotFoundException('Event not found');
+    if (event.status !== 'CANCELLED') {
+      throw new BadRequestException('请先下架该活动再删除');
+    }
+    const start = new Date(event.date);
+    const endedAt = new Date(
+      start.getFullYear(), start.getMonth(), start.getDate() + 1, 0, 0, 0, 0,
+    );
+    if (Date.now() < endedAt.getTime()) {
+      throw new BadRequestException('活动尚未结束，不能删除');
+    }
+    await this.prisma.$transaction(async (tx) => {
+      // 注：支付上线、生产部署 Order 表后，这里需补 tx.order.deleteMany({ where: { eventId: id } })
+      await tx.signup.deleteMany({ where: { eventId: id } });
+      await tx.event.delete({ where: { id } });
+    });
+    return { success: true };
+  }
+
   async adminCopyEvent(id: string) {
     const event = await this.prisma.event.findUnique({ where: { id } });
     if (!event) throw new NotFoundException('Event not found');

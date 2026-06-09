@@ -75,6 +75,10 @@ export async function copyEvent(id: string): Promise<Event> {
   return api.post(`/admin/events/${id}/copy`) as any
 }
 
+export async function deleteEvent(id: string): Promise<{ success: boolean }> {
+  return api.delete(`/admin/events/${id}`) as any
+}
+
 export async function getStats(): Promise<any> {
   return api.get('/admin/stats') as any
 }

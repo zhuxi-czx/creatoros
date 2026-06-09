@@ -10,10 +10,16 @@ import {
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { getEvents, getStats, updateEventStatus, copyEvent, type Event } from '../services/event'
+import { getEvents, getStats, updateEventStatus, copyEvent, deleteEvent, type Event } from '../services/event'
 
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid
+
+// 活动是否已结束：到了活动当天的次日 0 点
+function isEnded(date?: string): boolean {
+  if (!date) return false
+  return dayjs().isAfter(dayjs(date).add(1, 'day').startOf('day'))
+}
 
 const STATUS_MAP: Record<string, { color: string; label: string }> = {
   DRAFT: { color: 'default', label: '草稿' },
@@ -55,6 +61,16 @@ export default function EventList() {
       loadData()
     } catch (err) {
       message.error('状态更新失败')
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteEvent(id)
+      message.success('活动已删除')
+      loadData()
+    } catch (err: any) {
+      message.error(err?.message || '删除失败')
     }
   }
 
@@ -127,13 +143,18 @@ export default function EventList() {
             onClick={() => navigate(`/events/${record.id}/signups`)}
           >报名</Button>
           {['DRAFT', 'CANCELLED'].includes(record.status) && (
-            <Popconfirm title="确定发布该活动？" onConfirm={() => handleStatusChange(record.id, 'PUBLISHED')}>
-              <Button type="link" size="small">发布</Button>
+            <Popconfirm title="确定上架该活动？上架后用户端展示" onConfirm={() => handleStatusChange(record.id, 'PUBLISHED')}>
+              <Button type="link" size="small">{record.status === 'CANCELLED' ? '重新上架' : '发布'}</Button>
             </Popconfirm>
           )}
           {['PUBLISHED', 'FULL', 'ONGOING', 'ENDED'].includes(record.status) && (
             <Popconfirm title="确定下架该活动？下架后用户端将不再展示" onConfirm={() => handleStatusChange(record.id, 'CANCELLED')}>
               <Button type="link" size="small" danger>下架</Button>
+            </Popconfirm>
+          )}
+          {record.status === 'CANCELLED' && isEnded(record.date) && (
+            <Popconfirm title="删除后不可恢复，确定删除该活动？" onConfirm={() => handleDelete(record.id)}>
+              <Button type="link" size="small" danger>删除</Button>
             </Popconfirm>
           )}
         </Space>
