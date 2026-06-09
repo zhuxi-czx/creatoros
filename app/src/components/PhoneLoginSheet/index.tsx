@@ -55,7 +55,7 @@ export default function PhoneLoginSheet({ visible, onClose, onSuccess, tabBar }:
         <Text className='ls-title'>登录后报名活动</Text>
         <Text className='ls-sub'>使用微信手机号快捷登录，用于活动报名与到场联系</Text>
 
-        <Button className='ls-phone-btn' openType='getRealtimePhoneNumber' onGetRealTimePhoneNumber={handleGetPhone}>
+        <Button className='ls-phone-btn' openType='getPhoneNumber' onGetPhoneNumber={handleGetPhone}>
           <View className='ls-phone-icon' style={{ backgroundImage: `url("${lucideUri('smartphone', '#ffffff')}")` }} />
           <Text className='ls-phone-text'>微信手机号快捷登录</Text>
         </Button>
