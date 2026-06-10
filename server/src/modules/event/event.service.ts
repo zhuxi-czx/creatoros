@@ -326,7 +326,7 @@ export class EventService {
       throw new BadRequestException('活动尚未结束，不能删除');
     }
     await this.prisma.$transaction(async (tx) => {
-      // 注：支付上线、生产部署 Order 表后，这里需补 tx.order.deleteMany({ where: { eventId: id } })
+      await tx.order.deleteMany({ where: { eventId: id } });
       await tx.signup.deleteMany({ where: { eventId: id } });
       await tx.event.delete({ where: { id } });
     });
