@@ -124,7 +124,13 @@ export default function Index() {
       {/* Feature Icons Row */}
       <View className='feature-card'>
         {FEATURE_ICONS.map((item, i) => (
-          <View key={i} className='feature-item' hoverClass='card-hover' hoverStayTime={80}>
+          <View
+            key={i}
+            className='feature-item'
+            hoverClass='card-hover'
+            hoverStayTime={80}
+            onClick={() => Taro.showToast({ title: '即将上线，敬请期待', icon: 'none' })}
+          >
             <View
               className='feature-icon'
               style={{ backgroundImage: `url("${lucideUri(item.icon, '#C9A96E')}")` }}
