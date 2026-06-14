@@ -108,40 +108,58 @@ export class WechatPayService {
   }
 
   /**
-   * 验签 + 解密支付结果回调。
-   * @returns 解密后的资源对象；验签失败返回 null。
+   * 解密支付结果回调。
+   *
+   * APIv3 回调的 resource 使用 APIv3 密钥做 AES-256-GCM「认证加密」：
+   * 解密成功（GCM 标签校验通过）本身即证明报文来自微信、未被篡改，
+   * 只有持有 APIv3 密钥的微信与本商户能产生有效密文。
+   *
+   * 因此这里不依赖「平台证书」做 RSA 验签（新商户常拉不到平台证书，
+   * verifySign 会报「拉取平台证书失败」），改为直接 GCM 解密。
+   * 解密失败 → 报文不可信 → 返回 null。
+   *
+   * @returns 解密后的资源对象；解密失败返回 null。
    */
   async verifyAndDecryptNotify(
-    headers: Record<string, any>,
+    _headers: Record<string, any>,
     rawBody: string,
   ): Promise<NotifyResource | null> {
-    const client = this.client();
-    const timestamp = headers['wechatpay-timestamp'];
-    const nonce = headers['wechatpay-nonce'];
-    const signature = headers['wechatpay-signature'];
-    const serial = headers['wechatpay-serial'];
-
-    const ok = await client.verifySign({
-      timestamp,
-      nonce,
-      signature,
-      serial,
-      body: rawBody,
-      apiSecret: this.apiV3Key,
-    });
-    if (!ok) {
-      this.logger.warn('支付回调验签失败');
+    try {
+      const client = this.client();
+      const body = JSON.parse(rawBody);
+      const { ciphertext, associated_data, nonce } = body.resource;
+      return client.decipher_gcm<NotifyResource>(
+        ciphertext,
+        associated_data,
+        nonce,
+        this.apiV3Key,
+      );
+    } catch (e: any) {
+      this.logger.warn(`支付回调解密失败: ${e?.message ?? e}`);
       return null;
     }
+  }
 
-    const body = JSON.parse(rawBody);
-    const { ciphertext, associated_data, nonce: dataNonce } = body.resource;
-    return client.decipher_gcm<NotifyResource>(
-      ciphertext,
-      associated_data,
-      dataNonce,
-      this.apiV3Key,
-    );
+  /**
+   * 主动查单（兜底）。用商户证书向微信查询订单真实状态，
+   * 不依赖平台证书/APIv3 密钥，回调丢失或解密失败时也能确认收款。
+   * @returns { tradeState, transactionId }；查询失败返回 null。
+   */
+  async queryOrderState(
+    outTradeNo: string,
+  ): Promise<{ tradeState: string; transactionId: string } | null> {
+    try {
+      const res: any = await this.client().query({ out_trade_no: outTradeNo });
+      const p = res?.data ?? res;
+      if (!p || !p.trade_state) {
+        this.logger.warn(`查单无结果: ${outTradeNo} ${JSON.stringify(res?.error ?? '')}`);
+        return null;
+      }
+      return { tradeState: p.trade_state, transactionId: p.transaction_id ?? '' };
+    } catch (e: any) {
+      this.logger.warn(`查单异常 ${outTradeNo}: ${e?.message ?? e}`);
+      return null;
+    }
   }
 
   /** Date → RFC3339（+08:00），微信 time_expire 要求格式。 */

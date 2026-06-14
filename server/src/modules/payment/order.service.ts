@@ -159,12 +159,27 @@ export class OrderService {
 
   /** 查询订单（含报名状态），供前端轮询；校验归属。 */
   async getOrder(userId: string, orderId: string) {
-    const order = await this.prisma.order.findUnique({
+    let order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: { signup: { select: { status: true } } },
     });
     if (!order) throw new NotFoundException('订单不存在');
     if (order.userId !== userId) throw new ForbiddenException('无权查看该订单');
+
+    // 兜底：未确认收款时主动向微信查单（回调可能丢失/失败），
+    // 含已被超时关单(CLOSED)的单——若微信侧已收款则补确认报名，避免收钱不报名。
+    if (order.status === 'PENDING' || order.status === 'CLOSED') {
+      const state = await this.wechatPay.queryOrderState(order.outTradeNo);
+      if (state?.tradeState === 'SUCCESS') {
+        await this.confirmPaid(order.outTradeNo, state.transactionId);
+        order = await this.prisma.order.findUnique({
+          where: { id: orderId },
+          include: { signup: { select: { status: true } } },
+        });
+      }
+    }
+    if (!order) throw new NotFoundException('订单不存在');
+
     return {
       id: order.id,
       status: order.status,
