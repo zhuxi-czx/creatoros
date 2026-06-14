@@ -43,7 +43,7 @@ enum OrderStatus {
 
 model User {
   id         String     @id @default(cuid())
-  uid        Int        @unique @default(autoincrement()) // 后台运营用的短数字编号
+  uid        String     @unique // 11 位随机数字编号，全局唯一，后台运营用
   openId     String     @unique
   unionId    String?
   nickname   String?

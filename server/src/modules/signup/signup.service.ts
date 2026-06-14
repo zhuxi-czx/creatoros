@@ -33,6 +33,11 @@ export class SignupService {
         throw new BadRequestException(`Cannot sign up for event with status: ${event.status}`);
       }
 
+      // 付费活动必须走支付下单（checkout），免费报名接口不得绕过支付
+      if (event.price > 0) {
+        throw new BadRequestException('该活动需支付报名，请通过支付完成报名');
+      }
+
       // Check if already signed up
       const existingSignup = await tx.signup.findUnique({
         where: {
@@ -133,10 +138,16 @@ export class SignupService {
           eventId,
         },
       },
+      include: { order: true },
     });
 
     if (!signup || signup.status === 'CANCELLED') {
       throw new NotFoundException('Signup not found');
+    }
+
+    // 已支付报名不允许用户自助取消（退款仅由后台操作，避免取消后款项滞留）
+    if (signup.order && ['PAID', 'REFUNDING'].includes(signup.order.status)) {
+      throw new BadRequestException('已支付的报名，请联系主理人在后台办理退款取消');
     }
 
     const cancelled = await this.prisma.signup.update({

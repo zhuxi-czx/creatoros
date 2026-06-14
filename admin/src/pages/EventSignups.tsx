@@ -22,7 +22,7 @@ interface SignupRecord {
   order?: OrderInfo | null
   user: {
     id: string
-    uid?: number
+    uid?: string
     nickname?: string
     avatarUrl?: string
     city?: string
@@ -148,7 +148,8 @@ export default function EventSignups() {
       key: 'action',
       width: 100,
       render: (_, r) => {
-        const canRefund = r.status === 'CONFIRMED' && r.order?.status === 'PAID'
+        // 以订单 PAID 为准：报名即使已取消，只要钱未退仍可退款
+        const canRefund = r.order?.status === 'PAID'
         if (!canRefund) return <Text type="secondary">-</Text>
         return (
           <Popconfirm

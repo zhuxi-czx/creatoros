@@ -11,4 +11,10 @@ export class OrderCronService {
   async handleCloseExpired() {
     await this.orderService.closeExpiredOrders();
   }
+
+  /** 每 5 分钟对账处理中的退款单，及时落地 REFUNDED 状态。 */
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  async handleReconcileRefunds() {
+    await this.orderService.reconcileRefundingOrders();
+  }
 }

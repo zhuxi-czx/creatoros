@@ -27,6 +27,30 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  /** 生成 11 位随机数字 UID（首位非 0）。 */
+  private genUid(): string {
+    let s = String(1 + Math.floor(Math.random() * 9));
+    for (let i = 0; i < 10; i++) s += Math.floor(Math.random() * 10);
+    return s;
+  }
+
+  /** 创建用户并分配全局唯一 UID；遇唯一冲突自动重试。 */
+  private async createUser(data: any) {
+    for (let i = 0; i < 6; i++) {
+      try {
+        return await this.prisma.user.create({
+          data: { ...data, uid: this.genUid() },
+        });
+      } catch (e: any) {
+        // P2002 = 唯一约束冲突（uid 撞号），重试
+        if (e?.code === 'P2002' && i < 5) continue;
+        throw e;
+      }
+    }
+    // 理论不可达
+    throw new InternalServerErrorException('生成用户编号失败');
+  }
+
   async wxLogin(wxLoginDto: WxLoginDto) {
     const { code } = wxLoginDto;
 
@@ -62,11 +86,9 @@ export class AuthService {
     });
 
     if (!user) {
-      user = await this.prisma.user.create({
-        data: {
-          openId: wxSession.openid,
-          unionId: wxSession.unionid || null,
-        },
+      user = await this.createUser({
+        openId: wxSession.openid,
+        unionId: wxSession.unionid || null,
       });
     } else if (wxSession.unionid && !user.unionId) {
       // Update unionId if we now have it
@@ -119,8 +141,10 @@ export class AuthService {
 
     let user = await this.prisma.user.findUnique({ where: { openId: session.openid } });
     if (!user) {
-      user = await this.prisma.user.create({
-        data: { openId: session.openid, unionId: session.unionid || null, phone },
+      user = await this.createUser({
+        openId: session.openid,
+        unionId: session.unionid || null,
+        phone,
       });
     } else {
       user = await this.prisma.user.update({
@@ -193,12 +217,10 @@ export class AuthService {
     });
 
     if (!adminUser) {
-      adminUser = await this.prisma.user.create({
-        data: {
-          openId: `admin_${Date.now()}`,
-          nickname: 'Admin',
-          role: 'ADMIN',
-        },
+      adminUser = await this.createUser({
+        openId: `admin_${Date.now()}`,
+        nickname: 'Admin',
+        role: 'ADMIN',
       });
     }
 

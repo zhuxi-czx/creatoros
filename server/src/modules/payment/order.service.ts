@@ -192,28 +192,32 @@ export class OrderService {
   }
 
   /**
-   * 后台对某条已确认报名发起退款（原路退回）。
+   * 退款核心（原路退回）。以「订单是否 PAID」为准，与报名状态解耦：
+   * 报名即使已取消，只要钱已收且未退，仍可退款（避免收钱不退）。
    *
    * 安全要点（支付敏感）：
-   * - 仅 PAID 订单可退；用 updateMany(status:PAID→REFUNDING) 做乐观锁，
-   *   防止并发/重复点击导致重复退款。
+   * - 用 updateMany(status:PAID→REFUNDING) 做乐观锁，防并发/重复点击重复退款。
    * - 先锁单再调微信；微信拒绝则回滚为 PAID 供重试。
-   * - 微信受理(SUCCESS/PROCESSING)后才取消报名、释放名额、必要时 FULL→PUBLISHED。
+   * - 微信受理(SUCCESS/PROCESSING)后取消报名、释放名额、必要时 FULL→PUBLISHED。
+   *
+   * @returns status: SUCCESS/PROCESSING/REFUNDED(幂等)/NO_PAYMENT(无可退订单)
    */
-  async adminRefundSignup(signupId: string) {
+  async refundSignup(
+    signupId: string,
+    opts?: { reason?: string },
+  ): Promise<{ status: string; refunded: boolean }> {
     const signup = await this.prisma.signup.findUnique({
       where: { id: signupId },
       include: { order: true },
     });
     if (!signup) throw new NotFoundException('报名记录不存在');
-    if (signup.status !== 'CONFIRMED') {
-      throw new BadRequestException('该报名已取消，无需退款');
-    }
+
     const order = signup.order;
+    // 免费报名/未支付/已关单：无可退款订单
     if (!order || order.status === 'PENDING' || order.status === 'CLOSED') {
-      throw new BadRequestException('该报名无可退款的支付订单（免费报名或未支付）');
+      return { status: 'NO_PAYMENT', refunded: false };
     }
-    if (order.status === 'REFUNDED') throw new ConflictException('该订单已退款');
+    if (order.status === 'REFUNDED') return { status: 'REFUNDED', refunded: true }; // 幂等
     if (order.status === 'REFUNDING') {
       throw new ConflictException('退款处理中，请稍后刷新');
     }
@@ -233,7 +237,7 @@ export class OrderService {
       outTradeNo: order.outTradeNo,
       outRefundNo: refundNo,
       amount: order.amount,
-      reason: '活动报名退款',
+      reason: opts?.reason ?? '活动报名退款',
     });
     if (!result || result.status === 'ABNORMAL' || result.status === 'CLOSED') {
       await this.prisma.order.updateMany({
@@ -253,10 +257,12 @@ export class OrderService {
           refundedAt: done ? new Date() : null,
         },
       });
-      await tx.signup.update({
-        where: { id: signup.id },
-        data: { status: 'CANCELLED' },
-      });
+      if (signup.status !== 'CANCELLED') {
+        await tx.signup.update({
+          where: { id: signup.id },
+          data: { status: 'CANCELLED' },
+        });
+      }
       const ev = await tx.event.findUnique({ where: { id: signup.eventId } });
       if (ev && ev.status === 'FULL') {
         const confirmed = await tx.signup.count({
@@ -272,6 +278,41 @@ export class OrderService {
     });
     this.logger.log(`退款受理 order=${order.id} status=${result.status}`);
     return { status: result.status, refunded: done };
+  }
+
+  /** 后台对某条报名发起退款（原路退回）。报名状态不限，以订单 PAID 为准。 */
+  async adminRefundSignup(signupId: string) {
+    const r = await this.refundSignup(signupId, { reason: '后台退款' });
+    if (r.status === 'NO_PAYMENT') {
+      throw new BadRequestException('该报名无可退款的支付订单（免费报名或未支付）');
+    }
+    return r;
+  }
+
+  /**
+   * 定时任务调用：对账处理中(REFUNDING)的退款单，
+   * 查微信确认已退款则置 REFUNDED，避免长期卡在「退款中」。
+   */
+  async reconcileRefundingOrders(): Promise<number> {
+    const refunding = await this.prisma.order.findMany({
+      where: { status: 'REFUNDING', refundNo: { not: null } },
+      select: { id: true, refundNo: true },
+    });
+    let done = 0;
+    for (const o of refunding) {
+      const r = await this.wechatPay.queryRefund(o.refundNo!);
+      if (r?.status === 'SUCCESS') {
+        await this.prisma.order.update({
+          where: { id: o.id },
+          data: { status: 'REFUNDED', refundedAt: new Date() },
+        });
+        done++;
+      } else if (r?.status === 'ABNORMAL') {
+        this.logger.error(`退款异常需人工处理 order=${o.id} refundNo=${o.refundNo}`);
+      }
+    }
+    if (done > 0) this.logger.log(`对账完成退款 ${done} 笔`);
+    return done;
   }
 
   /** 定时任务调用：关闭超时未支付订单（释放名额由名额查询自动生效）。 */

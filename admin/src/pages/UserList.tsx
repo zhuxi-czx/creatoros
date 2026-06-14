@@ -35,19 +35,9 @@ export default function UserList() {
 
   const columns: ColumnsType<User> = [
     {
-      title: 'UID',
-      dataIndex: 'uid',
-      key: 'uid',
-      width: isMobile ? 52 : 72,
-      render: (uid?: number) => (
-        <Text style={{ fontFamily: 'monospace', fontSize: isMobile ? 12 : 13 }}>
-          {uid != null ? `#${uid}` : '-'}
-        </Text>
-      ),
-    },
-    {
       title: '用户',
       key: 'user',
+      width: isMobile ? 160 : 220,
       render: (_, record) => (
         <Space>
           <Avatar
@@ -65,10 +55,21 @@ export default function UserList() {
       )
     },
     {
+      title: 'UID',
+      dataIndex: 'uid',
+      key: 'uid',
+      width: isMobile ? 110 : 130,
+      render: (uid?: string) => (
+        <Text style={{ fontFamily: 'monospace', fontSize: isMobile ? 12 : 13 }} copyable={!!uid}>
+          {uid || '-'}
+        </Text>
+      ),
+    },
+    {
       title: '手机号',
       dataIndex: 'phone',
       key: 'phone',
-      width: 120,
+      width: 130,
       render: (phone: string) => phone || <Text type="secondary">-</Text>
     },
     ...(!isMobile ? [{
@@ -85,14 +86,15 @@ export default function UserList() {
     {
       title: '活动',
       key: 'signups',
-      width: 50,
+      width: 70,
+      align: 'center' as const,
       render: (_: any, record: User) => record._count?.signups || 0
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      width: 60,
+      width: 80,
       render: (status: string) => (
         <Tag color={status === 'ACTIVE' ? 'green' : 'red'}>
           {status === 'ACTIVE' ? '正常' : '禁用'}
@@ -103,7 +105,7 @@ export default function UserList() {
       title: '注册时间',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      width: 110,
+      width: 120,
       render: (time: string) => dayjs(time).format('YYYY-MM-DD')
     } as any] : [])
   ]

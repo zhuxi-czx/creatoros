@@ -192,6 +192,22 @@ export class WechatPayService {
     }
   }
 
+  /**
+   * 查询退款状态（按商户退款单号）。用商户证书，不依赖平台证书。
+   * @returns status: SUCCESS / PROCESSING / ABNORMAL / CLOSED；失败返回 null。
+   */
+  async queryRefund(outRefundNo: string): Promise<{ status: string } | null> {
+    try {
+      const res: any = await this.client().find_refunds(outRefundNo);
+      const p = res?.data ?? res;
+      if (!p || !p.status) return null;
+      return { status: p.status };
+    } catch (e: any) {
+      this.logger.warn(`查退款异常 ${outRefundNo}: ${e?.message ?? e}`);
+      return null;
+    }
+  }
+
   /** Date → RFC3339（+08:00），微信 time_expire 要求格式。 */
   private toRfc3339(d: Date): string {
     const tzMs = 8 * 60 * 60 * 1000;
