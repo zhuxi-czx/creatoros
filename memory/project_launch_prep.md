@@ -25,6 +25,9 @@ CreatorOS 小程序上架 — 当前状态（git 最新均已 push 到 main）
 - **查单兜底**：OrderService.getOrder 对 PENDING/CLOSED 单主动 `query({out_trade_no})`（商户证书签名，不需平台证书/APIv3），SUCCESS 则补 confirmPaid——回调丢失也能确认，避免收钱不报名
 - 库 `wechatpay-node-v3`：下单/查单返回值在 `res.data`（不是顶层）
 - APIv3 密钥须**生产 ecosystem 与商户平台一致**，否则回调解密失败
+- **退款（仅后台操作）**：报名详情页对 PAID 订单点退款。退款以「订单 PAID」为准而非报名状态（已取消但已付款仍可退）。乐观锁 PAID→REFUNDING 防重复退款；微信受理(SUCCESS/PROCESSING)即取消报名+释放名额；REFUNDING 由 5min cron 查 find_refunds 对账落地 REFUNDED。已验证真实退款 ¥1 原路退回成功
+- **已支付报名禁止用户自助取消**（前端取消会拦截，提示联系主理人后台退款），免费报名接口也拦截付费活动，防绕过支付
+- 用户 UID = 11 位随机数字字符串（全局唯一），auth.service genUid/createUser 登录时分配、撞号重试
 
 ## 关键坑（务必记住）
 - Event.price 单位是**分**
