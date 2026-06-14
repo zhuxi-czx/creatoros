@@ -35,6 +35,17 @@ export default function UserList() {
 
   const columns: ColumnsType<User> = [
     {
+      title: 'UID',
+      dataIndex: 'uid',
+      key: 'uid',
+      width: isMobile ? 52 : 72,
+      render: (uid?: number) => (
+        <Text style={{ fontFamily: 'monospace', fontSize: isMobile ? 12 : 13 }}>
+          {uid != null ? `#${uid}` : '-'}
+        </Text>
+      ),
+    },
+    {
       title: '用户',
       key: 'user',
       render: (_, record) => (

@@ -161,9 +161,12 @@ export class EventService {
         include: {
           user: {
             select: {
-              id: true, nickname: true, avatarUrl: true,
+              id: true, uid: true, nickname: true, avatarUrl: true,
               city: true, phone: true, mbti: true, createdAt: true,
             },
+          },
+          order: {
+            select: { id: true, status: true, amount: true, refundedAt: true },
           },
         },
       }),

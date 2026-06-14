@@ -1,19 +1,28 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Card, Table, Tag, Space, Typography, Avatar, Button, message } from 'antd'
+import { Card, Table, Tag, Space, Typography, Avatar, Button, Popconfirm, message } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { getEventDetail, getEventSignups, type Event } from '../services/event'
+import { getEventDetail, getEventSignups, refundSignup, type Event } from '../services/event'
 
 const { Title, Text } = Typography
+
+interface OrderInfo {
+  id: string
+  status: string // PENDING | PAID | CLOSED | REFUNDING | REFUNDED
+  amount: number // 分
+  refundedAt?: string | null
+}
 
 interface SignupRecord {
   id: string
   status: string
   createdAt: string
+  order?: OrderInfo | null
   user: {
     id: string
+    uid?: number
     nickname?: string
     avatarUrl?: string
     city?: string
@@ -22,12 +31,15 @@ interface SignupRecord {
   }
 }
 
+const yuan = (fen: number) => `¥${(fen / 100).toFixed(2)}`
+
 export default function EventSignups() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [event, setEvent] = useState<Event | null>(null)
   const [signups, setSignups] = useState<SignupRecord[]>([])
   const [loading, setLoading] = useState(true)
+  const [refundingId, setRefundingId] = useState<string | null>(null)
 
   useEffect(() => {
     if (id) loadData(id)
@@ -49,10 +61,37 @@ export default function EventSignups() {
     }
   }
 
+  const handleRefund = async (signupId: string) => {
+    try {
+      setRefundingId(signupId)
+      const res = await refundSignup(signupId)
+      if (res.refunded) {
+        message.success('退款成功，款项原路退回')
+      } else {
+        message.success('退款已受理，处理中（稍后刷新查看结果）')
+      }
+      if (id) await loadData(id)
+    } catch (err: any) {
+      message.error(err?.response?.data?.message || err?.message || '退款失败')
+    } finally {
+      setRefundingId(null)
+    }
+  }
+
   const confirmedCount = signups.filter(s => s.status === 'CONFIRMED').length
   const cancelledCount = signups.filter(s => s.status === 'CANCELLED').length
 
   const columns: ColumnsType<SignupRecord> = [
+    {
+      title: 'UID',
+      key: 'uid',
+      width: 64,
+      render: (_, r) => (
+        <Text style={{ fontFamily: 'monospace' }}>
+          {r.user.uid != null ? `#${r.user.uid}` : '-'}
+        </Text>
+      ),
+    },
     {
       title: '用户',
       key: 'user',
@@ -65,21 +104,26 @@ export default function EventSignups() {
           >
             {r.user.nickname?.charAt(0) || '?'}
           </Avatar>
-          <Text strong>{r.user.nickname || '未设置'}</Text>
+          <Space direction="vertical" size={0}>
+            <Text strong>{r.user.nickname || '未设置'}</Text>
+            {r.user.phone && <Text type="secondary" style={{ fontSize: 11 }}>{r.user.phone}</Text>}
+          </Space>
         </Space>
       ),
     },
     {
-      title: '城市',
-      key: 'city',
-      width: 100,
-      render: (_, r) => r.user.city || '-',
-    },
-    {
-      title: 'MBTI',
-      key: 'mbti',
-      width: 80,
-      render: (_, r) => r.user.mbti ? <Tag color="purple">{r.user.mbti}</Tag> : '-',
+      title: '支付',
+      key: 'pay',
+      width: 130,
+      render: (_, r) => {
+        const o = r.order
+        if (!o || o.status === 'PENDING' || o.status === 'CLOSED') {
+          return <Tag>免费/未支付</Tag>
+        }
+        if (o.status === 'REFUNDED') return <Tag color="orange">已退款 {yuan(o.amount)}</Tag>
+        if (o.status === 'REFUNDING') return <Tag color="gold">退款中 {yuan(o.amount)}</Tag>
+        return <Tag color="green">已支付 {yuan(o.amount)}</Tag>
+      },
     },
     {
       title: '状态',
@@ -96,8 +140,31 @@ export default function EventSignups() {
       title: '报名时间',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      width: 140,
+      width: 130,
       render: (t: string) => dayjs(t).format('MM-DD HH:mm'),
+    },
+    {
+      title: '操作',
+      key: 'action',
+      width: 100,
+      render: (_, r) => {
+        const canRefund = r.status === 'CONFIRMED' && r.order?.status === 'PAID'
+        if (!canRefund) return <Text type="secondary">-</Text>
+        return (
+          <Popconfirm
+            title="确认退款？"
+            description={`将向该用户退回 ${yuan(r.order!.amount)}，原路退回且不可撤销，报名将被取消。`}
+            okText="确认退款"
+            cancelText="取消"
+            okButtonProps={{ danger: true }}
+            onConfirm={() => handleRefund(r.id)}
+          >
+            <Button danger size="small" loading={refundingId === r.id}>
+              退款
+            </Button>
+          </Popconfirm>
+        )
+      },
     },
   ]
 
@@ -128,6 +195,7 @@ export default function EventSignups() {
           dataSource={signups}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 'max-content' }}
           pagination={{ pageSize: 20, showSizeChanger: false }}
         />
       </Card>

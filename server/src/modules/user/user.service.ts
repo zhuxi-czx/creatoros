@@ -89,6 +89,7 @@ export class UserService {
         orderBy: { createdAt: 'desc' },
         select: {
           id: true,
+          uid: true,
           nickname: true,
           avatarUrl: true,
           phone: true,

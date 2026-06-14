@@ -13,6 +13,7 @@ import type { Request, Response } from 'express';
 import { OrderService } from './order.service';
 import { WechatPayService } from './wechat-pay.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AdminGuard } from '../auth/admin.guard';
 
 @Controller()
 export class OrderController {
@@ -35,6 +36,13 @@ export class OrderController {
   @Get('api/orders/:id')
   async getOrder(@Req() req: any, @Param('id') orderId: string) {
     return this.orderService.getOrder(req.user.id, orderId);
+  }
+
+  /** 后台对某条报名退款（原路退回）。 */
+  @UseGuards(AdminGuard)
+  @Post('api/admin/signups/:id/refund')
+  async adminRefund(@Param('id') signupId: string) {
+    return this.orderService.adminRefundSignup(signupId);
   }
 
   /**

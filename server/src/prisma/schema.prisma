@@ -43,6 +43,7 @@ enum OrderStatus {
 
 model User {
   id         String     @id @default(cuid())
+  uid        Int        @unique @default(autoincrement()) // 后台运营用的短数字编号
   openId     String     @unique
   unionId    String?
   nickname   String?
@@ -137,6 +138,8 @@ model Order {
   status        OrderStatus @default(PENDING)
   transactionId String?                      // 微信支付订单号（回调返回）
   prepayId      String?                      // 预支付会话标识
+  refundNo      String?     @unique          // 商户退款单号（退款时生成）
+  refundedAt    DateTime?                    // 退款完成时间
   expiresAt     DateTime                     // 超时时间（下单 + 15min），过期不再占名额
   paidAt        DateTime?
   closedAt      DateTime?

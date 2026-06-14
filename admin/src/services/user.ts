@@ -2,6 +2,7 @@ import api from './api'
 
 export interface User {
   id: string
+  uid?: number
   nickname?: string
   avatarUrl?: string
   city?: string

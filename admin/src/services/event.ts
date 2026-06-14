@@ -95,6 +95,11 @@ export async function getEventSignups(id: string, page = 1, limit = 50): Promise
   return api.get(`/admin/events/${id}/signups?page=${page}&limit=${limit}`) as any
 }
 
+// 对某条报名退款（原路退回）。返回 { status, refunded }
+export async function refundSignup(signupId: string): Promise<{ status: string; refunded: boolean }> {
+  return api.post(`/admin/signups/${signupId}/refund`) as any
+}
+
 export async function uploadImage(file: File, type?: string): Promise<{ url: string }> {
   const formData = new FormData()
   formData.append('file', file)

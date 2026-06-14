@@ -162,6 +162,36 @@ export class WechatPayService {
     }
   }
 
+  /**
+   * 申请退款（原路退回）。金额单位为分；全额退款时 refund=total=原订单金额。
+   * @returns { status }；status: SUCCESS(已退) / PROCESSING(处理中) / CLOSED / ABNORMAL。
+   *          调用异常或微信拒绝返回 null。
+   */
+  async refund(opts: {
+    outTradeNo: string;
+    outRefundNo: string;
+    amount: number;
+    reason?: string;
+  }): Promise<{ status: string; refundId: string } | null> {
+    try {
+      const res: any = await this.client().refunds({
+        out_trade_no: opts.outTradeNo,
+        out_refund_no: opts.outRefundNo,
+        reason: opts.reason,
+        amount: { refund: opts.amount, total: opts.amount, currency: 'CNY' },
+      });
+      const p = res?.data ?? res;
+      if (!p || !p.status) {
+        this.logger.error(`退款失败: ${JSON.stringify(res?.error ?? res)}`);
+        return null;
+      }
+      return { status: p.status, refundId: p.refund_id ?? '' };
+    } catch (e: any) {
+      this.logger.error(`退款异常 ${opts.outRefundNo}: ${e?.message ?? e}`);
+      return null;
+    }
+  }
+
   /** Date → RFC3339（+08:00），微信 time_expire 要求格式。 */
   private toRfc3339(d: Date): string {
     const tzMs = 8 * 60 * 60 * 1000;
