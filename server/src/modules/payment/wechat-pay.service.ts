@@ -91,17 +91,19 @@ export class WechatPayService {
       amount: { total: opts.amount, currency: 'CNY' },
       payer: { openid: opts.openId },
     });
-    if (!res || !res.paySign) {
+    // 库把支付参数放在 res.data（兼容个别版本直接平铺）
+    const p = res?.data ?? res;
+    if (!p || !p.paySign) {
       this.logger.error(`JSAPI 下单失败: ${JSON.stringify(res?.error ?? res)}`);
       throw new ServiceUnavailableException('微信下单失败，请稍后重试');
     }
     return {
-      appId: res.appId,
-      timeStamp: res.timeStamp,
-      nonceStr: res.nonceStr,
-      package: res.package,
-      signType: res.signType,
-      paySign: res.paySign,
+      appId: p.appId,
+      timeStamp: p.timeStamp,
+      nonceStr: p.nonceStr,
+      package: p.package,
+      signType: p.signType,
+      paySign: p.paySign,
     };
   }
 
