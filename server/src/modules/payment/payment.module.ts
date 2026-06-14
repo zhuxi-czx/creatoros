@@ -9,5 +9,6 @@ import { OrderCronService } from './order-cron.service';
   imports: [AuthModule],
   controllers: [OrderController],
   providers: [OrderService, WechatPayService, OrderCronService],
+  exports: [OrderService],
 })
 export class PaymentModule {}

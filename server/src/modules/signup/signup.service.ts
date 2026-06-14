@@ -5,10 +5,14 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { OrderService } from '../payment/order.service';
 
 @Injectable()
 export class SignupService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private orderService: OrderService,
+  ) {}
 
   async signupForEvent(userId: string, eventId: string) {
     return this.prisma.$transaction(async (tx) => {
@@ -145,12 +149,20 @@ export class SignupService {
       throw new NotFoundException('Signup not found');
     }
 
-    // 已支付报名不允许用户自助取消（退款仅由后台操作，避免取消后款项滞留）
-    if (signup.order && ['PAID', 'REFUNDING'].includes(signup.order.status)) {
-      throw new BadRequestException('已支付的报名，请联系主理人在后台办理退款取消');
+    // 已支付报名：取消即触发原路退款（退款流程内部会取消报名 + 释放名额 + FULL→PUBLISHED）
+    if (signup.order && signup.order.status === 'PAID') {
+      const r = await this.orderService.refundSignup(signup.id, {
+        reason: '用户取消报名',
+      });
+      return { success: true, refunded: true, refundStatus: r.status };
+    }
+    // 退款处理中：不允许重复操作
+    if (signup.order && signup.order.status === 'REFUNDING') {
+      throw new BadRequestException('退款处理中，请稍后查看');
     }
 
-    const cancelled = await this.prisma.signup.update({
+    // 免费/未支付：直接取消
+    await this.prisma.signup.update({
       where: { id: signup.id },
       data: { status: 'CANCELLED' },
     });
@@ -163,7 +175,7 @@ export class SignupService {
       });
     }
 
-    return cancelled;
+    return { success: true, refunded: false };
   }
 
   private async checkAndUpdateEventCapacity(

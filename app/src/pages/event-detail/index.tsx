@@ -119,12 +119,28 @@ export default function EventDetail() {
   const handleCancel = async () => {
     if (!id || !event) return
     try {
-      await cancelSignup(id)
+      const res = await cancelSignup(id)
       setShowInfo(false)
       await loadEvent(true) // 重新同步报名状态/人数/参与者列表
-      Taro.showToast({ title: '已取消报名', icon: 'success' })
-    } catch (err) {
-      Taro.showToast({ title: '操作失败', icon: 'none' })
+      if (res?.refunded) {
+        Taro.showModal({
+          title: '已取消报名',
+          content: '退款将原路退回到你的支付账户，通常几分钟内到账',
+          showCancel: false,
+          confirmText: '好的',
+        })
+      } else {
+        Taro.showToast({ title: '已取消报名', icon: 'success' })
+      }
+    } catch (err: any) {
+      // 后端返回的具体原因（如退款处理中），用 modal 完整展示
+      setShowInfo(false)
+      Taro.showModal({
+        title: '无法取消',
+        content: err?.message || '操作失败，请稍后重试',
+        showCancel: false,
+        confirmText: '我知道了',
+      })
     }
   }
 

@@ -70,8 +70,14 @@ export const getEventSignups = (id: string): Promise<Participant[]> =>
 export const signup = (eventId: string): Promise<void> =>
   request<void>(`/events/${eventId}/signup`, 'POST')
 
-export const cancelSignup = (eventId: string): Promise<void> =>
-  request<void>(`/events/${eventId}/signup`, 'DELETE')
+export interface CancelResult {
+  success: boolean
+  refunded: boolean // 是否触发了原路退款（付费报名）
+  refundStatus?: string
+}
+
+export const cancelSignup = (eventId: string): Promise<CancelResult> =>
+  request<CancelResult>(`/events/${eventId}/signup`, 'DELETE')
 
 // ===== 付费报名（微信支付）=====
 
