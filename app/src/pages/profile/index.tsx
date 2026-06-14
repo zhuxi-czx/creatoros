@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Image } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useDidShow } from '@tarojs/taro'
 import { useAuthStore } from '../../stores/useAuthStore'
 import PhoneLoginSheet from '../../components/PhoneLoginSheet'
 import { resolveImageUrl } from '../../services/api'
@@ -19,6 +19,13 @@ export default function Profile() {
       loadSignups()
     }
   }, [token])
+
+  // 每次切回「我的」tab 都重新拉取，确保在详情页取消报名后列表同步
+  useDidShow(() => {
+    if (token) {
+      loadSignups()
+    }
+  })
 
   const loadSignups = async () => {
     try {
