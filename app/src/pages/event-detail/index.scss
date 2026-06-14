@@ -388,3 +388,36 @@ $accent: #C9A96E;
   font-size: 26rpx;
   color: #BBB;
 }
+
+/* —— 取消/退款弹窗变体 —— */
+.sm-check--warn {
+  background: #FBEEDD; // 琥珀色提示底
+}
+.sm-sub--wrap {
+  text-align: center;
+  line-height: 1.5;
+  padding: 0 8rpx;
+}
+.sm-info--refund {
+  background: #FBF6EC; // 金色高亮底，强调退款
+}
+.sm-row--between {
+  justify-content: space-between;
+  align-items: center;
+}
+.sm-amount {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #C9A96E;
+}
+.sm-note {
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.5;
+}
+.sm-ok--danger {
+  background: #E5534B; // 破坏性操作：红色
+}
+.sm-ok.loading {
+  opacity: 0.6;
+}

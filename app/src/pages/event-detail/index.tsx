@@ -19,6 +19,9 @@ export default function EventDetail() {
   const [loading, setLoading] = useState(true)
   const [signing, setSigning] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
+  const [showRefundDone, setShowRefundDone] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
 
   useEffect(() => {
@@ -115,32 +118,36 @@ export default function EventDetail() {
     }
   }
 
-  // 弹窗内取消报名
-  const handleCancel = async () => {
-    if (!id || !event) return
+  // 点「取消报名」→ 打开确认弹窗（付费活动会提示原路退款）
+  const handleCancel = () => {
+    setShowInfo(false)
+    setShowCancelConfirm(true)
+  }
+
+  // 确认取消 → 调用接口；付费则展示退款提示弹窗
+  const doCancel = async () => {
+    if (!id || !event || cancelling) return
     try {
+      setCancelling(true)
       const res = await cancelSignup(id)
-      setShowInfo(false)
+      setShowCancelConfirm(false)
       await loadEvent(true) // 重新同步报名状态/人数/参与者列表
       if (res?.refunded) {
-        Taro.showModal({
-          title: '已取消报名',
-          content: '退款将原路退回到你的支付账户，通常几分钟内到账',
-          showCancel: false,
-          confirmText: '好的',
-        })
+        setShowRefundDone(true)
       } else {
         Taro.showToast({ title: '已取消报名', icon: 'success' })
       }
     } catch (err: any) {
       // 后端返回的具体原因（如退款处理中），用 modal 完整展示
-      setShowInfo(false)
+      setShowCancelConfirm(false)
       Taro.showModal({
         title: '无法取消',
         content: err?.message || '操作失败，请稍后重试',
         showCancel: false,
         confirmText: '我知道了',
       })
+    } finally {
+      setCancelling(false)
     }
   }
 
@@ -369,6 +376,68 @@ export default function EventDetail() {
               <Text className='sm-ok-text'>知道了</Text>
             </View>
             <Text className='sm-cancel' onClick={handleCancel}>取消报名</Text>
+          </View>
+        </View>
+      )}
+
+      {/* 取消报名确认弹窗（付费活动提示原路退款） */}
+      {showCancelConfirm && (
+        <View className='signup-modal-mask' onClick={() => !cancelling && setShowCancelConfirm(false)}>
+          <View className='signup-modal' onClick={(e) => e.stopPropagation()}>
+            <View className='sm-check sm-check--warn'>
+              <View
+                className='sm-check-icon'
+                style={{ backgroundImage: `url("${lucideUri('rotate-ccw', '#D98A28')}")` }}
+              />
+            </View>
+            <Text className='sm-title'>确认取消报名？</Text>
+            <Text className='sm-sub sm-sub--wrap'>
+              {(event.price ?? 0) > 0
+                ? '取消后名额将释放，已支付款项将原路退回'
+                : '取消后名额将释放给其他人'}
+            </Text>
+            {(event.price ?? 0) > 0 && (
+              <View className='sm-info sm-info--refund'>
+                <View className='sm-row sm-row--between'>
+                  <Text className='sm-label'>退款金额</Text>
+                  <Text className='sm-amount'>¥{((event.price ?? 0) / 100).toFixed(2)}</Text>
+                </View>
+                <Text className='sm-note'>退款将原路退回到你的微信支付账户，预计几分钟内到账</Text>
+              </View>
+            )}
+            <View
+              className={`sm-ok sm-ok--danger ${cancelling ? 'loading' : ''}`}
+              onClick={doCancel}
+            >
+              <Text className='sm-ok-text'>{cancelling ? '处理中...' : '确认取消'}</Text>
+            </View>
+            <Text className='sm-cancel' onClick={() => !cancelling && setShowCancelConfirm(false)}>再想想</Text>
+          </View>
+        </View>
+      )}
+
+      {/* 退款提示弹窗 */}
+      {showRefundDone && (
+        <View className='signup-modal-mask' onClick={() => setShowRefundDone(false)}>
+          <View className='signup-modal' onClick={(e) => e.stopPropagation()}>
+            <View className='sm-check'>
+              <View
+                className='sm-check-icon'
+                style={{ backgroundImage: `url("${lucideUri('check', '#ffffff')}")` }}
+              />
+            </View>
+            <Text className='sm-title'>已取消报名</Text>
+            <Text className='sm-sub sm-sub--wrap'>名额已释放，退款处理中</Text>
+            <View className='sm-info sm-info--refund'>
+              <View className='sm-row sm-row--between'>
+                <Text className='sm-label'>退款金额</Text>
+                <Text className='sm-amount'>¥{((event.price ?? 0) / 100).toFixed(2)}</Text>
+              </View>
+              <Text className='sm-note'>已原路退回到你的微信支付账户，预计几分钟内到账</Text>
+            </View>
+            <View className='sm-ok' onClick={() => setShowRefundDone(false)}>
+              <Text className='sm-ok-text'>知道了</Text>
+            </View>
           </View>
         </View>
       )}
