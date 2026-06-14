@@ -85,16 +85,17 @@ export default function EventSignups() {
     {
       title: 'UID',
       key: 'uid',
-      width: 64,
+      width: 130,
       render: (_, r) => (
-        <Text style={{ fontFamily: 'monospace' }}>
-          {r.user.uid != null ? `#${r.user.uid}` : '-'}
+        <Text style={{ fontFamily: 'monospace', whiteSpace: 'nowrap' }} copyable={!!r.user.uid}>
+          {r.user.uid || '-'}
         </Text>
       ),
     },
     {
       title: '用户',
       key: 'user',
+      width: 220,
       render: (_, r) => (
         <Space>
           <Avatar

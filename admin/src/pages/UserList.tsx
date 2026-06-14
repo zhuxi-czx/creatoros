@@ -75,6 +75,7 @@ export default function UserList() {
     ...(!isMobile ? [{
       title: '标签',
       key: 'tags',
+      width: 220,
       render: (_: any, record: User) => (
         <Space size={4} wrap>
           {record.mbti && <Tag color="purple">{record.mbti}</Tag>}
