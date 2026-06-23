@@ -11,6 +11,7 @@ import {
 import dayjs from 'dayjs'
 import { createEvent, updateEvent, updateEventStatus, getEventDetail, getVenues, uploadImage, type EventFormData } from '../services/event'
 import { resolveImageUrl } from '../services/api'
+import RichEditor from '../components/RichEditor'
 
 const { Title } = Typography
 const { TextArea } = Input
@@ -282,8 +283,8 @@ export default function EventForm() {
             <Input placeholder="请输入活动名称" maxLength={50} showCount />
           </Form.Item>
 
-          <Form.Item label="活动描述" name="description">
-            <TextArea placeholder="请输入活动描述" rows={3} maxLength={500} showCount />
+          <Form.Item label="活动描述（图文正文）" name="description">
+            <RichEditor placeholder="请输入活动详情图文内容" />
           </Form.Item>
           <Form.Item label="活动亮点" name="highlights">
             <TextArea placeholder="活动特色和亮点，每行一个（可选）" rows={3} maxLength={500} showCount />

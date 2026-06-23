@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import {
   Card, Table, Tag, Space, Typography, Statistic, Row, Col,
-  Avatar, message, Grid
+  Avatar, message, Grid, Switch
 } from 'antd'
 import { UserOutlined, TeamOutlined, CalendarOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { getUsers, type User } from '../services/user'
+import { getUsers, setCreator, type User } from '../services/user'
 
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid
@@ -17,6 +17,20 @@ export default function UserList() {
   const [users, setUsers] = useState<User[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [savingId, setSavingId] = useState<string | null>(null)
+
+  const handleSetCreator = async (id: string, checked: boolean) => {
+    try {
+      setSavingId(id)
+      await setCreator(id, checked)
+      setUsers(prev => prev.map(u => u.id === id ? { ...u, isCreator: checked } : u))
+      message.success(checked ? '已设为 Creator' : '已取消 Creator')
+    } catch (e: any) {
+      message.error(e?.message || '操作失败')
+    } finally {
+      setSavingId(null)
+    }
+  }
 
   useEffect(() => { loadUsers() }, [])
 
@@ -100,6 +114,19 @@ export default function UserList() {
         <Tag color={status === 'ACTIVE' ? 'green' : 'red'}>
           {status === 'ACTIVE' ? '正常' : '禁用'}
         </Tag>
+      )
+    },
+    {
+      title: 'Creator',
+      key: 'creator',
+      width: 110,
+      render: (_: any, record: User) => (
+        <Switch
+          size="small"
+          checked={!!record.isCreator}
+          loading={savingId === record.id}
+          onChange={(checked) => handleSetCreator(record.id, checked)}
+        />
       )
     },
     ...(!isMobile ? [{
