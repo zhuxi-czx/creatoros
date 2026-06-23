@@ -10,10 +10,11 @@ interface Props {
   value?: string
   onChange?: (html: string) => void
   placeholder?: string
+  minHeight?: number
 }
 
 // 富文本编辑器（图文）：输出 HTML，插图走现有上传接口并存绝对地址
-export default function RichEditor({ value, onChange, placeholder }: Props) {
+export default function RichEditor({ value, onChange, placeholder, minHeight = 420 }: Props) {
   const quillRef = useRef<any>(null)
 
   const imageHandler = () => {
@@ -56,7 +57,7 @@ export default function RichEditor({ value, onChange, placeholder }: Props) {
   )
 
   return (
-    <div className="rich-editor">
+    <div className="rich-editor" style={{ ['--editor-min-h' as any]: `${minHeight}px` }}>
       <ReactQuill
         ref={quillRef}
         theme="snow"

@@ -30,3 +30,25 @@ body {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* 富文本编辑器：更大编辑区 + 超高滚动 */
+.rich-editor .ql-container {
+  height: auto;
+  font-size: 15px;
+}
+.rich-editor .ql-editor {
+  min-height: var(--editor-min-h, 420px);
+  max-height: 65vh;
+  overflow-y: auto;
+  line-height: 1.8;
+}
+.rich-editor .ql-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #fff;
+}
+
+/* 内容手机预览：图片自适应 */
+.content-preview-body img { max-width: 100%; height: auto; border-radius: 6px; }
+.content-preview-body p { margin: 0 0 12px; }
