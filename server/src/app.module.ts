@@ -10,6 +10,8 @@ import { VenueModule } from './modules/venue/venue.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { BannerModule } from './modules/banner/banner.module';
 import { HealthModule } from './modules/health/health.module';
+import { CreatorModule } from './modules/creator/creator.module';
+import { ContentModule } from './modules/content/content.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { HealthModule } from './modules/health/health.module';
     BannerModule,
     HealthModule,
     PaymentModule,
+    CreatorModule,
+    ContentModule,
   ],
 })
 export class AppModule {}

@@ -63,4 +63,14 @@ export class UserController {
   ) {
     return this.userService.adminUpdateUserStatus(id, dto);
   }
+
+  // 设置/取消 Creator 身份
+  @UseGuards(AdminGuard)
+  @Put('api/admin/users/:id/creator')
+  async adminSetCreator(
+    @Param('id') id: string,
+    @Body() body: { isCreator: boolean },
+  ) {
+    return this.userService.adminSetCreator(id, !!body.isCreator);
+  }
 }

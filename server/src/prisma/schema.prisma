@@ -41,6 +41,11 @@ enum OrderStatus {
   REFUNDED   // 已退款（本期不实现，占位）
 }
 
+enum ContentStatus {
+  DRAFT      // 草稿
+  PUBLISHED  // 已发布
+}
+
 model User {
   id         String     @id @default(cuid())
   uid        String     @unique // 11 位随机数字编号，全局唯一，后台运营用
@@ -57,11 +62,14 @@ model User {
   phone      String?
   role       Role       @default(USER)
   status     UserStatus @default(ACTIVE)
+  isCreator  Boolean    @default(false) // 管理员后台开关：是否为主推 Creator
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 
-  signups Signup[]
-  orders  Order[]
+  signups        Signup[]
+  orders         Order[]
+  creatorProfile CreatorProfile? // Creator 自我介绍资料（1:1）
+  contents       Content[] // 作为对谈对象关联的内容
 }
 
 model Venue {
@@ -154,6 +162,40 @@ model Order {
   @@index([eventId])
   @@index([status])
   @@index([status, expiresAt])
+}
+
+// Creator 自我介绍资料（与 User 1:1，本人在小程序「编辑资料」里填写）
+model CreatorProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  title     String? // 身份头衔（卡片副标题，如「外贸SOHO创业者 · 前大厂KA总监」）
+  tagline   String? // 一句话亮点（卡片主标题，如「裸辞1年，营收400万+」）
+  intro     String? // 自我介绍（详情页「简介」）
+  coverUrl  String? // 人物封面大图（卡片/详情页顶图）
+  tags      String[] @default([])
+  order     Int      @default(0) // 主推排序，越小越靠前
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// 敞开对谈内容（图文，管理后台发布，必关联一个 Creator 作为对谈对象）
+model Content {
+  id          String        @id @default(cuid())
+  creatorId   String // 对谈对象（Creator 用户）
+  title       String
+  body        String // 富文本 HTML 正文
+  coverUrl    String? // 封面图（详情页顶部）
+  status      ContentStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  creator User @relation(fields: [creatorId], references: [id])
+
+  @@index([status, publishedAt])
+  @@index([creatorId])
 }
 
 model Banner {

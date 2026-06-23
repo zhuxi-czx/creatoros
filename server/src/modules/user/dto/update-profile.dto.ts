@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsInt, Min, Max, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsInt, Min, Max, IsArray } from 'class-validator';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -38,4 +38,26 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsString()
   phone?: string;
+
+  // —— Creator 资料（仅 isCreator 用户填写生效）——
+  @IsOptional()
+  @IsString()
+  creatorTitle?: string;
+
+  @IsOptional()
+  @IsString()
+  creatorTagline?: string;
+
+  @IsOptional()
+  @IsString()
+  creatorIntro?: string;
+
+  @IsOptional()
+  @IsString()
+  creatorCoverUrl?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  creatorTags?: string[];
 }
