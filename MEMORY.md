@@ -5,3 +5,4 @@
 - [Server Info](memory/server_info.md) — 生产机 116.62.188.30 + creatorbar.cn 域名/部署方式/运维约束
 - [Dev Workflow](memory/feedback_dev_workflow.md) — 迭代流程：review → 自测 → 发布，不影响现有服务
 - [Launch Prep](memory/project_launch_prep.md) — 小程序上架当前快照：HTTPS就绪、新AppID、待认证备案、支付待商户号
+- [Creator Feature](memory/feature_creator.md) — Creator身份+敞开对谈图文内容：模型/导航IA/富文本约定
