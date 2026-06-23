@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { View, Text, Input, Textarea, Button, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useAuthStore } from '../../stores/useAuthStore'
-import { updateProfile } from '../../services/user'
+import { updateProfile, getProfile } from '../../services/user'
 import { uploadImage, resolveImageUrl } from '../../services/api'
 import './index.scss'
 
@@ -14,9 +14,40 @@ export default function ProfileEdit() {
   const [tempAvatar, setTempAvatar] = useState('')
   const [saving, setSaving] = useState(false)
 
+  // Creator 资料
+  const isCreator = !!user?.isCreator
+  const [cTitle, setCTitle] = useState('')
+  const [cTagline, setCTagline] = useState('')
+  const [cIntro, setCIntro] = useState('')
+  const [cTags, setCTags] = useState('')
+  const [cCoverUrl, setCCoverUrl] = useState('') // 已保存封面（/uploads 路径）
+  const [cCoverTemp, setCCoverTemp] = useState('') // 本地待上传
+
+  useEffect(() => {
+    if (!isCreator) return
+    getProfile().then((u) => {
+      const p = u.creatorProfile
+      if (p) {
+        setCTitle(p.title || '')
+        setCTagline(p.tagline || '')
+        setCIntro(p.intro || '')
+        setCTags((p.tags || []).join('、'))
+        setCCoverUrl(p.coverUrl || '')
+      }
+    }).catch(() => {})
+  }, [isCreator])
+
   const onChooseAvatar = (e: any) => {
     const url = e?.detail?.avatarUrl
     if (url) setTempAvatar(url)
+  }
+
+  const chooseCover = async () => {
+    try {
+      const res = await Taro.chooseImage({ count: 1, sizeType: ['compressed'] })
+      const path = res.tempFilePaths?.[0]
+      if (path) setCCoverTemp(path)
+    } catch (e) { /* 用户取消 */ }
   }
 
   const handleSave = async () => {
@@ -33,13 +64,32 @@ export default function ProfileEdit() {
           avatarUrl = up.url
         } catch (e) { /* 头像上传失败不阻断保存 */ }
       }
-      const updatedUser = await updateProfile({
+
+      const payload: any = {
         nickname, bio, city,
         ...(avatarUrl ? { avatarUrl } : {}),
-      })
-      if (token) {
-        login(token, updatedUser)
       }
+
+      if (isCreator) {
+        let coverUrl = cCoverUrl
+        if (cCoverTemp) {
+          try {
+            const up = await uploadImage(cCoverTemp, 'creator')
+            coverUrl = up.url
+          } catch (e) { /* 封面上传失败不阻断 */ }
+        }
+        payload.creatorTitle = cTitle
+        payload.creatorTagline = cTagline
+        payload.creatorIntro = cIntro
+        payload.creatorCoverUrl = coverUrl
+        payload.creatorTags = cTags
+          .split(/[、,，\s]+/)
+          .map((t) => t.trim())
+          .filter(Boolean)
+      }
+
+      const updatedUser = await updateProfile(payload)
+      if (token) login(token, updatedUser)
       Taro.showToast({ title: '保存成功', icon: 'success' })
       setTimeout(() => Taro.navigateBack(), 1000)
     } catch (err) {
@@ -101,6 +151,73 @@ export default function ProfileEdit() {
           <Text className="char-count">{bio.length}/200</Text>
         </View>
       </View>
+
+      {/* Creator 资料 */}
+      {isCreator && (
+        <View className="form">
+          <View className="creator-section-title">
+            <Text className="creator-section-text">Creator 资料</Text>
+            <Text className="creator-section-hint">展示在 Creator 卡片与个人主页</Text>
+          </View>
+
+          <View className="form-group">
+            <Text className="form-label">封面大图</Text>
+            <View className="cover-box" onClick={chooseCover}>
+              {(cCoverTemp || cCoverUrl) ? (
+                <Image className="cover-img" src={cCoverTemp || resolveImageUrl(cCoverUrl)} mode="aspectFill" />
+              ) : (
+                <View className="cover-ph"><Text className="cover-ph-text">＋ 上传封面</Text></View>
+              )}
+            </View>
+          </View>
+
+          <View className="form-group">
+            <Text className="form-label">身份头衔</Text>
+            <Input
+              className="form-input"
+              value={cTitle}
+              onInput={e => setCTitle(e.detail.value)}
+              placeholder="如：外贸SOHO创业者 · 前大厂KA总监"
+              maxlength={40}
+            />
+          </View>
+
+          <View className="form-group">
+            <Text className="form-label">一句话亮点</Text>
+            <Input
+              className="form-input"
+              value={cTagline}
+              onInput={e => setCTagline(e.detail.value)}
+              placeholder="如：裸辞1年，营收400万+"
+              maxlength={40}
+            />
+          </View>
+
+          <View className="form-group">
+            <Text className="form-label">自我介绍</Text>
+            <Textarea
+              className="form-textarea"
+              value={cIntro}
+              onInput={e => setCIntro(e.detail.value)}
+              placeholder="介绍你的经历与擅长"
+              maxlength={500}
+              autoHeight
+            />
+            <Text className="char-count">{cIntro.length}/500</Text>
+          </View>
+
+          <View className="form-group">
+            <Text className="form-label">标签</Text>
+            <Input
+              className="form-input"
+              value={cTags}
+              onInput={e => setCTags(e.detail.value)}
+              placeholder="用、分隔，如：外贸SOHO、大客户销售"
+              maxlength={60}
+            />
+          </View>
+        </View>
+      )}
 
       {/* Save Button */}
       <View className="bottom-action">

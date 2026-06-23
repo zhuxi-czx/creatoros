@@ -5,7 +5,10 @@ export default defineAppConfig({
     'pages/event-detail/index',
     'pages/venue/index',
     'pages/profile/index',
-    'pages/profile-edit/index'
+    'pages/profile-edit/index',
+    'pages/creator-channel/index',
+    'pages/creator-detail/index',
+    'pages/content-detail/index'
   ],
   window: {
     backgroundTextStyle: 'light',

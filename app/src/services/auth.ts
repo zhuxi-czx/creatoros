@@ -1,6 +1,14 @@
 import Taro from '@tarojs/taro'
 import { request } from './api'
 
+export interface CreatorProfile {
+  title?: string | null
+  tagline?: string | null
+  intro?: string | null
+  coverUrl?: string | null
+  tags?: string[]
+}
+
 export interface User {
   id: string
   nickname?: string
@@ -11,6 +19,8 @@ export interface User {
   mbti?: string
   zodiac?: string
   generation?: string
+  isCreator?: boolean
+  creatorProfile?: CreatorProfile | null
 }
 
 interface LoginResponse {

@@ -29,7 +29,7 @@ const FEATURE_ICONS = [
   { label: '主题分享', icon: 'message-circle' },
   { label: '活动策划', icon: 'calendar-check' },
   { label: 'PlanF', icon: 'rocket' },
-  { label: 'Creator', icon: 'wand-sparkles' },
+  { label: 'Creator', icon: 'wand-sparkles', path: '/pages/creator-channel/index' },
 ]
 
 const VENUE_COLORS = [
@@ -129,7 +129,9 @@ export default function Index() {
             className='feature-item'
             hoverClass='card-hover'
             hoverStayTime={80}
-            onClick={() => Taro.showToast({ title: '即将上线，敬请期待', icon: 'none' })}
+            onClick={() => item.path
+              ? Taro.navigateTo({ url: item.path })
+              : Taro.showToast({ title: '即将上线，敬请期待', icon: 'none' })}
           >
             <View
               className='feature-icon'

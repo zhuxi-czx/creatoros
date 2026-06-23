@@ -91,6 +91,13 @@ export default function Profile() {
         {/* Name */}
         <Text className='user-name'>{token ? displayName : '未登录'}</Text>
 
+        {/* Creator 身份标识 */}
+        {token && user?.isCreator && (
+          <View className='creator-badge'>
+            <Text className='creator-badge-text'>✦ Creator</Text>
+          </View>
+        )}
+
         {/* City */}
         {user?.city && (
           <View className='city-row'>

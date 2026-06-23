@@ -372,3 +372,18 @@ $accent: #C9A96E;
   font-size: 30rpx;
   color: #ff3b30;
 }
+
+/* Creator 身份标识 */
+.creator-badge {
+  margin-top: 12rpx;
+  padding: 6rpx 22rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, #e3c081, #c29a5b);
+  box-shadow: 0 4rpx 14rpx rgba(169, 130, 74, 0.35);
+}
+.creator-badge-text {
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: 700;
+  letter-spacing: 1rpx;
+}
