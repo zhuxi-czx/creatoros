@@ -10,8 +10,10 @@ import { VenueModule } from './modules/venue/venue.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { BannerModule } from './modules/banner/banner.module';
 import { HealthModule } from './modules/health/health.module';
-import { CreatorModule } from './modules/creator/creator.module';
-import { ContentModule } from './modules/content/content.module';
+import { CategoryModule } from './modules/category/category.module';
+import { ColumnModule } from './modules/column/column.module';
+import { CouponModule } from './modules/coupon/coupon.module';
+import { MembershipModule } from './modules/membership/membership.module';
 
 @Module({
   imports: [
@@ -26,8 +28,10 @@ import { ContentModule } from './modules/content/content.module';
     BannerModule,
     HealthModule,
     PaymentModule,
-    CreatorModule,
-    ContentModule,
+    CategoryModule,
+    ColumnModule,
+    CouponModule,
+    MembershipModule,
   ],
 })
 export class AppModule {}

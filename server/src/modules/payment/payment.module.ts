@@ -4,9 +4,10 @@ import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
 import { WechatPayService } from './wechat-pay.service';
 import { OrderCronService } from './order-cron.service';
+import { MembershipModule } from '../membership/membership.module';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, MembershipModule],
   controllers: [OrderController],
   providers: [OrderService, WechatPayService, OrderCronService],
   exports: [OrderService],

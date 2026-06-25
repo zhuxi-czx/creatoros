@@ -23,17 +23,12 @@ export interface UpdateProfileInput {
   avatarUrl?: string
   city?: string
   bio?: string
-  gender?: number
+  gender?: string
   mbti?: string
   zodiac?: string
   generation?: string
+  tags?: string[]
   phone?: string
-  // Creator 资料（仅 isCreator 生效）
-  creatorTitle?: string
-  creatorTagline?: string
-  creatorIntro?: string
-  creatorCoverUrl?: string
-  creatorTags?: string[]
 }
 
 export const getProfile = (): Promise<User> =>

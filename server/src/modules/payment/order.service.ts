@@ -10,6 +10,13 @@ import {
 import { PrismaClient } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { WechatPayService, JsapiPayParams } from './wechat-pay.service';
+import {
+  MembershipService,
+  MEMBERSHIP_PRICE,
+  computeRenewExpiry,
+  periodKeyOf,
+  freeTypeOf,
+} from '../membership/membership.service';
 
 /** 订单超时分钟数（与微信 time_expire 一致，超时释放名额）。 */
 const ORDER_TTL_MIN = 15;
@@ -27,6 +34,7 @@ export class OrderService {
   constructor(
     private prisma: PrismaService,
     private wechatPay: WechatPayService,
+    private membership: MembershipService,
   ) {}
 
   /**
@@ -36,80 +44,122 @@ export class OrderService {
   async checkout(
     userId: string,
     eventId: string,
-  ): Promise<{ orderId: string; payParams: JsapiPayParams }> {
-    // 取用户 openId（JSAPI 下单必需）
+  ): Promise<{ orderId?: string; payParams?: JsapiPayParams; free?: boolean }> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user?.openId) {
       throw new BadRequestException('用户缺少 openId，无法发起支付');
     }
 
-    const order = await this.prisma.$transaction(async (tx) => {
-      const event = await tx.event.findUnique({ where: { id: eventId } });
-      if (!event) throw new NotFoundException('活动不存在');
-      if (event.status !== 'PUBLISHED') {
-        throw new BadRequestException(
-          event.status === 'FULL' ? '活动名额已满' : '活动当前不可报名',
-        );
-      }
-      if (event.price <= 0) {
-        throw new BadRequestException('免费活动请走普通报名接口');
-      }
+    const eventFull = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      include: { category: true },
+    });
+    if (!eventFull) throw new NotFoundException('活动不存在');
+    if (eventFull.status !== 'PUBLISHED') {
+      throw new BadRequestException(
+        eventFull.status === 'FULL' ? '活动名额已满' : '活动当前不可报名',
+      );
+    }
+    if (eventFull.price <= 0) {
+      throw new BadRequestException('免费活动请走普通报名接口');
+    }
 
-      // 已确认报名 → 不可重复
-      const existingSignup = await tx.signup.findUnique({
-        where: { userId_eventId: { userId, eventId } },
+    const pricing = await this.membership.computePricing(eventFull, userId);
+
+    // 会员免费名额：占名额 + 扣免费名额在同一事务，不走支付
+    if (pricing.finalPrice === 0) {
+      await this.prisma.$transaction(async (tx) => {
+        await this.assertSignable(tx, userId, eventId, eventFull.maxCapacity);
+        await tx.signup.upsert({
+          where: { userId_eventId: { userId, eventId } },
+          create: { userId, eventId, status: 'CONFIRMED' },
+          update: { status: 'CONFIRMED', orderId: null },
+        });
+        const freeType = freeTypeOf(eventFull);
+        if (freeType) {
+          const m = await tx.membership.findUnique({ where: { userId } });
+          if (m) {
+            await tx.membershipBenefitUsage
+              .create({ data: { membershipId: m.id, periodKey: periodKeyOf(m.startAt), benefitType: freeType as any, eventId } })
+              .catch(() => undefined); // 名额已用（unique 冲突）幂等忽略
+          }
+        }
       });
-      if (existingSignup?.status === 'CONFIRMED') {
-        throw new ConflictException('你已报名该活动');
-      }
+      return { free: true };
+    }
 
-      // 复用未过期的待支付订单（用户重复点击/中断后重进）
+    // 付费下单（金额 = 会员价或原价）
+    const order = await this.prisma.$transaction(async (tx) => {
       const now = new Date();
       const reusable = await tx.order.findFirst({
-        where: {
-          userId,
-          eventId,
-          status: 'PENDING',
-          expiresAt: { gt: now },
-        },
+        where: { userId, eventId, type: 'EVENT', status: 'PENDING', expiresAt: { gt: now } },
       });
       if (reusable) return reusable;
-
-      // 名额校验：已确认报名 + 未过期待支付订单
-      const occupied = await this.countOccupied(tx, eventId, now);
-      if (occupied >= event.maxCapacity) {
-        throw new BadRequestException('活动名额已满');
-      }
-
+      await this.assertSignable(tx, userId, eventId, eventFull.maxCapacity);
       const expiresAt = new Date(now.getTime() + ORDER_TTL_MIN * 60 * 1000);
       return tx.order.create({
         data: {
           outTradeNo: this.genOutTradeNo(),
           userId,
+          type: 'EVENT',
           eventId,
-          amount: event.price,
+          amount: pricing.finalPrice,
           status: 'PENDING',
           expiresAt,
         },
       });
     });
 
-    // 网络调用放在事务外。下单失败时订单留 PENDING，超时自动关单释放名额。
-    const event = await this.prisma.event.findUnique({ where: { id: eventId } });
     const payParams = await this.wechatPay.createJsapiOrder({
-      description: `报名：${event!.title}`.slice(0, 127),
+      description: `报名：${eventFull.title}`.slice(0, 127),
       outTradeNo: order.outTradeNo,
       amount: order.amount,
       openId: user.openId,
       expiresAt: order.expiresAt,
     });
-
-    // 记录 prepay 包（便于排查）
     await this.prisma.order.update({
       where: { id: order.id },
       data: { prepayId: payParams.package.replace('prepay_id=', '') },
     });
+    return { orderId: order.id, payParams };
+  }
 
+  /** 购买 PlanF 会员（998/年）下单，返回支付参数。 */
+  async checkoutMembership(
+    userId: string,
+  ): Promise<{ orderId: string; payParams: JsapiPayParams }> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user?.openId) {
+      throw new BadRequestException('用户缺少 openId，无法发起支付');
+    }
+    const now = new Date();
+    let order = await this.prisma.order.findFirst({
+      where: { userId, type: 'MEMBERSHIP', status: 'PENDING', expiresAt: { gt: now } },
+    });
+    if (!order) {
+      const expiresAt = new Date(now.getTime() + ORDER_TTL_MIN * 60 * 1000);
+      order = await this.prisma.order.create({
+        data: {
+          outTradeNo: this.genOutTradeNo(),
+          userId,
+          type: 'MEMBERSHIP',
+          amount: MEMBERSHIP_PRICE,
+          status: 'PENDING',
+          expiresAt,
+        },
+      });
+    }
+    const payParams = await this.wechatPay.createJsapiOrder({
+      description: 'PlanF 会员（年）',
+      outTradeNo: order.outTradeNo,
+      amount: order.amount,
+      openId: user.openId,
+      expiresAt: order.expiresAt,
+    });
+    await this.prisma.order.update({
+      where: { id: order.id },
+      data: { prepayId: payParams.package.replace('prepay_id=', '') },
+    });
     return { orderId: order.id, payParams };
   }
 
@@ -131,12 +181,27 @@ export class OrderService {
         data: { status: 'PAID', transactionId, paidAt: new Date(), closedAt: null },
       });
 
+      // 会员订单：支付成功即开通/续费（续费从原到期日顺延，入会日不变）
+      if (order.type === 'MEMBERSHIP') {
+        const now = new Date();
+        const existing = await tx.membership.findUnique({ where: { userId: order.userId } });
+        const { expireAt, renewing } = computeRenewExpiry(existing, now);
+        await tx.membership.upsert({
+          where: { userId: order.userId },
+          create: { userId: order.userId, status: 'ACTIVE', startAt: now, expireAt },
+          update: { status: 'ACTIVE', ...(renewing ? {} : { startAt: now }), expireAt },
+        });
+        return;
+      }
+      const eventId = order.eventId;
+      if (!eventId) return;
+
       // 创建/确认报名并关联订单
       const signup = await tx.signup.upsert({
-        where: { userId_eventId: { userId: order.userId, eventId: order.eventId } },
+        where: { userId_eventId: { userId: order.userId, eventId } },
         create: {
           userId: order.userId,
-          eventId: order.eventId,
+          eventId,
           status: 'CONFIRMED',
           orderId: order.id,
         },
@@ -145,12 +210,12 @@ export class OrderService {
 
       // 满员则置 FULL
       const confirmed = await tx.signup.count({
-        where: { eventId: order.eventId, status: 'CONFIRMED' },
+        where: { eventId, status: 'CONFIRMED' },
       });
-      const event = await tx.event.findUnique({ where: { id: order.eventId } });
+      const event = await tx.event.findUnique({ where: { id: eventId } });
       if (event && confirmed >= event.maxCapacity && event.status === 'PUBLISHED') {
         await tx.event.update({
-          where: { id: order.eventId },
+          where: { id: eventId },
           data: { status: 'FULL' },
         });
       }
@@ -326,6 +391,21 @@ export class OrderService {
   }
 
   /** 已占名额 = 已确认报名 + 未过期待支付订单。 */
+  /** 报名前校验：未重复报名 + 名额未满（事务内复用）。 */
+  private async assertSignable(
+    tx: TxClient,
+    userId: string,
+    eventId: string,
+    maxCapacity: number,
+  ) {
+    const existing = await tx.signup.findUnique({
+      where: { userId_eventId: { userId, eventId } },
+    });
+    if (existing?.status === 'CONFIRMED') throw new ConflictException('你已报名该活动');
+    const occupied = await this.countOccupied(tx, eventId, new Date());
+    if (occupied >= maxCapacity) throw new BadRequestException('活动名额已满');
+  }
+
   private async countOccupied(
     tx: TxClient,
     eventId: string,

@@ -72,4 +72,20 @@ export class UpdateEventDto {
   @IsOptional()
   @IsBoolean()
   featured?: boolean;
+
+  @IsOptional()
+  @IsString()
+  categoryId?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isPlanfExclusive?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isGuestShare?: boolean;
+
+  @IsOptional()
+  @IsString()
+  guestName?: string;
 }

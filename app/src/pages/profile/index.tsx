@@ -62,10 +62,11 @@ export default function Profile() {
 
   const displayName = user?.nickname || '未设置昵称'
   const tags = [
-    user?.gender === 1 ? '男' : user?.gender === 2 ? '女' : null,
+    user?.gender,
     user?.mbti,
     user?.zodiac,
     user?.generation,
+    ...(user?.tags || []),
   ].filter(Boolean) as string[]
 
   return (
@@ -90,13 +91,6 @@ export default function Profile() {
 
         {/* Name */}
         <Text className='user-name'>{token ? displayName : '未登录'}</Text>
-
-        {/* Creator 身份标识 */}
-        {token && user?.isCreator && (
-          <View className='creator-badge'>
-            <Text className='creator-badge-text'>✦ Creator</Text>
-          </View>
-        )}
 
         {/* City */}
         {user?.city && (
@@ -128,6 +122,27 @@ export default function Profile() {
               <Text className='login-btn-text'>微信手机号登录</Text>
             </View>
             <Text className='skip-hint'>头像昵称可在登录后「编辑资料」完善</Text>
+          </View>
+        )}
+
+        {/* PlanF 会员卡 */}
+        {token && (
+          <View onClick={() => Taro.navigateTo({ url: '/pages/membership/index' })}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'linear-gradient(115deg,#E7C98B,#B5863C)', borderRadius: '24rpx', padding: '28rpx 32rpx', marginBottom: '24rpx' }}>
+            <View>
+              <Text style={{ fontSize: '30rpx', fontWeight: 700, color: '#fff' }}>♛ PlanF 会员</Text>
+              <Text style={{ fontSize: '24rpx', color: 'rgba(255,255,255,0.9)', display: 'block', marginTop: '6rpx' }}>专属活动 · 日常活动 8 折</Text>
+            </View>
+            <Text style={{ fontSize: '34rpx', color: '#fff' }}>›</Text>
+          </View>
+        )}
+
+        {/* 我的优惠券入口 */}
+        {token && (
+          <View onClick={() => Taro.navigateTo({ url: '/pages/coupon/index' })}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff', borderRadius: '24rpx', padding: '28rpx 32rpx', marginBottom: '24rpx' }}>
+            <Text style={{ fontSize: '30rpx', fontWeight: 600, color: '#1A1A1A' }}>🎟 我的优惠券</Text>
+            <Text style={{ fontSize: '34rpx', color: '#ccc' }}>›</Text>
           </View>
         )}
 

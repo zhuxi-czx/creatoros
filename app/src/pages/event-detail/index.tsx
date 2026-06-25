@@ -85,21 +85,26 @@ export default function EventDetail() {
     try {
       setSigning(true)
       if ((event.price ?? 0) > 0) {
-        // 付费活动：下单 → 拉起微信支付 → 轮询确认报名
-        const { orderId, payParams } = await checkout(id)
-        await Taro.requestPayment({
-          timeStamp: payParams.timeStamp,
-          nonceStr: payParams.nonceStr,
-          package: payParams.package,
-          signType: payParams.signType as any,
-          paySign: payParams.paySign,
-        })
-        const paid = await pollOrderPaid(orderId)
-        if (paid) {
-          await loadEvent(true) // 同步报名状态/人数/参与者
+        // 付费活动：下单。会员免费名额时后端直接确认报名（free），否则拉起微信支付
+        const res = await checkout(id)
+        if (res.free) {
+          await loadEvent(true)
           Taro.showToast({ title: '报名成功', icon: 'success' })
-        } else {
-          Taro.showToast({ title: '支付确认中，请稍后刷新', icon: 'none' })
+        } else if (res.payParams && res.orderId) {
+          await Taro.requestPayment({
+            timeStamp: res.payParams.timeStamp,
+            nonceStr: res.payParams.nonceStr,
+            package: res.payParams.package,
+            signType: res.payParams.signType as any,
+            paySign: res.payParams.paySign,
+          })
+          const paid = await pollOrderPaid(res.orderId)
+          if (paid) {
+            await loadEvent(true)
+            Taro.showToast({ title: '报名成功', icon: 'success' })
+          } else {
+            Taro.showToast({ title: '支付确认中，请稍后刷新', icon: 'none' })
+          }
         }
       } else {
         await signup(id)
@@ -291,8 +296,13 @@ export default function EventDetail() {
               <View className='info-content'>
                 <Text className='info-label'>费用</Text>
                 <Text className='info-value'>
-                  {event.price === 0 ? '免费' : `¥${(event.price! / 100).toFixed(0)}`}
+                  {event.isPlanfExclusive ? 'PlanF 会员免费' : event.price === 0 ? '免费' : `¥${(event.price! / 100).toFixed(0)}`}
                 </Text>
+                {event.pricing && event.pricing.isMember && !event.pricing.isFreeEvent && (
+                  <Text className='member-price'>
+                    {event.pricing.finalPrice === 0 ? 'PlanF 会员免费（本月名额）' : `PlanF 会员 ¥${(event.pricing.memberPrice / 100).toFixed(0)}（8折）`}
+                  </Text>
+                )}
               </View>
             </View>
           )}
@@ -332,6 +342,14 @@ export default function EventDetail() {
         )}
       </ScrollView>
 
+      {/* 会员轻引导（非会员 + 付费/专享活动） */}
+      {!event.isSignedUp && event.pricing && !event.pricing.isMember && ((event.price ?? 0) > 0 || event.isPlanfExclusive) && (
+        <View className='member-hint' onClick={() => Taro.navigateTo({ url: '/pages/membership/index' })}>
+          <Text className='member-hint-text'>♛ 开通 PlanF 会员，{event.isPlanfExclusive ? '专享活动免费畅享' : '日常活动享 8 折'}</Text>
+          <Text className='member-hint-arrow'>查看 ›</Text>
+        </View>
+      )}
+
       {/* Bottom Action */}
       <View className='bottom-action'>
         <View
@@ -346,7 +364,7 @@ export default function EventDetail() {
               : signupClosed
               ? (status.state === 'ENDED' ? '活动已结束' : '报名已结束')
               : (event.price ?? 0) > 0
-              ? `立即报名 · ¥${(event.price! / 100).toFixed(0)}`
+              ? `立即报名 · ${event.pricing ? (event.pricing.finalPrice === 0 ? '免费' : `¥${(event.pricing.finalPrice / 100).toFixed(0)}`) : `¥${(event.price! / 100).toFixed(0)}`}`
               : '立即报名 · 免费'}
           </Text>
         </View>

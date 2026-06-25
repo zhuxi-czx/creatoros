@@ -16,7 +16,6 @@ function iconUri(name: string, color: string): string {
 }
 
 const tabs = [
-  { name: 'home', pagePath: 'pages/index/index', label: '首页' },
   { name: 'discover', pagePath: 'pages/discover/index', label: '发现' },
   { name: 'profile', pagePath: 'pages/profile/index', label: '我的' },
 ]

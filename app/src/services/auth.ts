@@ -15,12 +15,11 @@ export interface User {
   avatarUrl?: string
   city?: string
   bio?: string
-  gender?: number
+  gender?: string
   mbti?: string
   zodiac?: string
   generation?: string
-  isCreator?: boolean
-  creatorProfile?: CreatorProfile | null
+  tags?: string[]
 }
 
 interface LoginResponse {

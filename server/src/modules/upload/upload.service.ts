@@ -5,7 +5,7 @@ import sharp = require('sharp');
 
 const ASPECT_RATIOS = {
   banner: { width: 16, height: 9, maxWidth: 1200 },
-  event: { width: 16, height: 9, maxWidth: 1200 },
+  event: { width: 3, height: 4, maxWidth: 900 }, // 活动封面竖图（3:4）
   venue: { width: 4, height: 3, maxWidth: 900 },
   avatar: { width: 1, height: 1, maxWidth: 400 },
   default: { width: 16, height: 9, maxWidth: 1200 },

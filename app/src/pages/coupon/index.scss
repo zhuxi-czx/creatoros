@@ -1,0 +1,34 @@
+.coupon-page { min-height: 100vh; background: #F5F5F7; padding: 28rpx 32rpx; }
+.empty { text-align: center; padding: 120rpx; }
+.empty-text { font-size: 28rpx; color: #999; }
+
+.coupon { display: flex; background: #fff; border-radius: 28rpx; overflow: hidden; margin-bottom: 28rpx; height: 208rpx; }
+.coupon.disabled { opacity: 0.75; }
+.coupon-amt {
+  width: 224rpx; flex-shrink: 0;
+  background: linear-gradient(135deg, #F3CA7E, #E0A95C);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4rpx;
+}
+.coupon.disabled .coupon-amt { background: #C9C9C9; }
+.coupon-amt-num { font-size: 60rpx; font-weight: 700; color: #fff; }
+.coupon-amt-label { font-size: 24rpx; color: #fff; }
+.coupon-info { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 10rpx; padding: 0 32rpx; }
+.coupon-title { font-size: 30rpx; font-weight: 700; color: #1A1A1A; }
+.coupon.disabled .coupon-title { color: #999; }
+.coupon-valid { font-size: 24rpx; color: #999; }
+.coupon-btn { align-self: flex-start; background: #C9A96E; border-radius: 28rpx; padding: 10rpx 32rpx; margin-top: 6rpx; }
+.coupon-btn.ghost { background: transparent; border: 2rpx solid #DDD; }
+.coupon-btn-text { font-size: 26rpx; font-weight: 600; color: #fff; }
+.coupon-btn-text.ghost { color: #999; }
+
+.dlg-mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.dlg { width: 600rpx; background: #fff; border-radius: 36rpx; padding: 48rpx 44rpx 44rpx; display: flex; flex-direction: column; align-items: center; gap: 24rpx; }
+.dlg-title { font-size: 34rpx; font-weight: 700; color: #1A1A1A; }
+.dlg-desc { font-size: 26rpx; color: #999; text-align: center; line-height: 1.6; }
+.dlg-coupon { width: 100%; background: #FBF4E6; border-radius: 20rpx; padding: 24rpx; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+.dlg-coupon-name { font-size: 28rpx; font-weight: 600; color: #7A5B2E; }
+.dlg-coupon-amt { font-size: 34rpx; font-weight: 700; color: #C9A96E; }
+.dlg-btns { display: flex; gap: 24rpx; width: 100%; }
+.dlg-cancel { flex: 1; height: 92rpx; background: #F2F2F2; border-radius: 46rpx; display: flex; align-items: center; justify-content: center; color: #666; font-size: 30rpx; }
+.dlg-confirm { flex: 1; height: 92rpx; background: #C9A96E; border-radius: 46rpx; display: flex; align-items: center; justify-content: center; }
+.dlg-confirm-text { color: #fff; font-size: 30rpx; font-weight: 700; }

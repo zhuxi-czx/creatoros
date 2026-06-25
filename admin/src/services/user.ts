@@ -7,13 +7,13 @@ export interface User {
   avatarUrl?: string
   city?: string
   bio?: string
-  gender?: number
+  gender?: string
   mbti?: string
   zodiac?: string
   generation?: string
+  tags?: string[]
   role: string
   status: string
-  isCreator?: boolean
   createdAt: string
   _count?: { signups: number }
 }
@@ -32,8 +32,4 @@ export async function getUsers(page = 1, limit = 50): Promise<PaginatedResponse>
 
 export async function updateUserStatus(id: string, status: string): Promise<void> {
   return api.put(`/admin/users/${id}/status`, { status }) as any
-}
-
-export async function setCreator(id: string, isCreator: boolean): Promise<void> {
-  return api.put(`/admin/users/${id}/creator`, { isCreator }) as any
 }

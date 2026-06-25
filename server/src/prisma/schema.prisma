@@ -37,13 +37,42 @@ enum OrderStatus {
   PENDING    // 已下单待支付
   PAID       // 支付成功
   CLOSED     // 超时/主动关单
-  REFUNDING  // 退款中（本期不实现，占位）
-  REFUNDED   // 已退款（本期不实现，占位）
+  REFUNDING  // 退款中
+  REFUNDED   // 已退款
 }
 
-enum ContentStatus {
-  DRAFT      // 草稿
-  PUBLISHED  // 已发布
+// 订单类型：活动报名 / PlanF 会员（2.0）
+enum OrderType {
+  EVENT
+  MEMBERSHIP
+}
+
+// 专栏类型（2.0，固定三种，展示样式后台可配）
+enum ColumnType {
+  FEATURED // 社区精选（复用 Event.featured）
+  PLANF    // PlanF 专享（Event.isPlanfExclusive）
+  GUEST    // 大咖分享（Event.isGuestShare）
+}
+
+enum MembershipStatus {
+  ACTIVE
+  EXPIRED
+}
+
+// 会员每月免费名额类型
+enum BenefitType {
+  GUEST_FREE     // 大咖活动每月免费 1 场
+  GATHERING_FREE // 群友聚会（memberFreeMonthly 分类）每月免费 1 场
+}
+
+enum CouponType {
+  DRINK_10 // 新人 10 元酒水券
+}
+
+enum CouponStatus {
+  UNUSED
+  USED
+  EXPIRED
 }
 
 model User {
@@ -55,21 +84,21 @@ model User {
   avatarUrl  String?
   city       String?
   bio        String?
-  gender     Int?
+  gender     String? // 男 / 女 / 其他（2.0：原 Int 改 String）
   mbti       String?
   zodiac     String?
   generation String?
+  tags       String[]   @default([]) // 自定义个性标签（2.0）
   phone      String?
   role       Role       @default(USER)
   status     UserStatus @default(ACTIVE)
-  isCreator  Boolean    @default(false) // 管理员后台开关：是否为主推 Creator
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 
-  signups        Signup[]
-  orders         Order[]
-  creatorProfile CreatorProfile? // Creator 自我介绍资料（1:1）
-  contents       Content[] // 作为对谈对象关联的内容
+  signups    Signup[]
+  orders     Order[]
+  membership Membership? // PlanF 会员（1:1，2.0）
+  coupons    Coupon[] // 优惠券（2.0）
 }
 
 model Venue {
@@ -90,43 +119,80 @@ model Venue {
   events Event[]
 }
 
-model Event {
-  id          String      @id @default(cuid())
-  title       String
-  description String?
-  highlights  String?
-  schedule    String?
-  notes       String?
-  coverUrl    String?
-  imageUrls   String[]    @default([])
-  autoplay    Boolean     @default(true)
-  interval    Int         @default(3000)
-  date        DateTime
-  venueId     String
-  hostName    String?
-  maxCapacity Int
-  price       Int         @default(0)
-  status      EventStatus @default(DRAFT)
-  featured    Boolean     @default(false)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+// 活动分类（2.0，后台可建）
+model Category {
+  id                String   @id @default(cuid())
+  name              String
+  intro             String? // 分类页介绍
+  coverUrl          String? // 分类页 banner
+  icon              String? // lucide 图标名 或 上传小图 url
+  order             Int      @default(0)
+  memberFreeMonthly Boolean  @default(false) // 「群友聚会」类：会员每月免费 1 场
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  venue   Venue    @relation(fields: [venueId], references: [id])
-  signups Signup[]
-  orders  Order[]
+  events Event[]
+
+  @@index([order])
+}
+
+// 专栏展示配置（2.0，3 条种子：FEATURED/PLANF/GUEST）
+model ColumnConfig {
+  id        String     @id @default(cuid())
+  type      ColumnType @unique
+  title     String
+  intro     String?
+  icon      String?
+  bgUrl     String? // 专栏卡背景图
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Event {
+  id               String      @id @default(cuid())
+  title            String
+  description      String?
+  highlights       String?
+  schedule         String?
+  notes            String?
+  coverUrl         String? // 封面竖图（3:4 或 9:16，sharp 居中裁剪）
+  imageUrls        String[]    @default([]) // 详情页轮播竖图
+  autoplay         Boolean     @default(true)
+  interval         Int         @default(3000)
+  date             DateTime
+  venueId          String
+  categoryId       String? // 分类（2.0）
+  hostName         String?
+  maxCapacity      Int
+  price            Int         @default(0) // 单位：分
+  status           EventStatus @default(DRAFT)
+  featured         Boolean     @default(false) // 社区精选
+  isPlanfExclusive Boolean     @default(false) // PlanF 专享（免费 + 会员氛围）
+  isGuestShare     Boolean     @default(false) // 大咖分享
+  guestName        String? // 大咖名称（isGuestShare 时）
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  venue    Venue     @relation(fields: [venueId], references: [id])
+  category Category? @relation(fields: [categoryId], references: [id])
+  signups  Signup[]
+  orders   Order[]
 
   @@index([status])
   @@index([featured])
+  @@index([categoryId])
+  @@index([isPlanfExclusive])
+  @@index([isGuestShare])
 }
 
 model Signup {
-  id        String      @id @default(cuid())
+  id        String       @id @default(cuid())
   userId    String
   eventId   String
   status    SignupStatus @default(CONFIRMED)
-  orderId   String?     @unique   // 付费报名关联订单；免费报名为 null
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  orderId   String?      @unique // 付费报名关联订单；免费报名为 null
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   user  User   @relation(fields: [userId], references: [id])
   event Event  @relation(fields: [eventId], references: [id])
@@ -139,23 +205,24 @@ model Signup {
 
 model Order {
   id            String      @id @default(cuid())
-  outTradeNo    String      @unique          // 商户订单号
+  outTradeNo    String      @unique // 商户订单号
   userId        String
-  eventId       String
-  amount        Int                          // 支付金额（分），下单时锁定
+  type          OrderType   @default(EVENT) // 活动报名 / 会员（2.0）
+  eventId       String? // 活动报名订单关联活动；会员订单为 null
+  amount        Int // 支付金额（分），下单时锁定
   status        OrderStatus @default(PENDING)
-  transactionId String?                      // 微信支付订单号（回调返回）
-  prepayId      String?                      // 预支付会话标识
-  refundNo      String?     @unique          // 商户退款单号（退款时生成）
-  refundedAt    DateTime?                    // 退款完成时间
-  expiresAt     DateTime                     // 超时时间（下单 + 15min），过期不再占名额
+  transactionId String? // 微信支付订单号（回调返回）
+  prepayId      String? // 预支付会话标识
+  refundNo      String?     @unique // 商户退款单号
+  refundedAt    DateTime?
+  expiresAt     DateTime // 超时时间（下单 + 15min）
   paidAt        DateTime?
   closedAt      DateTime?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
   user   User    @relation(fields: [userId], references: [id])
-  event  Event   @relation(fields: [eventId], references: [id])
+  event  Event?  @relation(fields: [eventId], references: [id])
   signup Signup?
 
   @@index([userId])
@@ -164,51 +231,67 @@ model Order {
   @@index([status, expiresAt])
 }
 
-// Creator 自我介绍资料（与 User 1:1，本人在小程序「编辑资料」里填写）
-model CreatorProfile {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  title     String? // 身份头衔（卡片副标题，如「外贸SOHO创业者 · 前大厂KA总监」）
-  tagline   String? // 一句话亮点（卡片主标题，如「裸辞1年，营收400万+」）
-  intro     String? // 自我介绍（详情页「简介」）
-  coverUrl  String? // 人物封面大图（卡片/详情页顶图）
-  tags      String[] @default([])
-  order     Int      @default(0) // 主推排序，越小越靠前
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// PlanF 会员（2.0，一年期）
+model Membership {
+  id        String           @id @default(cuid())
+  userId    String           @unique
+  status    MembershipStatus @default(ACTIVE)
+  startAt   DateTime         @default(now()) // 入会日（免费名额周期起点）
+  expireAt  DateTime // 到期日
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usages MembershipBenefitUsage[]
+
+  @@index([status])
 }
 
-// 敞开对谈内容（图文，管理后台发布，必关联一个 Creator 作为对谈对象）
-model Content {
-  id          String        @id @default(cuid())
-  creatorId   String // 对谈对象（Creator 用户）
-  title       String
-  body        String // 富文本 HTML 正文
-  coverUrl    String? // 封面图（详情页顶部）
-  status      ContentStatus @default(DRAFT)
-  publishedAt DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+// 会员每月免费名额用量（2.0）
+model MembershipBenefitUsage {
+  id           String      @id @default(cuid())
+  membershipId String
+  periodKey    String // 「会员月」标识（按入会日算），如 2026-06
+  benefitType  BenefitType
+  eventId      String // 用掉名额时报名的活动
+  createdAt    DateTime    @default(now())
 
-  creator User @relation(fields: [creatorId], references: [id])
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
 
-  @@index([status, publishedAt])
-  @@index([creatorId])
+  @@unique([membershipId, periodKey, benefitType]) // 每周期每类型仅 1 次
+  @@index([membershipId])
+}
+
+// 优惠券（2.0，纯线下核销，状态流转，不接支付）
+model Coupon {
+  id        String       @id @default(cuid())
+  userId    String
+  type      CouponType   @default(DRINK_10)
+  title     String
+  amount    Int // 面额（分），10 元 = 1000
+  status    CouponStatus @default(UNUSED)
+  expireAt  DateTime
+  usedAt    DateTime?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
 }
 
 model Banner {
-  id            String   @id @default(cuid())
-  title         String
-  subtitle      String?
-  imageUrls     String[] @default([])
-  autoplay      Boolean  @default(true)
-  interval      Int      @default(3000)
-  sortOrder     Int      @default(0)
-  enabled       Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        String   @id @default(cuid())
+  title     String
+  subtitle  String?
+  imageUrls String[] @default([])
+  autoplay  Boolean  @default(true)
+  interval  Int      @default(3000)
+  sortOrder Int      @default(0)
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([enabled])
 }

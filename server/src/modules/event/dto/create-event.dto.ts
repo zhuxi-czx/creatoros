@@ -70,5 +70,21 @@ export class CreateEventDto {
 
   @IsOptional()
   @IsBoolean()
-  featured?: boolean;
+  featured?: boolean; // 社区精选
+
+  @IsOptional()
+  @IsString()
+  categoryId?: string; // 分类
+
+  @IsOptional()
+  @IsBoolean()
+  isPlanfExclusive?: boolean; // PlanF 专享
+
+  @IsOptional()
+  @IsBoolean()
+  isGuestShare?: boolean; // 大咖分享
+
+  @IsOptional()
+  @IsString()
+  guestName?: string; // 大咖名称
 }

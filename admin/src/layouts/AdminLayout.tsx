@@ -21,7 +21,8 @@ const menuItems = [
   { key: '/events', icon: <CalendarOutlined />, label: '活动管理' },
   { key: '/banners', icon: <PictureOutlined />, label: 'Banner管理' },
   { key: '/venues', icon: <EnvironmentOutlined />, label: '场馆管理' },
-  { key: '/contents', icon: <ReadOutlined />, label: '敞开对谈' },
+  { key: '/categories', icon: <ReadOutlined />, label: '分类管理' },
+  { key: '/columns', icon: <PictureOutlined />, label: '专栏配置' },
   { key: '/users', icon: <UserOutlined />, label: '用户管理' }
 ]
 

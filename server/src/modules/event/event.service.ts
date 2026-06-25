@@ -7,10 +7,14 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { UpdateEventStatusDto } from './dto/update-event-status.dto';
+import { MembershipService } from '../membership/membership.service';
 
 @Injectable()
 export class EventService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private membership: MembershipService,
+  ) {}
 
   // Public endpoints
   async getPublishedEvents(page: number = 1, limit: number = 20, city?: string) {
@@ -30,7 +34,7 @@ export class EventService {
         where,
         skip,
         take: limit,
-        orderBy: { date: 'asc' },
+        orderBy: { date: 'desc' },
         include: {
           venue: {
             select: {
@@ -94,6 +98,7 @@ export class EventService {
       where: { id },
       include: {
         venue: true,
+        category: true,
         _count: {
           select: { signups: { where: { status: 'CONFIRMED' } } },
         },
@@ -116,7 +121,8 @@ export class EventService {
       isSignedUp = !!signup && signup.status === 'CONFIRMED';
     }
 
-    return { ...event, isSignedUp };
+    const pricing = await this.membership.computePricing(event, userId);
+    return { ...event, isSignedUp, pricing };
   }
 
   async getEventSignups(id: string) {
@@ -252,7 +258,7 @@ export class EventService {
         ...dto,
         venueId,
         date: new Date(dto.date),
-        price: dto.price ?? 0,
+        price: dto.isPlanfExclusive ? 0 : (dto.price ?? 0), // 专享活动强制免费
         featured: dto.featured ?? false,
         imageUrls: dto.imageUrls ?? [],
         autoplay: dto.autoplay ?? true,
@@ -285,6 +291,7 @@ export class EventService {
     if (dto.date) {
       updateData.date = new Date(dto.date);
     }
+    if (dto.isPlanfExclusive) updateData.price = 0; // 专享活动强制免费
 
     const updated = await this.prisma.event.update({
       where: { id },

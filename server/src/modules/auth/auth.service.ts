@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma/prisma.service';
 import { WxLoginDto } from './dto/wx-login.dto';
 import { AdminLoginDto } from './dto/admin-login.dto';
+import { CouponService } from '../coupon/coupon.service';
 
 interface WxSession {
   openid?: string;
@@ -38,9 +39,16 @@ export class AuthService {
   private async createUser(data: any) {
     for (let i = 0; i < 6; i++) {
       try {
-        return await this.prisma.user.create({
+        const created = await this.prisma.user.create({
           data: { ...data, uid: this.genUid() },
         });
+        // 新注册普通用户赠 1 张 10 元酒水券（有效期 1 个月）
+        if (created.role !== 'ADMIN') {
+          await this.prisma.coupon
+            .create({ data: CouponService.newUserCouponData(created.id) })
+            .catch(() => undefined);
+        }
+        return created;
       } catch (e: any) {
         // P2002 = 唯一约束冲突（uid 撞号），重试
         if (e?.code === 'P2002' && i < 5) continue;
@@ -235,7 +243,6 @@ export class AuthService {
   async getProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      include: { creatorProfile: true },
     });
 
     if (!user) {

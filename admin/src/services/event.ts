@@ -18,6 +18,12 @@ export interface Event {
   price: number
   status: string
   featured: boolean
+  categoryId?: string
+  isPlanfExclusive?: boolean
+  isGuestShare?: boolean
+  guestName?: string
+  category?: { id: string; name: string }
+  pricing?: any
   createdAt: string
   updatedAt: string
   venue?: { id: string; name: string; city: string }
@@ -41,6 +47,10 @@ export interface EventFormData {
   price?: number
   status?: string
   featured?: boolean
+  categoryId?: string
+  isPlanfExclusive?: boolean
+  isGuestShare?: boolean
+  guestName?: string
 }
 
 interface PaginatedResponse {

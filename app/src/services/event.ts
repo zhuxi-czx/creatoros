@@ -38,6 +38,22 @@ export interface Event {
   venue?: Venue
   _count?: { signups: number }
   signups?: Array<{ user: { id: string; avatarUrl?: string } }>
+  categoryId?: string
+  isPlanfExclusive?: boolean
+  isGuestShare?: boolean
+  guestName?: string
+  category?: { id: string; name: string; icon?: string }
+  pricing?: Pricing
+}
+
+export interface Pricing {
+  originalPrice: number
+  isMember: boolean
+  isFreeEvent: boolean
+  memberPrice: number
+  finalPrice: number
+  freeType: 'GUEST_FREE' | 'GATHERING_FREE' | null
+  freeAvailable: boolean
 }
 
 export interface EventsResponse {
@@ -91,8 +107,9 @@ export interface PayParams {
 }
 
 export interface CheckoutResponse {
-  orderId: string
-  payParams: PayParams
+  orderId?: string
+  payParams?: PayParams
+  free?: boolean // 会员免费名额直接确认报名
 }
 
 export interface OrderStatus {

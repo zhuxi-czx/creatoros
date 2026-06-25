@@ -421,3 +421,17 @@ $accent: #C9A96E;
 .sm-ok.loading {
   opacity: 0.6;
 }
+
+// 会员价 / 轻引导（2.0）
+.member-price { font-size: 24rpx; color: #C9A96E; font-weight: 600; margin-top: 4rpx; }
+.member-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 32rpx 12rpx;
+  background: #FBF4E6;
+  border-radius: 16rpx;
+  padding: 20rpx 28rpx;
+}
+.member-hint-text { font-size: 25rpx; color: #A9824A; font-weight: 500; }
+.member-hint-arrow { font-size: 25rpx; color: #A9824A; }

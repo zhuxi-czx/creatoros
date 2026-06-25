@@ -31,6 +31,13 @@ export class OrderController {
     return this.orderService.checkout(req.user.id, eventId);
   }
 
+  /** 购买 PlanF 会员（998/年），返回支付参数。 */
+  @UseGuards(JwtAuthGuard)
+  @Post('api/membership/purchase')
+  async purchaseMembership(@Req() req: any) {
+    return this.orderService.checkoutMembership(req.user.id);
+  }
+
   /** 查询订单/报名状态（前端支付后轮询）。 */
   @UseGuards(JwtAuthGuard)
   @Get('api/orders/:id')

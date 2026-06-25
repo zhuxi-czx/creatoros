@@ -8,8 +8,8 @@ import EventSignups from './pages/EventSignups'
 import BannerList from './pages/BannerList'
 import VenueList from './pages/VenueList'
 import UserList from './pages/UserList'
-import ContentList from './pages/ContentList'
-import ContentForm from './pages/ContentForm'
+import CategoryList from './pages/CategoryList'
+import ColumnConfig from './pages/ColumnConfig'
 import { getToken } from './stores/useAuthStore'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -41,9 +41,8 @@ export default function App() {
         <Route path="banners" element={<BannerList />} />
         <Route path="venues" element={<VenueList />} />
         <Route path="users" element={<UserList />} />
-        <Route path="contents" element={<ContentList />} />
-        <Route path="contents/create" element={<ContentForm />} />
-        <Route path="contents/:id/edit" element={<ContentForm />} />
+        <Route path="categories" element={<CategoryList />} />
+        <Route path="columns" element={<ColumnConfig />} />
       </Route>
     </Routes>
   )

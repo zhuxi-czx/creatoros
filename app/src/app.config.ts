@@ -1,14 +1,14 @@
 export default defineAppConfig({
   pages: [
-    'pages/index/index',
     'pages/discover/index',
     'pages/event-detail/index',
     'pages/venue/index',
     'pages/profile/index',
     'pages/profile-edit/index',
-    'pages/creator-channel/index',
-    'pages/creator-detail/index',
-    'pages/content-detail/index'
+    'pages/category/index',
+    'pages/column/index',
+    'pages/membership/index',
+    'pages/coupon/index'
   ],
   window: {
     backgroundTextStyle: 'light',
@@ -23,12 +23,6 @@ export default defineAppConfig({
     backgroundColor: '#ffffff',
     borderStyle: 'white',
     list: [
-      {
-        pagePath: 'pages/index/index',
-        text: '首页',
-        iconPath: 'assets/tab-home.png',
-        selectedIconPath: 'assets/tab-home-active.png'
-      },
       {
         pagePath: 'pages/discover/index',
         text: '发现',

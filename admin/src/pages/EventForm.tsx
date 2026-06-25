@@ -12,6 +12,7 @@ import dayjs from 'dayjs'
 import { createEvent, updateEvent, updateEventStatus, getEventDetail, getVenues, uploadImage, type EventFormData } from '../services/event'
 import { resolveImageUrl } from '../services/api'
 import RichEditor from '../components/RichEditor'
+import { getCategories } from '../services/category'
 
 const { Title } = Typography
 const { TextArea } = Input
@@ -25,11 +26,13 @@ export default function EventForm() {
   const [fetchLoading, setFetchLoading] = useState(isEdit)
   const [currentStatus, setCurrentStatus] = useState('DRAFT')
   const [venues, setVenues] = useState<any[]>([])
+  const [categories, setCategories] = useState<any[]>([])
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     loadVenues()
+    loadCategories()
     if (isEdit && id) {
       loadEvent(id)
     } else {
@@ -41,6 +44,13 @@ export default function EventForm() {
     try {
       const data = await getVenues()
       setVenues(Array.isArray(data) ? data : [])
+    } catch { /* optional */ }
+  }
+
+  const loadCategories = async () => {
+    try {
+      const data = await getCategories()
+      setCategories(Array.isArray(data) ? data : [])
     } catch { /* optional */ }
   }
 
@@ -61,6 +71,10 @@ export default function EventForm() {
         date: event.date ? dayjs(event.date) : undefined,
         venueId: event.venueId,
         featured: event.featured,
+        categoryId: event.categoryId,
+        isPlanfExclusive: event.isPlanfExclusive,
+        isGuestShare: event.isGuestShare,
+        guestName: event.guestName,
         autoplay: (event.imageUrls?.length || 0) > 1 ? event.autoplay !== false : false,
         interval: event.interval ? event.interval / 1000 : 3,
       })
@@ -142,6 +156,10 @@ export default function EventForm() {
         : undefined,
       status: publish ? 'PUBLISHED' : undefined,
       featured: values.featured as boolean,
+      categoryId: (values.categoryId as string) || undefined,
+      isPlanfExclusive: values.isPlanfExclusive as boolean,
+      isGuestShare: values.isGuestShare as boolean,
+      guestName: (values.guestName as string) || undefined,
     }
 
     try {
@@ -329,8 +347,33 @@ export default function EventForm() {
             </Form.Item>
           </div>
 
-          <Form.Item name="featured" valuePropName="checked" label="社区精选" style={{ marginBottom: 8 }}>
-            <Switch checkedChildren="是" unCheckedChildren="否" />
+          <Form.Item label="分类" name="categoryId">
+            <Select
+              placeholder="选择分类（可在分类管理新建）"
+              allowClear
+              options={categories.map(c => ({ label: c.name, value: c.id }))}
+            />
+          </Form.Item>
+
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+            <Form.Item name="featured" valuePropName="checked" label="社区精选" style={{ marginBottom: 8 }}>
+              <Switch checkedChildren="是" unCheckedChildren="否" />
+            </Form.Item>
+            <Form.Item name="isPlanfExclusive" valuePropName="checked" label="PlanF 专享" style={{ marginBottom: 8 }}>
+              <Switch checkedChildren="是" unCheckedChildren="否" />
+            </Form.Item>
+            <Form.Item name="isGuestShare" valuePropName="checked" label="大咖分享" style={{ marginBottom: 8 }}>
+              <Switch checkedChildren="是" unCheckedChildren="否" />
+            </Form.Item>
+          </div>
+          <Form.Item noStyle shouldUpdate={(p, c) => p.isGuestShare !== c.isGuestShare}>
+            {({ getFieldValue }) =>
+              getFieldValue('isGuestShare') ? (
+                <Form.Item label="大咖名称" name="guestName" rules={[{ required: true, message: '请输入大咖名称' }]}>
+                  <Input placeholder="如 李宗盛（封面将显示「大咖分享 · 李宗盛」）" />
+                </Form.Item>
+              ) : null
+            }
           </Form.Item>
 
           <Divider />
