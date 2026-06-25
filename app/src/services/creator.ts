@@ -44,7 +44,7 @@ export interface ContentDetail {
   body: string
   coverUrl?: string | null
   publishedAt?: string | null
-  creator: { id: string; nickname?: string; avatarUrl?: string; title?: string | null }
+  creator: { id: string; nickname?: string; avatarUrl?: string; title?: string | null; isActive?: boolean }
 }
 
 export const getCreators = () => request<CreatorCard[]>('/creators')

@@ -27,4 +27,11 @@ CreatorOS 大改：新增 **Creator 身份** 和 **敞开对谈图文内容**（
 - 后台：PUT /api/admin/users/:id/creator(开关)、/api/admin/contents CRUD
 - getProfile 返回 creatorProfile 供编辑资料预填
 
+## 后续迭代（2026-06-23/24）
+- **后台独立编辑页**：敞开对谈内容改用独立页 `admin ContentForm`（/contents/create、/contents/:id/edit），ContentList 只管列表
+- **富文本更大**：`RichEditor` 共用组件，min-height 480 / max-height 65vh 滚动 / toolbar sticky 吸顶；活动管理与敞开对谈均支持「手机预览」（实时渲染未保存内容）
+- **对谈对象（结论）**：保持"只能选已设为 Creator 的用户"。`assertCreator(dto.creatorId)` 只校验**所选对谈对象** isCreator，不校验管理员本人；发布前需先在用户管理把人设为 Creator
+- **已隐退保护（已编码，⚠️未部署生产）**：取消某人 Creator 后其历史内容仍展示署名，但 content 详情接口返回 `creator.isActive`，小程序点头像若 `isActive===false` 则 toast「该 Creator 已隐退」不跳转。改动在 `content.service.ts(getPublished)` + `app/services/creator.ts` + `content-detail`。**尚未 scp 部署，生产详情暂返回 isActive=undefined**
+- **生产 mock 内容**：已通过后台发布接口创建 3 篇敞开对谈，均挂真实 Creator「著西」(cmq5ckc2s0000fspohfhvdxn4)；配图用 picsum 占位图，待换成 /uploads 正式图
+
 参见 [[project_launch_prep]] [[server_info]]

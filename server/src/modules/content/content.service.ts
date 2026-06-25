@@ -44,6 +44,7 @@ export class ContentService {
             id: true,
             nickname: true,
             avatarUrl: true,
+            isCreator: true,
             creatorProfile: { select: { title: true } },
           },
         },
@@ -63,6 +64,8 @@ export class ContentService {
         nickname: c.creator.nickname,
         avatarUrl: c.creator.avatarUrl,
         title: c.creator.creatorProfile?.title ?? null,
+        // 已取消 Creator（隐退）时仍展示其署名，但前端不再允许跳转人物页
+        isActive: c.creator.isCreator,
       },
     };
   }

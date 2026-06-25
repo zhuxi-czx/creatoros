@@ -26,7 +26,12 @@ export default function ContentDetailPage() {
   }
 
   const openCreator = () => {
-    if (data?.creator?.id) Taro.navigateTo({ url: `/pages/creator-detail/index?id=${data.creator.id}` })
+    if (!data?.creator?.id) return
+    if (data.creator.isActive === false) {
+      Taro.showToast({ title: '该 Creator 已隐退', icon: 'none' })
+      return
+    }
+    Taro.navigateTo({ url: `/pages/creator-detail/index?id=${data.creator.id}` })
   }
 
   if (loading) {
