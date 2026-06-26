@@ -74,6 +74,6 @@ $accent: #C9A96E;
 }
 
 // 活动列表
-.event-list { padding: 8rpx 32rpx 200rpx; }
-.empty-state { text-align: center; padding: 80rpx; }
+.event-list { padding: 8rpx 32rpx 0; } // 底部留白交给 .discover-page 的 padding-bottom，避免叠加
+.empty-state { text-align: center; padding: 32rpx; } // 「没有更多了」上下对称的小间距
 .empty-text { font-size: 28rpx; color: #999; }
