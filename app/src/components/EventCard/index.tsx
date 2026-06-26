@@ -35,12 +35,12 @@ export default function EventCard({ event, onClick }: EventCardProps) {
   const placeholderColors = [0, 1, 2].map(
     (i) => AVATAR_COLORS[(colorIndex + i * placeStep) % AVATAR_COLORS.length],
   )
-  const avatarCount = endedNotJoined
-    ? 0
-    : canSignup
-      ? placeholderColors.length
-      : avatars.length > 0
-        ? avatars.length
+  const avatarCount = canSignup
+    ? placeholderColors.length
+    : avatars.length > 0
+      ? avatars.length
+      : endedNotJoined
+        ? placeholderColors.length
         : Math.min(5, signupCount)
 
   return (
@@ -84,9 +84,7 @@ export default function EventCard({ event, onClick }: EventCardProps) {
         </View>
         <View className='card-bottom'>
           <View className='avatar-stack' style={{ width: avatarCount > 0 ? `${avatarCount * 32 + 32}rpx` : '0' }}>
-            {endedNotJoined
-              ? null
-              : canSignup
+            {canSignup
               ? placeholderColors.map((c, i) => (
                   <View key={i} className='avatar-circle' style={{ left: `${i * 32}rpx`, zIndex: i + 1, background: c }}>
                     {i === placeholderColors.length - 1 ? <Text className='avatar-q'>?</Text> : null}
@@ -103,7 +101,7 @@ export default function EventCard({ event, onClick }: EventCardProps) {
                 ))}
           </View>
           {endedNotJoined
-            ? <Text className='signup-count'>欢迎下次参与</Text>
+            ? <Text className='signup-count'>下次参与</Text>
             : signupCount > 0
             ? <Text className='signup-count'>{signupCount}人已报名</Text>
             : canSignup
