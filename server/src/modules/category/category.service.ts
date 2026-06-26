@@ -12,7 +12,14 @@ export class CategoryService {
 
   /** 发现页顶部分类标签。 */
   async listForApp() {
-    const cats = await this.prisma.category.findMany({ orderBy: { order: 'asc' } });
+    const cats = await this.prisma.category.findMany({
+      orderBy: { order: 'asc' },
+      include: {
+        _count: { select: { events: { where: { status: { in: LIVE_STATUS as any } } } } },
+      },
+    });
+    // 默认按有效活动数降序（活动多的分类靠前）；活动数相同再按手动 order 升序
+    cats.sort((a, b) => b._count.events - a._count.events || a.order - b.order);
     return cats.map((c) => ({ id: c.id, name: c.name, icon: c.icon, iconPath: iconInner(c.icon) }));
   }
 
