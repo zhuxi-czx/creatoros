@@ -21,6 +21,7 @@ export default function Discover() {
   const [categories, setCategories] = useState<Category[]>([])
   const [columns, setColumns] = useState<ColumnConfig[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [keyword, setKeyword] = useState('')
   const [searchResults, setSearchResults] = useState<Event[]>([])
   const [searching, setSearching] = useState(false)
@@ -39,8 +40,8 @@ export default function Discover() {
     try { setColumns((await getColumns()) || []) } catch { /* */ }
   }
   const loadEvents = async (silent = false) => {
-    try { if (!silent) setLoading(true); const res = await getEvents(1, 20); setEvents(res?.data ?? []) }
-    catch (e) { console.error(e) } finally { if (!silent) setLoading(false) }
+    try { if (!silent) { setLoading(true); setError(false) } const res = await getEvents(1, 20); setEvents(res?.data ?? []) }
+    catch (e) { console.error(e); if (!silent) setError(true) } finally { if (!silent) setLoading(false) }
   }
 
   const toCategory = (id: string) => Taro.navigateTo({ url: `/pages/category/index?id=${id}` })
@@ -132,6 +133,8 @@ export default function Discover() {
           <View className='event-list'>
             {loading ? (
               <View className='empty-state'><Text className='empty-text'>加载中...</Text></View>
+            ) : error ? (
+              <View className='empty-state' onClick={() => loadEvents()}><Text className='empty-text'>加载失败，点击重试</Text></View>
             ) : events.length === 0 ? (
               <View className='empty-state'><Text className='empty-text'>暂无活动</Text></View>
             ) : (

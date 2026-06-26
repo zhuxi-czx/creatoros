@@ -37,7 +37,7 @@ export default function EventCard({ event, onClick }: EventCardProps) {
           <Image className='cover-image' src={resolveImageUrl(event.coverUrl)} mode='aspectFill' lazyLoad />
         ) : (
           <View className='cover-placeholder' style={{ background: AVATAR_COLORS[colorIndex % AVATAR_COLORS.length] }}>
-            <Text className='cover-text'>{event.title.slice(0, 2)}</Text>
+            <Text className='cover-text'>{(event.title || '').slice(0, 2)}</Text>
           </View>
         )}
         {event.isGuestShare && (
@@ -72,8 +72,8 @@ export default function EventCard({ event, onClick }: EventCardProps) {
           <View className='avatar-stack' style={{ width: avatarCount > 0 ? `${avatarCount * 40 + 24}rpx` : '0' }}>
             {avatars.length > 0
               ? avatars.map((s, i) => (
-                  <View key={s.user.id} className='avatar-circle' style={{ left: `${i * 40}rpx`, zIndex: i + 1, background: s.user.avatarUrl ? undefined : AVATAR_COLORS[i % AVATAR_COLORS.length] }}>
-                    {s.user.avatarUrl ? <Image className='avatar-img' src={resolveImageUrl(s.user.avatarUrl)} mode='aspectFill' /> : null}
+                  <View key={s.user?.id || i} className='avatar-circle' style={{ left: `${i * 40}rpx`, zIndex: i + 1, background: s.user?.avatarUrl ? undefined : AVATAR_COLORS[i % AVATAR_COLORS.length] }}>
+                    {s.user?.avatarUrl ? <Image className='avatar-img' src={resolveImageUrl(s.user.avatarUrl)} mode='aspectFill' /> : null}
                   </View>
                 ))
               : [0, 1, 2, 3, 4].slice(0, avatarCount).map((i) => (

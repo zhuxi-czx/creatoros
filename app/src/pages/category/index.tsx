@@ -9,13 +9,18 @@ import './index.scss'
 export default function CategoryPageView() {
   const { id } = Taro.getCurrentInstance().router?.params || {}
   const [data, setData] = useState<CategoryPage | null>(null)
+  const [error, setError] = useState(false)
 
-  useEffect(() => {
-    if (id) getCategoryPage(id).then(setData).catch(() => {})
-  }, [id])
+  const load = () => {
+    if (!id) return
+    setError(false)
+    getCategoryPage(id).then(setData).catch(() => setError(true))
+  }
+  useEffect(() => { load() }, [id])
 
   const toEvent = (eid: string) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${eid}` })
 
+  if (error) return <View className='cat-page'><View className='empty'><Text className='empty-text'>加载失败</Text><View onClick={load} style={{ marginTop: '20rpx', padding: '12rpx 36rpx', background: '#C9A96E', borderRadius: '30rpx' }}><Text style={{ color: '#fff', fontSize: '26rpx' }}>点击重试</Text></View></View></View>
   if (!data) return <View className='cat-page'><Text className='loading'>加载中...</Text></View>
 
   return (

@@ -60,7 +60,7 @@ export default function EventDetail() {
   }
 
   const handleSignup = async () => {
-    if (!event || !id) return
+    if (!event || !id || signing) return
     // 已报名 → 弹出报名详情弹窗（不再直接取消）
     if (event.isSignedUp) {
       setShowInfo(true)

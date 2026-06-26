@@ -11,15 +11,20 @@ const COLOR: Record<string, string> = { FEATURED: '#5E9E87', PLANF: '#B49C76', G
 export default function ColumnPageView() {
   const { type } = Taro.getCurrentInstance().router?.params || {}
   const [data, setData] = useState<ColumnPage | null>(null)
+  const [error, setError] = useState(false)
 
-  useEffect(() => {
-    if (type) getColumnPage(type).then(setData).catch(() => {})
-  }, [type])
+  const load = () => {
+    if (!type) return
+    setError(false)
+    getColumnPage(type).then(setData).catch(() => setError(true))
+  }
+  useEffect(() => { load() }, [type])
 
   const toEvent = (eid: string) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${eid}` })
   const toMembership = () => Taro.navigateTo({ url: '/pages/membership/index' })
   const bg = COLOR[type || ''] || '#5E9E87'
 
+  if (error) return <View className='col-page'><View className='empty'><Text className='empty-text'>加载失败</Text><View className='col-cta' onClick={load} style={{ background: '#fff', marginTop: '20rpx' }}><Text className='col-cta-text'>点击重试</Text></View></View></View>
   if (!data) return <View className='col-page'><Text className='loading'>加载中...</Text></View>
 
   return (

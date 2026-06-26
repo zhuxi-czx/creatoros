@@ -16,6 +16,8 @@ export class SignupService {
 
   async signupForEvent(userId: string, eventId: string) {
     return this.prisma.$transaction(async (tx) => {
+      // 行锁：序列化并发报名，防「读 count → 判断 → 插入」超卖
+      await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${eventId} FOR UPDATE`;
       // Check event exists and is published
       const event = await tx.event.findUnique({
         where: { id: eventId },
@@ -161,19 +163,27 @@ export class SignupService {
       throw new BadRequestException('退款处理中，请稍后查看');
     }
 
-    // 免费/未支付：直接取消
-    await this.prisma.signup.update({
-      where: { id: signup.id },
-      data: { status: 'CANCELLED' },
-    });
-
-    // If event was FULL, reopen it to PUBLISHED
-    if (event.status === 'FULL') {
-      await this.prisma.event.update({
-        where: { id: eventId },
-        data: { status: 'PUBLISHED' },
+    // 免费/未支付：直接取消 + 退还会员免费名额（同事务，保证原子）
+    await this.prisma.$transaction(async (tx) => {
+      await tx.signup.update({
+        where: { id: signup.id },
+        data: { status: 'CANCELLED' },
       });
-    }
+      // 退还本次消耗的会员免费名额（会员免费名额报名 orderId 为 null，走此路径）
+      const m = await tx.membership.findUnique({ where: { userId } });
+      if (m) {
+        await tx.membershipBenefitUsage.deleteMany({
+          where: { membershipId: m.id, eventId },
+        });
+      }
+      // If event was FULL, reopen it to PUBLISHED
+      if (event.status === 'FULL') {
+        await tx.event.update({
+          where: { id: eventId },
+          data: { status: 'PUBLISHED' },
+        });
+      }
+    });
 
     return { success: true, refunded: false };
   }

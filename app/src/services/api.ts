@@ -1,4 +1,5 @@
 import Taro from '@tarojs/taro'
+import { useAuthStore } from '../stores/useAuthStore'
 
 // 生产域名（HTTPS，nginx 443 反代到 4000）。小程序合法域名即此。
 const SERVER_HOST = 'https://creatorbar.cn'
@@ -29,8 +30,11 @@ export async function request<T = any>(url: string, method: 'GET' | 'POST' | 'PU
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve(res.data as T)
         } else if (res.statusCode === 401) {
+          // token 失效：清理 storage + 内存 store，避免「假登录」卡死
           Taro.removeStorageSync('h5_token')
-          reject(new Error('Unauthorized'))
+          Taro.removeStorageSync('user')
+          try { useAuthStore.getState().logout() } catch { /* 忽略 */ }
+          reject(new Error('登录已过期，请重新登录'))
         } else {
           reject(new Error((res.data as any)?.message || 'Request failed'))
         }

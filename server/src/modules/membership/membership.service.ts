@@ -23,7 +23,10 @@ export interface Pricing {
 export function periodKeyOf(startAt: Date, now = new Date()): string {
   let months =
     (now.getFullYear() - startAt.getFullYear()) * 12 + (now.getMonth() - startAt.getMonth());
-  if (now.getDate() < startAt.getDate()) months -= 1; // 本月还没到入会日 → 算上一个会员月
+  // 入会日可能超过当月天数（如 31 日入会遇到 2 月）→ 以当月最后一天为界，避免短月丢失免费名额
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const anchor = Math.min(startAt.getDate(), daysInMonth);
+  if (now.getDate() < anchor) months -= 1; // 本月还没到入会日锚点 → 算上一个会员月
   return String(months);
 }
 
@@ -54,7 +57,12 @@ export class MembershipService {
     const m = await this.prisma.membership.findUnique({ where: { userId } });
     if (!m) return null;
     if (m.status === 'ACTIVE' && m.expireAt < new Date()) {
-      await this.prisma.membership.update({ where: { userId }, data: { status: 'EXPIRED' } });
+      // 带守卫的条件更新，避免覆盖并发的续费写（续费会把 expireAt 推到未来）
+      const now = new Date();
+      await this.prisma.membership.updateMany({
+        where: { userId, status: 'ACTIVE', expireAt: { lt: now } },
+        data: { status: 'EXPIRED' },
+      });
       return { ...m, status: 'EXPIRED' as const };
     }
     return m;

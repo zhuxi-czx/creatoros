@@ -81,7 +81,10 @@ export class OrderService {
           if (m) {
             await tx.membershipBenefitUsage
               .create({ data: { membershipId: m.id, periodKey: periodKeyOf(m.startAt), benefitType: freeType as any, eventId } })
-              .catch(() => undefined); // 名额已用（unique 冲突）幂等忽略
+              .catch((e: any) => {
+                // 仅唯一冲突（名额已用）幂等忽略；其它错误抛出回滚事务，避免静默绕过名额限制
+                if (e?.code !== 'P2002') throw e;
+              });
           }
         }
       });
@@ -176,10 +179,12 @@ export class OrderService {
       }
       if (order.status === 'PAID') return; // 幂等
 
-      await tx.order.update({
-        where: { id: order.id },
+      // 乐观锁：仅 PENDING/CLOSED 可转 PAID，防并发回调与查单重复处理（与退款保持一致）
+      const locked = await tx.order.updateMany({
+        where: { id: order.id, status: { in: ['PENDING', 'CLOSED'] } },
         data: { status: 'PAID', transactionId, paidAt: new Date(), closedAt: null },
       });
+      if (locked.count === 0) return; // 已被其它请求处理
 
       // 会员订单：支付成功即开通/续费（续费从原到期日顺延，入会日不变）
       if (order.type === 'MEMBERSHIP') {
@@ -398,6 +403,8 @@ export class OrderService {
     eventId: string,
     maxCapacity: number,
   ) {
+    // 行锁：序列化并发抢名额，避免「读 count → 判断 → 插入」的 TOCTOU 超卖
+    await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${eventId} FOR UPDATE`;
     const existing = await tx.signup.findUnique({
       where: { userId_eventId: { userId, eventId } },
     });
