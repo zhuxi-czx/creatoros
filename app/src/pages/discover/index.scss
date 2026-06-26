@@ -28,7 +28,17 @@ $accent: #C9A96E;
 .section-title-text { font-size: 34rpx; font-weight: 700; color: #1A1A1A; }
 
 // 专栏卡（横滑）
-.column-scroll { white-space: nowrap; padding: 4rpx 32rpx; }
+.column-scroll { white-space: nowrap; padding: 4rpx 0; }
+.column-card:first-child { margin-left: 32rpx; }
+
+// 顶部标题 + 搜索
+.top-nav { display: flex; align-items: center; gap: 20rpx; padding: 16rpx 32rpx 8rpx; }
+.nav-title { font-size: 40rpx; font-weight: 700; color: #1A1A1A; flex-shrink: 0; }
+.search-bar { flex: 1; display: flex; align-items: center; gap: 12rpx; height: 72rpx; background: #F0F0F0; border-radius: 36rpx; padding: 0 28rpx; }
+.search-icon { width: 32rpx; height: 32rpx; background-size: contain; background-repeat: no-repeat; background-position: center; }
+.search-ph { font-size: 26rpx; color: #BBB; }
+// 分类图标
+.cat-icon { width: 28rpx; height: 28rpx; background-size: contain; background-repeat: no-repeat; background-position: center; margin-right: 8rpx; }
 .column-card {
   position: relative;
   display: inline-block;

@@ -136,6 +136,17 @@ export default function EventForm() {
     })
   }, [form])
 
+  // 点选任意图设为封面（移到第 1 张）；封面即小程序卡片预览图
+  const setAsCover = useCallback((index: number) => {
+    setImageUrls(prev => {
+      if (index <= 0) return prev
+      const arr = [...prev]
+      const [item] = arr.splice(index, 1)
+      arr.unshift(item)
+      return arr
+    })
+  }, [])
+
   const handleSubmit = async (values: Record<string, unknown>, publish = false) => {
     const data: EventFormData = {
       title: values.title as string,
@@ -219,7 +230,7 @@ export default function EventForm() {
               </Button>
             </Upload>
             <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
-              支持 JPG/PNG 格式，单张不超过 5MB，建议宽高比 16:9，系统会自动裁剪压缩
+              支持 JPG/PNG 格式，单张不超过 5MB，建议 3:4 竖图，系统会自动居中裁剪为 3:4（封面即卡片预览图）
             </div>
             {imageUrls.length > 0 && (
               <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -247,6 +258,11 @@ export default function EventForm() {
                       {index === 0 ? '封面(第1张)' : `第${index + 1}张`}
                     </span>
                     <Space size={2}>
+                      {index !== 0 && (
+                        <Button type="link" size="small" onClick={() => setAsCover(index)}>
+                          设为封面
+                        </Button>
+                      )}
                       <Button
                         type="text"
                         size="small"

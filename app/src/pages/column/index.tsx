@@ -3,6 +3,7 @@ import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { getColumnPage, type ColumnPage } from '../../services/column'
 import EventCard from '../../components/EventCard'
+import { lucideUri } from '../../utils/lucide'
 import './index.scss'
 
 const COLOR: Record<string, string> = { FEATURED: '#5E9E87', PLANF: '#B49C76', GUEST: '#D08C72' }
@@ -24,7 +25,13 @@ export default function ColumnPageView() {
   return (
     <View className='col-page'>
       <View className='col-header' style={{ background: bg }}>
-        <Text className='col-title'>{data.config?.title}</Text>
+        <View className='col-toprow'>
+          <View className='col-iconbox'>
+            {data.config?.icon ? <View className='col-icon' style={{ backgroundImage: `url("${lucideUri(data.config.icon, bg)}")` }} /> : null}
+          </View>
+          <Text className='col-title'>{data.config?.title}</Text>
+          <View className='col-share' style={{ backgroundImage: `url("${lucideUri('share-2', '#ffffff')}")` }} />
+        </View>
         {data.config?.intro ? <Text className='col-intro'>{data.config.intro}</Text> : null}
         {type === 'PLANF'
           ? <View className='col-cta' onClick={toMembership}><Text className='col-cta-text'>查看会员权益 ›</Text></View>

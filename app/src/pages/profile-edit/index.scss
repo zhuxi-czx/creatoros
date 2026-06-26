@@ -1,77 +1,143 @@
-.profile-edit-page {
+.pe-page {
   min-height: 100vh;
-  background: #f5f5f7;
-  padding-bottom: 100px;
+  background: #F7F7F7;
+  padding: 0 16px 100px;
+  box-sizing: border-box;
 }
 
-.form {
-  padding: 16px;
+/* 头像区 */
+.pe-avatar-group {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 0 12px;
 }
+.pe-avatar-btn {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  background: transparent;
+  line-height: normal;
+  overflow: visible;
 
-.form-group {
-  background: #fff;
-  border-radius: 16px;
-  padding: 16px;
-
-  .form-label {
-    font-size: 13px;
-    color: #999;
-    display: block;
-    margin-bottom: 10px;
-  }
-
-  .form-input {
-    font-size: 15px;
-    color: #1d1d1f;
-    border: none;
-    width: 100%;
-    padding: 0;
-    background: transparent;
-  }
-
-  .form-textarea {
-    font-size: 15px;
-    color: #1d1d1f;
-    width: 100%;
-    min-height: 80px;
-    background: transparent;
-  }
-
-  .char-count {
-    font-size: 11px;
-    color: #ccc;
-    display: block;
-    text-align: right;
-    margin-top: 4px;
-  }
+  &::after { border: none; }
 }
-
-.tags-grid {
+.pe-avatar-img { width: 88px; height: 88px; border-radius: 50%; }
+.pe-avatar-ph {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: #F2EFE9;
+  border: 1px dashed #D8C9A8;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-
-  .tag-item {
-    padding: 6px 14px;
-    border-radius: 20px;
-    background: #f0f0f5;
-    font-size: 13px;
-    color: #666;
-    border: 1px solid transparent;
-
-    &.selected {
-      background: #efefff;
-      border-color: #6366f1;
-      color: #6366f1;
-      font-weight: 500;
-    }
-  }
+  align-items: center;
+  justify-content: center;
 }
+.pe-avatar-ph-text { font-size: 32px; color: #C9A96E; line-height: 1; }
+.pe-avatar-cam {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #C9A96E;
+  border: 2px solid #F7F7F7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pe-avatar-cam-icon { width: 15px; height: 15px; background-size: contain; background-repeat: no-repeat; background-position: center; }
+.pe-avatar-tip { font-size: 13px; color: #999; }
 
-.bottom-action {
+/* 白卡 */
+.pe-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 2px 16px;
+  margin-bottom: 14px;
+}
+.pe-card--pad { padding: 16px; }
+
+/* 表单行 */
+.pe-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+}
+.pe-row--seg { padding: 12px 0; }
+.pe-label { font-size: 14px; font-weight: 500; color: #1A1A1A; flex-shrink: 0; }
+.pe-input {
+  flex: 1;
+  text-align: right;
+  font-size: 14px;
+  color: #1A1A1A;
+  margin-left: 16px;
+}
+.pe-divider { height: 1px; background: #F0F0F0; transform: scaleY(0.5); }
+
+/* 跳转选择行的值 + 箭头 */
+.pe-linkval { display: flex; align-items: center; gap: 4px; }
+.pe-val { font-size: 14px; color: #666; }
+.pe-val--ph { color: #BBB; }
+.pe-chevron { width: 16px; height: 16px; background-size: contain; background-repeat: no-repeat; background-position: center; }
+
+/* 性别胶囊单选 */
+.pe-seg { display: flex; gap: 8px; }
+.pe-chip {
+  padding: 6px 16px;
+  border-radius: 14px;
+  background: #F2F2F2;
+}
+.pe-chip--on { background: #C9A96E; }
+.pe-chip-text { font-size: 13px; font-weight: 500; color: #666; }
+.pe-chip-text--on { color: #fff; font-weight: 600; }
+
+/* 个人简介 */
+.pe-bio-box {
+  background: #F6F7F9;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 10px;
+}
+.pe-textarea {
+  width: 100%;
+  min-height: 70px;
+  font-size: 13px;
+  color: #1A1A1A;
+  line-height: 1.6;
+  background: transparent;
+}
+.pe-count { font-size: 11px; color: #CCC; display: block; text-align: right; margin-top: 6px; }
+
+/* 个性标签 chips */
+.pe-tagsarea { padding: 14px 0; }
+.pe-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+.pe-tag {
+  padding: 6px 14px;
+  border-radius: 14px;
+  background: #F2EFE8;
+}
+.pe-tag-text { font-size: 13px; font-weight: 500; color: #8A7A5A; }
+.pe-tag-add {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 14px;
+  border: 1px solid #C9A96E;
+}
+.pe-tag-add-icon { width: 13px; height: 13px; background-size: contain; background-repeat: no-repeat; background-position: center; }
+.pe-tag-add-text { font-size: 13px; font-weight: 600; color: #C9A96E; }
+.pe-tag-hint { font-size: 11px; color: #BBB; display: block; margin-top: 10px; }
+
+/* 保存 */
+.pe-bottom {
   position: fixed;
   bottom: 0;
   left: 0;
@@ -80,104 +146,15 @@
   padding-bottom: calc(12px + env(safe-area-inset-bottom));
   background: #fff;
   border-top: 1px solid #f0f0f0;
-
-  .save-btn {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    border-radius: 14px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 16px;
-    font-weight: 600;
-
-    &.loading {
-      opacity: 0.7;
-    }
-  }
 }
-
-/* 头像选择 */
-.avatar-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 24px 0 4px;
-}
-.avatar-btn {
-  width: 80px;
-  height: 80px;
-  padding: 0;
-  margin: 0;
-  border-radius: 50%;
-  background: transparent;
-  line-height: normal;
-  overflow: hidden;
-
-  &::after { border: none; }
-}
-.avatar-img {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-}
-.avatar-ph {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: #F2EFE9;
-  border: 1px dashed #D8C9A8;
+.pe-save {
+  background: #C9A96E;
+  border-radius: 14px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.avatar-ph-text {
-  font-size: 32px;
-  color: #C9A96E;
-  line-height: 1;
-}
-.avatar-tip {
-  font-size: 12px;
-  color: #999;
-}
 
-/* —— Creator 资料 —— */
-.creator-section-title {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 4px 4px 12px;
+  &.loading { opacity: 0.7; }
 }
-.creator-section-text {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1a1a1a;
-}
-.creator-section-hint {
-  font-size: 12px;
-  color: #999;
-}
-.cover-box {
-  width: 100%;
-  height: 180px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #f0f0f0;
-}
-.cover-img {
-  width: 100%;
-  height: 100%;
-}
-.cover-ph {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.cover-ph-text {
-  color: #aaa;
-  font-size: 14px;
-}
+.pe-save-text { color: #fff; font-size: 16px; font-weight: 600; }

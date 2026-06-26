@@ -342,16 +342,14 @@ export default function EventDetail() {
         )}
       </ScrollView>
 
-      {/* 会员轻引导（非会员 + 付费/专享活动） */}
-      {!event.isSignedUp && event.pricing && !event.pricing.isMember && ((event.price ?? 0) > 0 || event.isPlanfExclusive) && (
-        <View className='member-hint' onClick={() => Taro.navigateTo({ url: '/pages/membership/index' })}>
-          <Text className='member-hint-text'>♛ 开通 PlanF 会员，{event.isPlanfExclusive ? '专享活动免费畅享' : '日常活动享 8 折'}</Text>
-          <Text className='member-hint-arrow'>查看 ›</Text>
-        </View>
-      )}
-
       {/* Bottom Action */}
       <View className='bottom-action'>
+        {/* PlanF 引导气泡：常驻按钮上方；仅非会员 + 付费/专享 + 未报名 + 未结束时显示 */}
+        {!event.isSignedUp && !signupClosed && event.pricing && !event.pricing.isMember && ((event.price ?? 0) > 0 || event.isPlanfExclusive) && (
+          <View className='member-bubble' onClick={() => Taro.navigateTo({ url: '/pages/membership/index' })}>
+            <Text className='member-bubble-text'>♛ 开通 PlanF 会员，{event.isPlanfExclusive ? '专享活动免费畅享' : '日常活动享 8 折'}</Text>
+          </View>
+        )}
         <View
           className={`action-btn ${event.isSignedUp ? 'signed' : ''} ${!event.isSignedUp && signupClosed ? 'disabled' : ''} ${signing ? 'loading' : ''}`}
           onClick={handleSignup}

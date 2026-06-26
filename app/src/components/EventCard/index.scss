@@ -6,7 +6,7 @@ $accent: #C9A96E;
   margin-bottom: 28rpx;
   display: flex;
   flex-direction: row;
-  height: 340rpx;
+  height: 400rpx;
   overflow: hidden;
   transition: transform 0.15s ease, opacity 0.15s ease;
 }
@@ -14,7 +14,7 @@ $accent: #C9A96E;
 // 左侧竖图
 .card-cover {
   position: relative;
-  width: 256rpx;
+  width: 300rpx; // 3:4 竖图（300×400rpx）
   height: 100%;
   flex-shrink: 0;
 }
@@ -60,7 +60,7 @@ $accent: #C9A96E;
 .info-label { font-size: 24rpx; color: #666; }
 .status-dot { width: 12rpx; height: 12rpx; border-radius: 50%; }
 
-.card-bottom { display: flex; align-items: center; gap: 16rpx; }
+.card-bottom { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
 .avatar-stack { position: relative; height: 48rpx; }
 .avatar-circle {
   position: absolute;

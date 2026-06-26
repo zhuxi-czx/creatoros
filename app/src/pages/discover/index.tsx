@@ -6,6 +6,7 @@ import type { Event } from '../../services/event'
 import { getCategories, type Category } from '../../services/category'
 import { getColumns, type ColumnConfig } from '../../services/column'
 import { resolveImageUrl } from '../../services/api'
+import { lucideUri } from '../../utils/lucide'
 import EventCard from '../../components/EventCard'
 import './index.scss'
 
@@ -44,11 +45,20 @@ export default function Discover() {
 
   return (
     <View className='discover-page'>
+      {/* 顶部：标题 + 搜索 */}
+      <View className='top-nav'>
+        <View className='search-bar'>
+          <View className='search-icon' style={{ backgroundImage: `url("${lucideUri('search', '#bbbbbb')}")` }} />
+          <Text className='search-ph'>搜索活动、主题、场地</Text>
+        </View>
+      </View>
+
       {/* 分类标签 */}
       <View className='cat-bar'>
         <ScrollView scrollX className='cat-scroll' enableFlex>
           {categories.map((c) => (
             <View key={c.id} className='cat-item' onClick={() => toCategory(c.id)}>
+              {c.icon ? <View className='cat-icon' style={{ backgroundImage: `url("${lucideUri(c.icon, '#666666')}")` }} /> : null}
               <Text className='cat-text'>{c.name}</Text>
             </View>
           ))}

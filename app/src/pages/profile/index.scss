@@ -14,7 +14,7 @@ $accent: #C9A96E;
   left: 0;
   right: 0;
   width: 100%;
-  height: 536rpx;
+  height: 700rpx;
   z-index: 0;
 }
 
@@ -23,7 +23,7 @@ $accent: #C9A96E;
   top: 0;
   left: 0;
   right: 0;
-  height: 536rpx;
+  height: 700rpx;
   background: linear-gradient(to bottom, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.32) 60%, #F7F7F7 100%);
   z-index: 1;
 }
@@ -105,6 +105,77 @@ $accent: #C9A96E;
   font-weight: 500;
   color: #fff;
 }
+
+// 头图上的简介 + 编辑资料按钮
+.header-bio {
+  font-size: 26rpx;
+  color: rgba(255,255,255,0.92);
+  line-height: 1.7;
+  text-align: center;
+  margin-top: 22rpx;
+  padding: 0 24rpx;
+}
+.header-edit {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-top: 24rpx;
+  padding: 12rpx 28rpx;
+  border-radius: 32rpx;
+  background: rgba(255,255,255,0.18);
+  border: 1rpx solid rgba(255,255,255,0.4);
+}
+.header-edit-icon {
+  width: 26rpx;
+  height: 26rpx;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.header-edit-text { font-size: 26rpx; font-weight: 600; color: #fff; }
+
+// PlanF 会员卡（金色渐变 + crown + 三行）
+.mem-card {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  background: linear-gradient(115deg,#E7C98B,#B5863C);
+  border-radius: 24rpx;
+  padding: 28rpx 32rpx;
+  margin-bottom: 24rpx;
+}
+.mem-left { flex: 1; display: flex; flex-direction: column; gap: 10rpx; min-width: 0; }
+.mem-title-row { display: flex; align-items: center; gap: 12rpx; }
+.mem-crown { width: 36rpx; height: 36rpx; background-size: contain; background-repeat: no-repeat; background-position: center; }
+.mem-title { font-size: 32rpx; font-weight: 700; color: #fff; }
+.mem-sub { font-size: 24rpx; color: rgba(255,255,255,0.92); display: block; }
+.mem-arrow { width: 36rpx; height: 36rpx; background-size: contain; background-repeat: no-repeat; background-position: center; flex-shrink: 0; }
+
+// 优惠券入口（白卡 + 米底 ticket 图标 + 副标题）
+.coupon-entry {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 24rpx;
+}
+.coupon-icon {
+  width: 76rpx;
+  height: 76rpx;
+  border-radius: 50%;
+  background: #FBF4E6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.coupon-ticket { width: 38rpx; height: 38rpx; background-size: contain; background-repeat: no-repeat; background-position: center; }
+.coupon-text { flex: 1; display: flex; flex-direction: column; gap: 4rpx; min-width: 0; }
+.coupon-title { font-size: 30rpx; font-weight: 600; color: #1A1A1A; }
+.coupon-sub { font-size: 24rpx; color: #999; }
+.coupon-arrow { width: 32rpx; height: 32rpx; background-size: contain; background-repeat: no-repeat; background-position: center; flex-shrink: 0; }
 
 // Content Area（整页原生滚动；底部留白避开悬浮药丸 TabBar）
 .profile-content {

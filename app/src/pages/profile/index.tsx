@@ -6,6 +6,9 @@ import PhoneLoginSheet from '../../components/PhoneLoginSheet'
 import { resolveImageUrl } from '../../services/api'
 import { getMySignups } from '../../services/user'
 import type { SignupRecord } from '../../services/user'
+import { getMembership, type MembershipInfo } from '../../services/membership'
+import { getCoupons, type Coupon } from '../../services/coupon'
+import { lucideUri } from '../../utils/lucide'
 import './index.scss'
 
 export default function Profile() {
@@ -13,6 +16,8 @@ export default function Profile() {
   const [signups, setSignups] = useState<SignupRecord[]>([])
   const [loading, setLoading] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
+  const [mem, setMem] = useState<MembershipInfo | null>(null)
+  const [coupons, setCoupons] = useState<Coupon[]>([])
 
   useEffect(() => {
     if (token) {
@@ -37,6 +42,8 @@ export default function Profile() {
     } finally {
       setLoading(false)
     }
+    try { setMem(await getMembership()) } catch { /* 未登录忽略 */ }
+    try { setCoupons((await getCoupons()) || []) } catch { /* 未登录忽略 */ }
   }
 
   const handleLogout = () => {
@@ -68,6 +75,11 @@ export default function Profile() {
     user?.generation,
     ...(user?.tags || []),
   ].filter(Boolean) as string[]
+  const usableCoupons = coupons.filter((c) => c.status === 'UNUSED')
+  const couponMax = usableCoupons.reduce((m, c) => Math.max(m, c.amount), 0)
+  const couponSub = usableCoupons.length > 0
+    ? `${usableCoupons.length} 张可用 · ${couponMax / 100} 元酒水券`
+    : '暂无可用优惠券'
 
   return (
     <View className='profile-page'>
@@ -110,6 +122,19 @@ export default function Profile() {
             ))}
           </View>
         )}
+
+        {/* 个人简介（叠在头图上，居中）*/}
+        {token && user?.bio && (
+          <Text className='header-bio'>{user.bio}</Text>
+        )}
+
+        {/* 编辑资料按钮 */}
+        {token && (
+          <View className='header-edit' onClick={handleEditProfile}>
+            <View className='header-edit-icon' style={{ backgroundImage: `url("${lucideUri('pencil', '#ffffff')}")` }} />
+            <Text className='header-edit-text'>编辑资料</Text>
+          </View>
+        )}
       </View>
 
       {/* Content Area（整页原生滚动，不用固定高度 ScrollView）*/}
@@ -127,35 +152,36 @@ export default function Profile() {
 
         {/* PlanF 会员卡 */}
         {token && (
-          <View onClick={() => Taro.navigateTo({ url: '/pages/membership/index' })}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'linear-gradient(115deg,#E7C98B,#B5863C)', borderRadius: '24rpx', padding: '28rpx 32rpx', marginBottom: '24rpx' }}>
-            <View>
-              <Text style={{ fontSize: '30rpx', fontWeight: 700, color: '#fff' }}>♛ PlanF 会员</Text>
-              <Text style={{ fontSize: '24rpx', color: 'rgba(255,255,255,0.9)', display: 'block', marginTop: '6rpx' }}>专属活动 · 日常活动 8 折</Text>
+          <View className='mem-card' onClick={() => Taro.navigateTo({ url: '/pages/membership/index' })}>
+            <View className='mem-left'>
+              <View className='mem-title-row'>
+                <View className='mem-crown' style={{ backgroundImage: `url("${lucideUri('crown', '#ffffff')}")` }} />
+                <Text className='mem-title'>PlanF 会员</Text>
+              </View>
+              {mem?.isMember ? (
+                <>
+                  <Text className='mem-sub'>有效期至 {mem.expireAt?.slice(0, 10)}</Text>
+                  <Text className='mem-sub'>本月大咖免费名额 · 剩 {mem.guestFreeLeft ?? 0} 次</Text>
+                </>
+              ) : (
+                <Text className='mem-sub'>开通享专属活动 · 日常活动 8 折</Text>
+              )}
             </View>
-            <Text style={{ fontSize: '34rpx', color: '#fff' }}>›</Text>
+            <View className='mem-arrow' style={{ backgroundImage: `url("${lucideUri('chevron-right', '#ffffff')}")` }} />
           </View>
         )}
 
         {/* 我的优惠券入口 */}
         {token && (
-          <View onClick={() => Taro.navigateTo({ url: '/pages/coupon/index' })}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff', borderRadius: '24rpx', padding: '28rpx 32rpx', marginBottom: '24rpx' }}>
-            <Text style={{ fontSize: '30rpx', fontWeight: 600, color: '#1A1A1A' }}>🎟 我的优惠券</Text>
-            <Text style={{ fontSize: '34rpx', color: '#ccc' }}>›</Text>
-          </View>
-        )}
-
-        {/* Bio Card */}
-        {token && (
-          <View className='bio-card'>
-            <View className='bio-header'>
-              <Text className='bio-title'>个人简介</Text>
-              <View className='edit-btn' onClick={handleEditProfile}>
-                <Text className='edit-text'>编辑</Text>
-              </View>
+          <View className='coupon-entry' onClick={() => Taro.navigateTo({ url: '/pages/coupon/index' })}>
+            <View className='coupon-icon'>
+              <View className='coupon-ticket' style={{ backgroundImage: `url("${lucideUri('ticket', '#C9A96E')}")` }} />
             </View>
-            <Text className='bio-content'>{user?.bio || '暂无简介'}</Text>
+            <View className='coupon-text'>
+              <Text className='coupon-title'>我的优惠券</Text>
+              <Text className='coupon-sub'>{couponSub}</Text>
+            </View>
+            <View className='coupon-arrow' style={{ backgroundImage: `url("${lucideUri('chevron-right', '#cccccc')}")` }} />
           </View>
         )}
 

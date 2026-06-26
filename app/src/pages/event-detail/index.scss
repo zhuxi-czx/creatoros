@@ -35,13 +35,13 @@ $accent: #C9A96E;
   flex: 1;
   overflow: hidden;
   box-sizing: border-box;
-  padding-bottom: 190rpx; // 给固定底栏留出空间，内容不被遮挡
+  padding-bottom: 260rpx; // 给固定底栏（含会员气泡）留出空间，内容不被遮挡
 }
 
 // Cover
 .cover-section {
   position: relative;
-  height: 440rpx;
+  height: 1000rpx; // 3:4 全宽竖图（750×1000rpx）
   overflow: hidden;
 }
 
@@ -254,6 +254,8 @@ $accent: #C9A96E;
   right: 0;
   bottom: 0;
   z-index: 100;
+  display: flex;
+  flex-direction: column;
   padding: 16rpx 32rpx;
   padding-bottom: calc(16rpx + env(safe-area-inset-bottom, 16rpx));
   background: #fff;
@@ -424,14 +426,24 @@ $accent: #C9A96E;
 
 // 会员价 / 轻引导（2.0）
 .member-price { font-size: 24rpx; color: #C9A96E; font-weight: 600; margin-top: 4rpx; }
-.member-hint {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 0 32rpx 12rpx;
+.member-bubble {
+  position: relative;
+  align-self: center; // 在底栏内居中，hug 内容形成小气泡
+  margin-bottom: 20rpx;
   background: #FBF4E6;
-  border-radius: 16rpx;
-  padding: 20rpx 28rpx;
+  border-radius: 20rpx;
+  padding: 14rpx 30rpx;
 }
-.member-hint-text { font-size: 25rpx; color: #A9824A; font-weight: 500; }
-.member-hint-arrow { font-size: 25rpx; color: #A9824A; }
+.member-bubble::after { // 向下三角，指向报名按钮
+  content: '';
+  position: absolute;
+  bottom: -10rpx;
+  left: 50%;
+  margin-left: -10rpx;
+  width: 0;
+  height: 0;
+  border-left: 10rpx solid transparent;
+  border-right: 10rpx solid transparent;
+  border-top: 10rpx solid #FBF4E6;
+}
+.member-bubble-text { font-size: 25rpx; color: #A9824A; font-weight: 600; }
