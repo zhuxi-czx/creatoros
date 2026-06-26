@@ -186,6 +186,7 @@ export default function UserList() {
         cancelText="取消"
         destroyOnClose
         width={360}
+        centered
       >
         <p style={{ color: '#888', marginBottom: 8 }}>请输入查看密码以显示完整手机号</p>
         <Input.Password
