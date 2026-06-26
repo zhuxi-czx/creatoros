@@ -2,13 +2,13 @@
 // 小程序 rich-text 忽略 class、块级标签默认无 margin，
 // 这里给常见标签注入内联 style（rich-text 认内联 style）。
 const STYLE: Record<string, string> = {
-  p: 'margin:0 0 22rpx;font-size:29rpx;line-height:1.85;color:#333;letter-spacing:0.5rpx',
+  p: 'margin:0 0 24rpx;font-size:30rpx;line-height:1.9;color:#2d2d2d;letter-spacing:0.6rpx;text-align:justify;text-align-last:left',
   h1: 'margin:30rpx 0 16rpx;font-size:40rpx;font-weight:700;line-height:1.4;color:#1a1a1a',
   h2: 'margin:28rpx 0 14rpx;font-size:36rpx;font-weight:700;line-height:1.4;color:#1a1a1a',
   h3: 'margin:24rpx 0 12rpx;font-size:32rpx;font-weight:600;line-height:1.4;color:#1a1a1a',
   ul: 'margin:0 0 20rpx;padding-left:40rpx',
   ol: 'margin:0 0 20rpx;padding-left:40rpx',
-  li: 'margin:0 0 8rpx;font-size:29rpx;line-height:1.85;color:#333;letter-spacing:0.5rpx',
+  li: 'margin:0 0 8rpx;font-size:30rpx;line-height:1.9;color:#2d2d2d;letter-spacing:0.6rpx;text-align:justify;text-align-last:left',
   blockquote: 'margin:0 0 20rpx;padding:14rpx 24rpx;border-left:6rpx solid #C9A96E;background:#FBF7EF;color:#666',
   img: 'max-width:100%;height:auto;border-radius:12rpx;margin:8rpx 0;display:block',
 }
@@ -18,9 +18,11 @@ export function enrichHtml(html?: string): string {
   const s = html.trim()
   // 纯文本（无标签，旧数据）：保留换行
   if (!/<[a-z!][\s\S]*?>/i.test(s)) {
-    return `<div style="font-size:29rpx;line-height:1.85;color:#333;letter-spacing:0.5rpx">${s.replace(/\n/g, '<br>')}</div>`
+    return `<div style="font-size:30rpx;line-height:1.9;color:#2d2d2d;letter-spacing:0.6rpx;text-align:justify;text-align-last:left">${s.replace(/\n/g, '<br>')}</div>`
   }
-  let out = s
+  // 不间断空格还原成普通空格：允许中英文/数字间断行，justify 时均匀分摊，
+  // 避免"还没有 winner"这类把英文单词整体挤到下一行、导致上一行字距被拉大
+  let out = s.replace(/&nbsp;/g, ' ')
   // Quill 空段落（<p></p> / <p><br></p>）在小程序 rich-text 里会坍缩，
   // 用 &nbsp; 撑出一行高度，保留后台编辑时的空行
   out = out.replace(/<p>\s*(<br\s*\/?>)?\s*<\/p>/gi, '<p style="margin:0;font-size:28rpx;line-height:1.8"> </p>')
