@@ -27,7 +27,13 @@ export default function EventCard({ event, onClick }: EventCardProps) {
   const d = dateStr ? formatDate(dateStr, 'short') : ''
   const t = dateStr ? formatDate(dateStr, 'time') : ''
   const displayDate = d && t ? `${d} ${t}` : d
-  const avatarCount = avatars.length > 0 ? avatars.length : Math.min(5, signupCount)
+  const isEmpty = signupCount === 0
+  const PLACEHOLDER_COUNT = 4 // 无人报名时的灰色占位头像数
+  const avatarCount = isEmpty
+    ? PLACEHOLDER_COUNT
+    : avatars.length > 0
+      ? avatars.length
+      : Math.min(5, signupCount)
 
   return (
     <View className='event-card' onClick={onClick} hoverClass='card-hover' hoverStayTime={80}>
@@ -70,7 +76,11 @@ export default function EventCard({ event, onClick }: EventCardProps) {
         </View>
         <View className='card-bottom'>
           <View className='avatar-stack' style={{ width: avatarCount > 0 ? `${avatarCount * 32 + 32}rpx` : '0' }}>
-            {avatars.length > 0
+            {isEmpty
+              ? [0, 1, 2, 3].map((i) => (
+                  <View key={i} className='avatar-circle avatar-empty' style={{ left: `${i * 32}rpx`, zIndex: i + 1 }} />
+                ))
+              : avatars.length > 0
               ? avatars.map((s, i) => (
                   <View key={s.user?.id || i} className='avatar-circle' style={{ left: `${i * 32}rpx`, zIndex: i + 1, background: s.user?.avatarUrl ? undefined : AVATAR_COLORS[i % AVATAR_COLORS.length] }}>
                     {s.user?.avatarUrl ? <Image className='avatar-img' src={resolveImageUrl(s.user.avatarUrl)} mode='aspectFill' /> : null}
@@ -80,7 +90,9 @@ export default function EventCard({ event, onClick }: EventCardProps) {
                   <View key={i} className='avatar-circle' style={{ left: `${i * 32}rpx`, zIndex: i + 1, background: AVATAR_COLORS[(colorIndex + i) % AVATAR_COLORS.length] }} />
                 ))}
           </View>
-          {signupCount > 0 && <Text className='signup-count'>{signupCount}人已报名</Text>}
+          {signupCount > 0
+            ? <Text className='signup-count'>{signupCount}人已报名</Text>
+            : <Text className='signup-count signup-empty'>虚位以待</Text>}
         </View>
       </View>
     </View>
