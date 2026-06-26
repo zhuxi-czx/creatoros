@@ -57,7 +57,7 @@ $accent: #C9A96E;
 }
 .info-item { display: flex; align-items: center; gap: 8rpx; }
 .info-icon-text { font-size: 22rpx; line-height: 1; }
-.info-label { font-size: 26rpx; color: #666; }
+.info-label { font-size: 28rpx; color: #666; } // 对齐详情页 info-value(时间/地点) 字号
 .status-dot { width: 12rpx; height: 12rpx; border-radius: 50%; }
 
 .card-bottom { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
