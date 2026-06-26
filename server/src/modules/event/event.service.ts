@@ -22,6 +22,7 @@ export class EventService {
     limit: number = 20,
     city?: string,
     keyword?: string,
+    userId?: string,
   ) {
     const skip = (page - 1) * limit;
 
@@ -80,8 +81,23 @@ export class EventService {
       this.prisma.event.count({ where }),
     ]);
 
+    // 标记当前用户是否已报名（卡片据此对「已结束且未参与」显示「欢迎下次参与」）
+    let data: any[] = events;
+    if (userId && events.length) {
+      const mine = await this.prisma.signup.findMany({
+        where: {
+          userId,
+          eventId: { in: events.map((e) => e.id) },
+          status: 'CONFIRMED',
+        },
+        select: { eventId: true },
+      });
+      const joined = new Set(mine.map((s) => s.eventId));
+      data = events.map((e) => ({ ...e, isSignedUp: joined.has(e.id) }));
+    }
+
     return {
-      data: events,
+      data,
       total,
       page,
       limit,

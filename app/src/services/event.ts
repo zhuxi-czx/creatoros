@@ -71,8 +71,8 @@ export interface Participant {
   city?: string
 }
 
-export const getEvents = (page = 1, limit = 20, keyword?: string): Promise<EventsResponse> =>
-  request<EventsResponse>(`/events?page=${page}&limit=${limit}${keyword ? `&keyword=${encodeURIComponent(keyword)}` : ''}`)
+export const getEvents = (page = 1, limit = 20, keyword?: string, userId?: string): Promise<EventsResponse> =>
+  request<EventsResponse>(`/events?page=${page}&limit=${limit}${keyword ? `&keyword=${encodeURIComponent(keyword)}` : ''}${userId ? `&userId=${userId}` : ''}`)
 
 export const getFeaturedEvents = (): Promise<Event[]> =>
   request<Event[]>('/events/featured')

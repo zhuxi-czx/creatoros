@@ -49,7 +49,7 @@ export default function Discover() {
   const loadEvents = async (silent = false) => {
     try {
       if (!silent) { setLoading(true); setError(false) }
-      const res = await getEvents(1, 20)
+      const res = await getEvents(1, 20, undefined, Taro.getStorageSync('user')?.id)
       setEvents(res?.data ?? [])
       setPage(1)
       setHasMore((res?.totalPages ?? 1) > 1)
@@ -62,7 +62,7 @@ export default function Discover() {
     setLoadingMore(true)
     try {
       const next = page + 1
-      const res = await getEvents(next, 20)
+      const res = await getEvents(next, 20, undefined, Taro.getStorageSync('user')?.id)
       setEvents((prev) => [...prev, ...(res?.data ?? [])])
       setPage(next)
       setHasMore((res?.totalPages ?? next) > next)
@@ -85,7 +85,7 @@ export default function Discover() {
     setSearching(true)
     searchTimer.current = setTimeout(async () => {
       try {
-        const res = await getEvents(1, 20, kw)
+        const res = await getEvents(1, 20, kw, Taro.getStorageSync('user')?.id)
         setSearchResults(res?.data ?? [])
       } catch (e) { console.error(e) } finally { setSearching(false) }
     }, 300)

@@ -27,14 +27,15 @@ export class EventController {
 
   // Public routes
   @Get('api/events')
-  @Header('Cache-Control', 'public, max-age=30')
+  @Header('Cache-Control', 'private, max-age=10')
   async getPublishedEvents(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Query('city') city?: string,
     @Query('keyword') keyword?: string,
+    @Query('userId') userId?: string,
   ) {
-    return this.eventService.getPublishedEvents(page, limit, city, keyword);
+    return this.eventService.getPublishedEvents(page, limit, city, keyword, userId);
   }
 
   @Get('api/events/featured')

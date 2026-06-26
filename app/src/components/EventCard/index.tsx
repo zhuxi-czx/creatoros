@@ -28,17 +28,20 @@ export default function EventCard({ event, onClick }: EventCardProps) {
   const t = dateStr ? formatDate(dateStr, 'time') : ''
   const displayDate = d && t ? `${d} ${t}` : d
   const isEmpty = signupCount === 0
+  const endedNotJoined = status.state === 'ENDED' && !event.isSignedUp // 已结束且自己没参与
   const canSignup = isEmpty && status.state === 'OPEN' // 仅「报名中」且无人时才引导报名
   // 引导报名时的 3 个彩色占位圈：起始色与步长按活动 id 区分，使不同活动配色/排布不同
   const placeStep = 1 + (colorIndex % 2) // 1 或 2，保证 3 个颜色互不重复
   const placeholderColors = [0, 1, 2].map(
     (i) => AVATAR_COLORS[(colorIndex + i * placeStep) % AVATAR_COLORS.length],
   )
-  const avatarCount = canSignup
-    ? placeholderColors.length
-    : avatars.length > 0
-      ? avatars.length
-      : Math.min(5, signupCount)
+  const avatarCount = endedNotJoined
+    ? 0
+    : canSignup
+      ? placeholderColors.length
+      : avatars.length > 0
+        ? avatars.length
+        : Math.min(5, signupCount)
 
   return (
     <View className='event-card' onClick={onClick} hoverClass='card-hover' hoverStayTime={80}>
@@ -81,7 +84,9 @@ export default function EventCard({ event, onClick }: EventCardProps) {
         </View>
         <View className='card-bottom'>
           <View className='avatar-stack' style={{ width: avatarCount > 0 ? `${avatarCount * 32 + 32}rpx` : '0' }}>
-            {canSignup
+            {endedNotJoined
+              ? null
+              : canSignup
               ? placeholderColors.map((c, i) => (
                   <View key={i} className='avatar-circle' style={{ left: `${i * 32}rpx`, zIndex: i + 1, background: c }}>
                     {i === placeholderColors.length - 1 ? <Text className='avatar-q'>?</Text> : null}
@@ -97,7 +102,9 @@ export default function EventCard({ event, onClick }: EventCardProps) {
                   <View key={i} className='avatar-circle' style={{ left: `${i * 32}rpx`, zIndex: i + 1, background: AVATAR_COLORS[(colorIndex + i) % AVATAR_COLORS.length] }} />
                 ))}
           </View>
-          {signupCount > 0
+          {endedNotJoined
+            ? <Text className='signup-count'>欢迎下次参与</Text>
+            : signupCount > 0
             ? <Text className='signup-count'>{signupCount}人已报名</Text>
             : canSignup
             ? <Text className='signup-count signup-empty'>立即报名</Text>
