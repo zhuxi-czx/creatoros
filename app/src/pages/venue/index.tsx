@@ -63,7 +63,7 @@ export default function VenuePage() {
             </View>
           )}
           <View className='hero-overlay'>
-            <Text className='venue-name'>{venue?.name || '场地'}</Text>
+            <Text className='venue-name' selectable userSelect>{venue?.name || '场地'}</Text>
             {venue?.city && (
               <Text className='venue-city'>📍 {venue.city}</Text>
             )}
@@ -77,7 +77,7 @@ export default function VenuePage() {
               <Text className='info-icon'>📍</Text>
               <View className='info-content'>
                 <Text className='info-label'>地址</Text>
-                <Text className='info-value'>{venue.address}</Text>
+                <Text className='info-value' selectable userSelect>{venue.address}</Text>
               </View>
             </View>
           )}

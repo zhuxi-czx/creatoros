@@ -268,7 +268,7 @@ export default function EventDetail() {
             <View className='info-icon-svg' style={{ backgroundImage: `url("${lucideUri('map-pin', '#C9A96E')}")` }} />
             <View className='info-content'>
               <Text className='info-label'>地点</Text>
-              <Text className='info-value'>
+              <Text className='info-value' selectable userSelect>
                 {event.venue?.name || event.location || '待定'}{event.venue?.id ? ' ›' : ''}
               </Text>
             </View>
@@ -395,7 +395,7 @@ export default function EventDetail() {
               </View>
               <View className='sm-row'>
                 <Text className='sm-label'>地点</Text>
-                <Text className='sm-value'>{event.venue?.name || event.location || '待定'}</Text>
+                <Text className='sm-value' selectable userSelect>{event.venue?.name || event.location || '待定'}</Text>
               </View>
             </View>
             <View className='sm-ok' onClick={() => setShowInfo(false)}>
