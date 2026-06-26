@@ -40,6 +40,7 @@ export default function EventDetail() {
   useShareTimeline(() => ({
     title: event?.title || 'CreatorOS · 一起来玩',
     query: `id=${id}`,
+    imageUrl: event?.coverUrl ? resolveImageUrl(event.coverUrl) : undefined,
   }))
 
   const loadEvent = async (silent = false) => {

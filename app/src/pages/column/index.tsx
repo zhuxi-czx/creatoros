@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text } from '@tarojs/components'
-import Taro, { useShareAppMessage } from '@tarojs/taro'
+import Taro, { useDidShow } from '@tarojs/taro'
 import { getColumnPage, type ColumnPage } from '../../services/column'
 import EventCard from '../../components/EventCard'
 import { resolveImageUrl } from '../../services/api'
@@ -20,7 +20,7 @@ export default function ColumnPageView() {
     getColumnPage(type).then(setData).catch(() => setError(true))
   }
   useEffect(() => { load() }, [type])
-  useShareAppMessage(() => ({ title: data?.config?.title || '敞开 · 专栏', path: `/pages/column/index?type=${type}` }))
+  useDidShow(() => { Taro.hideShareMenu() }) // 专栏页不提供分享，隐藏右上角转发/朋友圈菜单
 
   const toEvent = (eid: string) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${eid}` })
   const toMembership = () => Taro.navigateTo({ url: '/pages/membership/index' })
@@ -40,7 +40,6 @@ export default function ColumnPageView() {
             {(data.config?.iconPath || data.config?.icon) ? <View className='col-icon' style={{ backgroundImage: `url("${data.config.iconPath ? pathToUri(data.config.iconPath, bg) : lucideUri(data.config.icon!, bg)}")` }} /> : null}
           </View>
           <Text className='col-title'>{data.config?.title}</Text>
-          <View className='col-share' style={{ backgroundImage: `url("${lucideUri('share-2', '#ffffff')}")` }} />
         </View>
         {data.config?.intro ? <Text className='col-intro'>{data.config.intro}</Text> : null}
         {type === 'PLANF'
