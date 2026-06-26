@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Image, ScrollView, Swiper, SwiperItem, Button, RichText } from '@tarojs/components'
+import { enrichHtml } from '../../utils/richText'
 import Taro, { useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { lucideUri } from '../../utils/lucide'
 import { getEventDisplay } from '../../utils/eventStatus'
@@ -313,7 +314,7 @@ export default function EventDetail() {
           <View className='desc-card'>
             <Text className='card-title'>活动介绍</Text>
             <View className='desc-rich'>
-              <RichText nodes={event.description} />
+              <RichText nodes={enrichHtml(event.description)} />
             </View>
           </View>
         )}

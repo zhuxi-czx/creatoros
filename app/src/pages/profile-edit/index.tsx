@@ -15,6 +15,7 @@ const chevron = lucideUri('chevron-right', '#CCCCCC')
 
 export default function ProfileEdit() {
   const { user, login, token } = useAuthStore()
+  const welcome = Taro.getCurrentInstance().router?.params?.welcome
   const [nickname, setNickname] = useState(user?.nickname || '')
   const [bio, setBio] = useState(user?.bio || '')
   const [city, setCity] = useState(user?.city || '')
@@ -73,6 +74,11 @@ export default function ProfileEdit() {
 
   return (
     <View className='pe-page'>
+      {welcome ? (
+        <View className='pe-welcome'>
+          <Text className='pe-welcome-text'>👋 欢迎加入！完善头像和昵称，让大家更好地认识你</Text>
+        </View>
+      ) : null}
       {/* 头像区 */}
       <View className='pe-avatar-group'>
         <Button className='pe-avatar-btn' openType='chooseAvatar' onChooseAvatar={onChooseAvatar}>

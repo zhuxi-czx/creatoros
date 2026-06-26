@@ -14,6 +14,7 @@ import { CategoryModule } from './modules/category/category.module';
 import { ColumnModule } from './modules/column/column.module';
 import { CouponModule } from './modules/coupon/coupon.module';
 import { MembershipModule } from './modules/membership/membership.module';
+import { IconModule } from './modules/icon/icon.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { MembershipModule } from './modules/membership/membership.module';
     ColumnModule,
     CouponModule,
     MembershipModule,
+    IconModule,
   ],
 })
 export class AppModule {}

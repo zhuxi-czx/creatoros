@@ -144,8 +144,11 @@ model ColumnConfig {
   intro     String?
   icon      String?
   bgUrl     String? // 专栏卡背景图
+  order     Int        @default(0) // 发现页排序（升序）
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+
+  @@index([order])
 }
 
 model Event {

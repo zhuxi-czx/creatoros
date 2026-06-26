@@ -120,4 +120,10 @@ export class EventController {
   async adminDeleteEvent(@Param('id') id: string) {
     return this.eventService.adminDeleteEvent(id);
   }
+
+  @UseGuards(AdminGuard)
+  @Post('api/admin/events/:id/signups')
+  async adminAddSignup(@Param('id') id: string, @Body() dto: { userId: string }) {
+    return this.eventService.adminAddSignup(id, dto.userId);
+  }
 }

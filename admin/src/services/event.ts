@@ -110,6 +110,11 @@ export async function refundSignup(signupId: string): Promise<{ status: string; 
   return api.post(`/admin/signups/${signupId}/refund`) as any
 }
 
+// 后台手动添加报名成员
+export async function adminAddSignup(eventId: string, userId: string): Promise<any> {
+  return api.post(`/admin/events/${eventId}/signups`, { userId }) as any
+}
+
 export async function uploadImage(file: File, type?: string): Promise<{ url: string }> {
   const formData = new FormData()
   formData.append('file', file)

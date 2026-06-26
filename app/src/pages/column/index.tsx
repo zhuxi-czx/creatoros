@@ -3,7 +3,7 @@ import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { getColumnPage, type ColumnPage } from '../../services/column'
 import EventCard from '../../components/EventCard'
-import { lucideUri } from '../../utils/lucide'
+import { lucideUri, pathToUri } from '../../utils/lucide'
 import './index.scss'
 
 const COLOR: Record<string, string> = { FEATURED: '#5E9E87', PLANF: '#B49C76', GUEST: '#D08C72' }
@@ -27,7 +27,7 @@ export default function ColumnPageView() {
       <View className='col-header' style={{ background: bg }}>
         <View className='col-toprow'>
           <View className='col-iconbox'>
-            {data.config?.icon ? <View className='col-icon' style={{ backgroundImage: `url("${lucideUri(data.config.icon, bg)}")` }} /> : null}
+            {(data.config?.iconPath || data.config?.icon) ? <View className='col-icon' style={{ backgroundImage: `url("${data.config.iconPath ? pathToUri(data.config.iconPath, bg) : lucideUri(data.config.icon!, bg)}")` }} /> : null}
           </View>
           <Text className='col-title'>{data.config?.title}</Text>
           <View className='col-share' style={{ backgroundImage: `url("${lucideUri('share-2', '#ffffff')}")` }} />

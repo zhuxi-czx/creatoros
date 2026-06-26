@@ -68,9 +68,7 @@ export default function Profile() {
   }
 
   const displayName = user?.nickname || '未设置昵称'
-  const genderSymbol = user?.gender === '男' ? '♂' : user?.gender === '女' ? '♀' : user?.gender
-  const tags = [
-    genderSymbol,
+  const otherTags = [
     user?.mbti,
     user?.zodiac,
     user?.generation,
@@ -113,10 +111,15 @@ export default function Profile() {
           </View>
         )}
 
-        {/* Tags */}
-        {token && tags.length > 0 && (
+        {/* Tags：性别单独着色（男蓝/女粉）+ 居中，其余标签常规 */}
+        {token && (user?.gender || otherTags.length > 0) && (
           <View className='tags-row'>
-            {tags.map((tag, i) => (
+            {user?.gender && (
+              <View className={`tag-badge gender-badge ${user.gender === '男' ? 'gender-male' : user.gender === '女' ? 'gender-female' : 'gender-other'}`}>
+                <Text className='gender-symbol'>{user.gender === '男' ? '♂' : user.gender === '女' ? '♀' : user.gender}</Text>
+              </View>
+            )}
+            {otherTags.map((tag, i) => (
               <View key={i} className='tag-badge'>
                 <Text className='tag-text'>{tag}</Text>
               </View>

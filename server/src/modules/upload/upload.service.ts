@@ -5,7 +5,7 @@ import sharp = require('sharp');
 
 const ASPECT_RATIOS = {
   banner: { width: 16, height: 9, maxWidth: 1200 },
-  event: { width: 3, height: 4, maxWidth: 900 }, // 活动封面竖图（3:4）
+  event: { width: 3, height: 4, maxWidth: 1500 }, // 活动封面竖图（3:4），高分辨率避免详情页全宽发糊
   venue: { width: 4, height: 3, maxWidth: 900 },
   avatar: { width: 1, height: 1, maxWidth: 400 },
   default: { width: 16, height: 9, maxWidth: 1200 },
@@ -59,7 +59,7 @@ export class UploadService {
       await sharp(filePath)
         .resize(cropWidth, cropHeight, { fit: 'cover', position: 'centre' })
         .resize(maxWidth, null, { withoutEnlargement: true })
-        .webp({ quality: 80 })
+        .webp({ quality: 88 })
         .toFile(mainFile);
 
       // Thumbnail: 20px wide, blurred, WebP, ~1-2KB

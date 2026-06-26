@@ -95,7 +95,10 @@ $accent: #C9A96E;
 }
 
 .tag-badge {
-  padding: 8rpx 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10rpx 20rpx;
   border-radius: 24rpx;
   background: rgba(255, 255, 255, 0.18);
 }
@@ -105,6 +108,17 @@ $accent: #C9A96E;
   font-weight: 500;
   color: #fff;
 }
+
+// 性别徽章：居中 + 男蓝/女粉
+.gender-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40rpx;
+}
+.gender-symbol { font-size: 28rpx; line-height: 1; color: #fff; font-weight: 700; }
+.gender-male .gender-symbol { color: #6BB0F5; }   // 男：蓝
+.gender-female .gender-symbol { color: #F58FB4; } // 女：粉
 
 // 头图上的简介 + 编辑资料按钮
 .header-bio {

@@ -5,6 +5,7 @@ export interface Category {
   id: string
   name: string
   icon?: string
+  iconPath?: string
 }
 
 export interface CategoryPage {
@@ -13,6 +14,7 @@ export interface CategoryPage {
   intro?: string
   coverUrl?: string
   icon?: string
+  iconPath?: string
   events: Event[]
 }
 

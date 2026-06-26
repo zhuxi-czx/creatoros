@@ -152,8 +152,8 @@ export default function EventList() {
               <Button type="link" size="small" danger>下架</Button>
             </Popconfirm>
           )}
-          {record.status === 'CANCELLED' && isEnded(record.date) && (
-            <Popconfirm title="删除后不可恢复，确定删除该活动？" onConfirm={() => handleDelete(record.id)}>
+          {record.status === 'CANCELLED' && (
+            <Popconfirm title="删除后不可恢复，确定删除该活动？" okText="确定删除" cancelText="取消" okButtonProps={{ danger: true }} onConfirm={() => handleDelete(record.id)}>
               <Button type="link" size="small" danger>删除</Button>
             </Popconfirm>
           )}

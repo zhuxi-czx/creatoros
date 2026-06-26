@@ -33,6 +33,10 @@ export default function PhoneLoginSheet({ visible, onClose, onSuccess, tabBar }:
       Taro.showToast({ title: '登录成功', icon: 'success' })
       onClose()
       onSuccess?.()
+      // 首次登录（尚无昵称）引导完善头像与昵称
+      if (!res.user?.nickname) {
+        setTimeout(() => Taro.navigateTo({ url: '/pages/profile-edit/index?welcome=1' }), 700)
+      }
     } catch (err) {
       Taro.hideLoading()
       Taro.showToast({ title: '登录失败，请重试', icon: 'none' })

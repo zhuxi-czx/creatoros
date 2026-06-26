@@ -6,7 +6,7 @@ import type { Event } from '../../services/event'
 import { getCategories, type Category } from '../../services/category'
 import { getColumns, type ColumnConfig } from '../../services/column'
 import { resolveImageUrl } from '../../services/api'
-import { lucideUri } from '../../utils/lucide'
+import { lucideUri, pathToUri } from '../../utils/lucide'
 import EventCard from '../../components/EventCard'
 import './index.scss'
 
@@ -96,10 +96,10 @@ export default function Discover() {
         <>
           {/* 分类标签 */}
           <View className='cat-bar'>
-            <ScrollView scrollX className='cat-scroll' enableFlex>
+            <ScrollView scrollX className='cat-scroll'>
               {categories.map((c) => (
                 <View key={c.id} className='cat-item' onClick={() => toCategory(c.id)}>
-                  {c.icon ? <View className='cat-icon' style={{ backgroundImage: `url("${lucideUri(c.icon, '#666666')}")` }} /> : null}
+                  {(c.iconPath || c.icon) ? <View className='cat-icon' style={{ backgroundImage: `url("${c.iconPath ? pathToUri(c.iconPath, '#666666') : lucideUri(c.icon!, '#666666')}")` }} /> : null}
                   <Text className='cat-text'>{c.name}</Text>
                 </View>
               ))}

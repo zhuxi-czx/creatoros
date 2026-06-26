@@ -22,12 +22,12 @@ export default function EventCard({ event, onClick }: EventCardProps) {
   const signupCount = event._count?.signups ?? event.currentParticipants ?? 0
   const status = getEventDisplay(event.date || event.startTime, signupCount, event.maxCapacity || event.maxParticipants)
   const colorIndex = hashId(event.id)
-  const avatars = event.signups?.slice(0, 3) ?? []
+  const avatars = event.signups?.slice(0, 5) ?? []
   const dateStr = event.date || event.startTime
   const d = dateStr ? formatDate(dateStr, 'short') : ''
   const t = dateStr ? formatDate(dateStr, 'time') : ''
   const displayDate = d && t ? `${d} ${t}` : d
-  const avatarCount = avatars.length > 0 ? avatars.length : Math.min(3, signupCount)
+  const avatarCount = avatars.length > 0 ? avatars.length : Math.min(5, signupCount)
 
   return (
     <View className='event-card' onClick={onClick} hoverClass='card-hover' hoverStayTime={80}>
@@ -76,7 +76,7 @@ export default function EventCard({ event, onClick }: EventCardProps) {
                     {s.user.avatarUrl ? <Image className='avatar-img' src={resolveImageUrl(s.user.avatarUrl)} mode='aspectFill' /> : null}
                   </View>
                 ))
-              : [0, 1, 2].slice(0, avatarCount).map((i) => (
+              : [0, 1, 2, 3, 4].slice(0, avatarCount).map((i) => (
                   <View key={i} className='avatar-circle' style={{ left: `${i * 40}rpx`, zIndex: 3 - i, background: AVATAR_COLORS[(colorIndex + i) % AVATAR_COLORS.length] }} />
                 ))}
           </View>

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import {
   Card, Table, Button, Modal, Form, Input, InputNumber, Switch,
-  Space, message, Popconfirm, Image, Upload,
+  Space, message, Popconfirm, Image, Upload, Select,
 } from 'antd'
 import { PlusOutlined, UploadOutlined } from '@ant-design/icons'
+import { IconSelect, IconImg } from '../utils/lucideIcons'
 import type { ColumnsType } from 'antd/es/table'
 import {
   getCategories, createCategory, updateCategory, deleteCategory, type Category,
@@ -56,7 +57,7 @@ export default function CategoryList() {
   }
 
   const columns: ColumnsType<Category> = [
-    { title: '图标', dataIndex: 'icon', width: 90, render: (i) => i || '—' },
+    { title: '图标', dataIndex: 'icon', width: 70, align: 'center' as const, render: (i: string) => i ? <IconImg name={i} size={20} /> : '—' },
     { title: '名称', dataIndex: 'name' },
     { title: '活动数', width: 80, render: (_, r) => r._count?.events ?? 0 },
     { title: '群友聚会·会员每月免费', dataIndex: 'memberFreeMonthly', width: 170, render: (v) => (v ? '是' : '否') },
@@ -82,7 +83,7 @@ export default function CategoryList() {
         <Form form={form} layout="vertical">
           <Form.Item label="名称" name="name" rules={[{ required: true, message: '请输入名称' }]}><Input maxLength={20} /></Form.Item>
           <Form.Item label="介绍（分类页展示）" name="intro"><Input.TextArea rows={3} maxLength={200} /></Form.Item>
-          <Form.Item label="图标（lucide 名，如 music / wine）" name="icon"><Input placeholder="music" /></Form.Item>
+          <Form.Item label="图标" name="icon"><IconSelect /></Form.Item>
           <Form.Item label="封面图（分类页 banner）">
             <Space direction="vertical">
               {cover && <Image src={resolveImageUrl(cover)} width={200} style={{ borderRadius: 8 }} />}

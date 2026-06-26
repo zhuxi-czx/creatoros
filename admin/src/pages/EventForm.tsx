@@ -97,8 +97,8 @@ export default function EventForm() {
       message.error('仅支持 JPG、PNG、GIF、WebP 格式')
       return false
     }
-    if (file.size > 5 * 1024 * 1024) {
-      message.error('图片大小不能超过 5MB')
+    if (file.size > 10 * 1024 * 1024) {
+      message.error('图片大小不能超过 10MB')
       return false
     }
     try {
@@ -230,7 +230,7 @@ export default function EventForm() {
               </Button>
             </Upload>
             <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
-              支持 JPG/PNG 格式，单张不超过 5MB，建议 3:4 竖图，系统会自动居中裁剪为 3:4（封面即卡片预览图）
+              支持 JPG/PNG 格式，单张不超过 10MB，建议 3:4 竖图，系统会自动居中裁剪为 3:4（封面即卡片预览图）
             </div>
             {imageUrls.length > 0 && (
               <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>

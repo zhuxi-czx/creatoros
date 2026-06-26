@@ -30,4 +30,10 @@ export class ColumnController {
   ) {
     return this.svc.adminUpdate(type.toUpperCase(), dto);
   }
+
+  @UseGuards(AdminGuard)
+  @Put('api/admin/columns/:type/move')
+  move(@Param('type') type: string, @Body() dto: { dir: 'up' | 'down' }) {
+    return this.svc.adminMove(type.toUpperCase(), dto.dir);
+  }
 }

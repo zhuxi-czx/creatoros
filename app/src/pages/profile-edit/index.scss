@@ -4,6 +4,13 @@
   padding: 0 16px 100px;
   box-sizing: border-box;
 }
+.pe-welcome {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: #FBF7EF;
+  border-radius: 10px;
+}
+.pe-welcome-text { font-size: 13px; color: #A9824A; line-height: 1.6; }
 
 /* 头像区 */
 .pe-avatar-group {

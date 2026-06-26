@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Card, Table, Tag, Space, Typography, Avatar, Button, Popconfirm, message } from 'antd'
+import { Card, Table, Tag, Space, Typography, Avatar, Button, Popconfirm, message, Modal, Select } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { getEventDetail, getEventSignups, refundSignup, type Event } from '../services/event'
+import { getEventDetail, getEventSignups, refundSignup, adminAddSignup, type Event } from '../services/event'
+import { getUsers } from '../services/user'
 
 const { Title, Text } = Typography
 
@@ -40,6 +41,10 @@ export default function EventSignups() {
   const [signups, setSignups] = useState<SignupRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [refundingId, setRefundingId] = useState<string | null>(null)
+  const [addOpen, setAddOpen] = useState(false)
+  const [userOptions, setUserOptions] = useState<{ value: string; label: string }[]>([])
+  const [selUser, setSelUser] = useState<string>()
+  const [adding, setAdding] = useState(false)
 
   useEffect(() => {
     if (id) loadData(id)
@@ -76,6 +81,30 @@ export default function EventSignups() {
     } finally {
       setRefundingId(null)
     }
+  }
+
+  const openAdd = async () => {
+    setAddOpen(true)
+    setSelUser(undefined)
+    try {
+      const res: any = await getUsers(1, 200)
+      setUserOptions((res?.data || []).map((u: any) => ({
+        value: u.id,
+        label: `${u.nickname || '未设置'}（${u.uid || u.phone || u.id.slice(-4)}）`,
+      })))
+    } catch { message.error('加载用户失败') }
+  }
+  const handleAdd = async () => {
+    if (!selUser || !id) return
+    try {
+      setAdding(true)
+      await adminAddSignup(id, selUser)
+      message.success('已添加报名')
+      setAddOpen(false)
+      await loadData(id)
+    } catch (err: any) {
+      message.error(err?.response?.data?.message || '添加失败')
+    } finally { setAdding(false) }
   }
 
   const confirmedCount = signups.filter(s => s.status === 'CONFIRMED').length
@@ -172,10 +201,13 @@ export default function EventSignups() {
 
   return (
     <div>
-      <Space style={{ marginBottom: 24 }}>
-        <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate('/events')} />
-        <Title level={4} style={{ margin: 0 }}>报名详情</Title>
-      </Space>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+        <Space>
+          <Button type="text" icon={<ArrowLeftOutlined />} onClick={() => navigate('/events')} />
+          <Title level={4} style={{ margin: 0 }}>报名详情</Title>
+        </Space>
+        <Button type="primary" onClick={openAdd}>+ 添加成员</Button>
+      </div>
 
       {event && (
         <Card bordered={false} style={{ borderRadius: 12, marginBottom: 16 }} styles={{ body: { padding: 16 } }}>
@@ -201,6 +233,26 @@ export default function EventSignups() {
           pagination={{ pageSize: 20, showSizeChanger: false }}
         />
       </Card>
+
+      <Modal
+        title="添加报名成员"
+        open={addOpen}
+        onCancel={() => setAddOpen(false)}
+        onOk={handleAdd}
+        confirmLoading={adding}
+        okText="确认添加"
+        okButtonProps={{ disabled: !selUser }}
+      >
+        <Select
+          showSearch
+          style={{ width: '100%' }}
+          placeholder="搜索并选择用户（昵称 / 编号）"
+          value={selUser}
+          onChange={setSelUser}
+          options={userOptions}
+          optionFilterProp="label"
+        />
+      </Modal>
     </div>
   )
 }

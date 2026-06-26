@@ -7,6 +7,7 @@ export interface ColumnConfigItem {
   intro?: string
   icon?: string
   bgUrl?: string
+  order?: number
 }
 
 export const getColumns = (): Promise<ColumnConfigItem[]> =>
@@ -16,3 +17,6 @@ export const updateColumn = (
   type: string,
   data: Partial<ColumnConfigItem>,
 ): Promise<ColumnConfigItem> => api.put(`/admin/columns/${type}`, data) as any
+
+export const moveColumn = (type: string, dir: 'up' | 'down'): Promise<ColumnConfigItem[]> =>
+  api.put(`/admin/columns/${type}/move`, { dir }) as any

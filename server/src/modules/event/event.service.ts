@@ -68,7 +68,7 @@ export class EventService {
           },
           signups: {
             where: { status: 'CONFIRMED' },
-            take: 3,
+            take: 5,
             orderBy: { createdAt: 'desc' },
             select: { user: { select: { id: true, avatarUrl: true } } },
           },
@@ -350,19 +350,26 @@ export class EventService {
     if (event.status !== 'CANCELLED') {
       throw new BadRequestException('请先下架该活动再删除');
     }
-    const start = new Date(event.date);
-    const endedAt = new Date(
-      start.getFullYear(), start.getMonth(), start.getDate() + 1, 0, 0, 0, 0,
-    );
-    if (Date.now() < endedAt.getTime()) {
-      throw new BadRequestException('活动尚未结束，不能删除');
-    }
     await this.prisma.$transaction(async (tx) => {
       await tx.order.deleteMany({ where: { eventId: id } });
       await tx.signup.deleteMany({ where: { eventId: id } });
       await tx.event.delete({ where: { id } });
     });
     return { success: true };
+  }
+
+  /** 后台手动添加报名成员（免费、状态 CONFIRMED）。 */
+  async adminAddSignup(eventId: string, userId: string) {
+    const event = await this.prisma.event.findUnique({ where: { id: eventId } });
+    if (!event) throw new NotFoundException('活动不存在');
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('用户不存在');
+    const exist = await this.prisma.signup.findFirst({ where: { eventId, userId } });
+    if (exist) {
+      if (exist.status === 'CONFIRMED') throw new BadRequestException('该用户已报名');
+      return this.prisma.signup.update({ where: { id: exist.id }, data: { status: 'CONFIRMED' } });
+    }
+    return this.prisma.signup.create({ data: { eventId, userId, status: 'CONFIRMED' } });
   }
 
   async adminCopyEvent(id: string) {

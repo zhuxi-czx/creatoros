@@ -9,6 +9,7 @@ export interface ColumnConfig {
   title: string
   intro?: string
   icon?: string
+  iconPath?: string
   bgUrl?: string
 }
 

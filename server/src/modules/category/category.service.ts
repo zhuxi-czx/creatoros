@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpsertCategoryDto } from './dto/upsert-category.dto';
 import { LIVE_STATUS, EVENT_CARD_INCLUDE } from '../../common/event-card';
+import { iconInner } from '../../common/lucide-icons';
 
 @Injectable()
 export class CategoryService {
@@ -12,7 +13,7 @@ export class CategoryService {
   /** 发现页顶部分类标签。 */
   async listForApp() {
     const cats = await this.prisma.category.findMany({ orderBy: { order: 'asc' } });
-    return cats.map((c) => ({ id: c.id, name: c.name, icon: c.icon }));
+    return cats.map((c) => ({ id: c.id, name: c.name, icon: c.icon, iconPath: iconInner(c.icon) }));
   }
 
   /** 分类页：分类信息 + 该分类活动（开始时间倒序）。 */
@@ -30,6 +31,7 @@ export class CategoryService {
       intro: cat.intro,
       coverUrl: cat.coverUrl,
       icon: cat.icon,
+      iconPath: iconInner(cat.icon),
       events,
     };
   }
