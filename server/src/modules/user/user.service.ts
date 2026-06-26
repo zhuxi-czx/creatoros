@@ -64,7 +64,7 @@ export class UserService {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { event: { date: 'desc' } },
     });
 
     return signups;
