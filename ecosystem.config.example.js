@@ -14,6 +14,15 @@ module.exports = {
         ADMIN_PASSWORD: '<ADMIN_PASSWORD>',
         WX_APP_ID: '<WX_APP_ID>',
         WX_APP_SECRET: '<WX_APP_SECRET>',
+        // 生产建议限定跨域来源（逗号分隔）；缺省则放行所有来源
+        CORS_ORIGIN: 'https://creatorbar.cn,https://admin.creatorbar.cn',
+        // 微信支付（商户号下来后填齐这 6 项；未配则支付链路不可用，免费报名不受影响）
+        WX_PAY_MCH_ID: '<WX_PAY_MCH_ID>',
+        WX_PAY_SERIAL_NO: '<WX_PAY_CERT_SERIAL_NO>',
+        WX_PAY_API_V: '<WX_PAY_APIV3_KEY>',
+        WX_PAY_PRIVATE_KEY_PATH: '/root/creatoros/server/cert/apiclient_key.pem',
+        WX_PAY_CERT_PATH: '/root/creatoros/server/cert/apiclient_cert.pem',
+        WX_PAY_NOTIFY_URL: 'https://creatorbar.cn/api/payment/notify',
       },
     },
     {

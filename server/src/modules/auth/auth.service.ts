@@ -21,6 +21,18 @@ interface WxSession {
 // access_token 进程内缓存（微信 access_token 有效期 ~7200s）
 let accessTokenCache: { token: string; expireAt: number } | null = null;
 
+/** 带超时的微信 API 请求（默认 6s）→ JSON。避免微信侧抖动让请求一直挂起、占连接。 */
+async function wxFetch(url: string, init?: any, timeoutMs = 6000): Promise<any> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const resp = await fetch(url, { ...(init || {}), signal: ctrl.signal });
+    return await resp.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -74,8 +86,7 @@ export class AuthService {
 
     let wxSession: WxSession;
     try {
-      const response = await fetch(url);
-      wxSession = (await response.json()) as WxSession;
+      wxSession = (await wxFetch(url)) as WxSession;
     } catch (error) {
       throw new InternalServerErrorException('Failed to connect to WeChat API');
     }
@@ -128,7 +139,7 @@ export class AuthService {
     const accessToken = await this.getAccessToken();
     let phone: string | undefined;
     try {
-      const resp = await fetch(
+      const data: any = await wxFetch(
         `https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token=${accessToken}`,
         {
           method: 'POST',
@@ -136,7 +147,6 @@ export class AuthService {
           body: JSON.stringify({ code: phoneCode }),
         },
       );
-      const data: any = await resp.json();
       if (data.errcode === 0 && data.phone_info) {
         phone = data.phone_info.purePhoneNumber;
       } else {
@@ -180,8 +190,7 @@ export class AuthService {
     }
     const url = `https://api.weixin.qq.com/sns/jscode2session?appid=${appId}&secret=${appSecret}&js_code=${code}&grant_type=authorization_code`;
     try {
-      const response = await fetch(url);
-      return (await response.json()) as WxSession;
+      return (await wxFetch(url)) as WxSession;
     } catch (error) {
       throw new InternalServerErrorException('Failed to connect to WeChat API');
     }
@@ -194,10 +203,9 @@ export class AuthService {
     }
     const appId = process.env.WX_APP_ID;
     const appSecret = process.env.WX_APP_SECRET;
-    const resp = await fetch(
+    const data: any = await wxFetch(
       `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${appId}&secret=${appSecret}`,
     );
-    const data: any = await resp.json();
     if (!data.access_token) {
       throw new InternalServerErrorException(`获取 access_token 失败: ${data.errmsg || data.errcode}`);
     }

@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { PaymentModule } from './modules/payment/payment.module';
@@ -19,6 +21,7 @@ import { IconModule } from './modules/icon/icon.module';
 @Module({
   imports: [
     ScheduleModule.forRoot(),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]), // 全局兜底限流：120 次/分/IP
     PrismaModule,
     AuthModule,
     UserModule,
@@ -35,5 +38,6 @@ import { IconModule } from './modules/icon/icon.module';
     MembershipModule,
     IconModule,
   ],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

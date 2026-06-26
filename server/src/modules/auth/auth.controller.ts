@@ -11,6 +11,7 @@ import { WxLoginDto } from './dto/wx-login.dto';
 import { PhoneLoginDto } from './dto/phone-login.dto';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('api/auth')
 export class AuthController {
@@ -26,6 +27,7 @@ export class AuthController {
     return this.authService.phoneLogin(dto.loginCode, dto.phoneCode);
   }
 
+  @Throttle({ default: { ttl: 60000, limit: 5 } }) // 后台登录严格限流：5 次/分/IP，防撞库
   @Post('admin-login')
   async adminLogin(@Body() adminLoginDto: AdminLoginDto) {
     return this.authService.adminLogin(adminLoginDto);
