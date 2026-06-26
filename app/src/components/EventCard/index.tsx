@@ -28,15 +28,15 @@ export default function EventCard({ event, onClick }: EventCardProps) {
   const t = dateStr ? formatDate(dateStr, 'time') : ''
   const displayDate = d && t ? `${d} ${t}` : d
   const isEmpty = signupCount === 0
-  const endedNotJoined = status.state === 'ENDED' && !event.isSignedUp // 已结束且自己没参与
+  const notJoined = (status.state === 'CLOSED' || status.state === 'ENDED') && !event.isSignedUp // 已无法报名(报名结束/已结束)且本人未参与
   const canSignup = isEmpty && status.state === 'OPEN' // 仅「报名中」且无人时才引导报名
   // 引导报名时的 3 个彩色占位圈：起始色与步长按活动 id 区分，使不同活动配色/排布不同
   const placeStep = 1 + (colorIndex % 2) // 1 或 2，保证 3 个颜色互不重复
   const placeholderColors = [0, 1, 2].map(
     (i) => AVATAR_COLORS[(colorIndex + i * placeStep) % AVATAR_COLORS.length],
   )
-  // 彩色占位圈(末位带?)：报名中无人 或 已结束未参与且无人
-  const showPlaceholder = canSignup || (endedNotJoined && isEmpty)
+  // 彩色占位圈(末位带?)：报名中无人 或 无法报名且本人未参与且无人
+  const showPlaceholder = canSignup || (notJoined && isEmpty)
   const avatarCount = showPlaceholder
     ? placeholderColors.length
     : avatars.length > 0
@@ -100,7 +100,7 @@ export default function EventCard({ event, onClick }: EventCardProps) {
                   <View key={i} className='avatar-circle' style={{ left: `${i * 32}rpx`, zIndex: i + 1, background: AVATAR_COLORS[(colorIndex + i) % AVATAR_COLORS.length] }} />
                 ))}
           </View>
-          {endedNotJoined
+          {notJoined
             ? <Text className='signup-count'>下次参与</Text>
             : signupCount > 0
             ? <Text className='signup-count'>{signupCount}人已报名</Text>
