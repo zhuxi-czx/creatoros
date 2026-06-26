@@ -264,12 +264,12 @@ export default function EventDetail() {
               </Text>
             </View>
           </View>
-          <View className='info-row'>
+          <View className='info-row' onClick={() => event.venue?.id && Taro.navigateTo({ url: `/pages/venue/index?id=${event.venue.id}` })}>
             <View className='info-icon-svg' style={{ backgroundImage: `url("${lucideUri('map-pin', '#C9A96E')}")` }} />
             <View className='info-content'>
               <Text className='info-label'>地点</Text>
               <Text className='info-value'>
-                {event.venue?.name || event.location || '待定'}
+                {event.venue?.name || event.location || '待定'}{event.venue?.id ? ' ›' : ''}
               </Text>
             </View>
           </View>

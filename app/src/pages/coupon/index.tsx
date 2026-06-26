@@ -7,17 +7,20 @@ import './index.scss'
 export default function CouponPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([])
   const [confirming, setConfirming] = useState<Coupon | null>(null)
+  const [using, setUsing] = useState(false)
 
   const load = () => getCoupons().then(setCoupons).catch(() => {})
   useEffect(() => { load() }, [])
 
   const doUse = async () => {
-    if (!confirming) return
+    if (!confirming || using) return
+    setUsing(true)
     try {
       await useCoupon(confirming.id)
       Taro.showToast({ title: '已使用', icon: 'success' })
       setConfirming(null); load()
     } catch (e: any) { Taro.showToast({ title: e?.message || '使用失败', icon: 'none' }) }
+    finally { setUsing(false) }
   }
   const doDelete = async (c: Coupon) => {
     try { await deleteCoupon(c.id); load() } catch { Taro.showToast({ title: '删除失败', icon: 'none' }) }
@@ -58,7 +61,7 @@ export default function CouponPage() {
             </View>
             <View className='dlg-btns'>
               <View className='dlg-cancel' onClick={() => setConfirming(null)}><Text>取消</Text></View>
-              <View className='dlg-confirm' onClick={doUse}><Text className='dlg-confirm-text'>确认使用</Text></View>
+              <View className='dlg-confirm' onClick={doUse}><Text className='dlg-confirm-text'>{using ? '处理中…' : '确认使用'}</Text></View>
             </View>
           </View>
         </View>

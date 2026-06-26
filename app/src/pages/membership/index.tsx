@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { getMembership, purchaseMembership, type MembershipInfo } from '../../services/membership'
+import { useAuthStore } from '../../stores/useAuthStore'
 import './index.scss'
 
 const BENEFITS = [
@@ -12,6 +13,7 @@ const BENEFITS = [
 ]
 
 export default function MembershipPage() {
+  const { token } = useAuthStore()
   const [info, setInfo] = useState<MembershipInfo | null>(null)
   const [paying, setPaying] = useState(false)
 
@@ -20,6 +22,7 @@ export default function MembershipPage() {
 
   const handlePurchase = async () => {
     if (paying) return
+    if (!token) { Taro.showToast({ title: '请先登录', icon: 'none' }); return }
     setPaying(true)
     try {
       const res = await purchaseMembership()

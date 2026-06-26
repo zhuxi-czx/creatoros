@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useShareAppMessage } from '@tarojs/taro'
 import { getColumnPage, type ColumnPage } from '../../services/column'
 import EventCard from '../../components/EventCard'
 import { lucideUri, pathToUri } from '../../utils/lucide'
@@ -19,6 +19,7 @@ export default function ColumnPageView() {
     getColumnPage(type).then(setData).catch(() => setError(true))
   }
   useEffect(() => { load() }, [type])
+  useShareAppMessage(() => ({ title: data?.config?.title || '敞开 · 专栏', path: `/pages/column/index?type=${type}` }))
 
   const toEvent = (eid: string) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${eid}` })
   const toMembership = () => Taro.navigateTo({ url: '/pages/membership/index' })

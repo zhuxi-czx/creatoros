@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { View, Text, ScrollView, Input } from '@tarojs/components'
-import Taro, { useDidShow } from '@tarojs/taro'
+import Taro, { useDidShow, useReachBottom, usePullDownRefresh } from '@tarojs/taro'
 import { getEvents } from '../../services/event'
 import type { Event } from '../../services/event'
 import { getCategories, type Category } from '../../services/category'
@@ -22,6 +22,9 @@ export default function Discover() {
   const [columns, setColumns] = useState<ColumnConfig[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [keyword, setKeyword] = useState('')
   const [searchResults, setSearchResults] = useState<Event[]>([])
   const [searching, setSearching] = useState(false)
@@ -33,6 +36,10 @@ export default function Discover() {
     if (firstShow.current) { firstShow.current = false; return }
     loadEvents(true) // 返回时静默刷新，不触发 loading、不破坏滚动位置
   })
+  useReachBottom(() => { loadMore() })
+  usePullDownRefresh(async () => {
+    try { await loadEvents() } finally { Taro.stopPullDownRefresh() }
+  })
 
   const loadAll = async () => {
     loadEvents()
@@ -40,8 +47,27 @@ export default function Discover() {
     try { setColumns((await getColumns()) || []) } catch { /* */ }
   }
   const loadEvents = async (silent = false) => {
-    try { if (!silent) { setLoading(true); setError(false) } const res = await getEvents(1, 20); setEvents(res?.data ?? []) }
-    catch (e) { console.error(e); if (!silent) setError(true) } finally { if (!silent) setLoading(false) }
+    try {
+      if (!silent) { setLoading(true); setError(false) }
+      const res = await getEvents(1, 20)
+      setEvents(res?.data ?? [])
+      setPage(1)
+      setHasMore((res?.totalPages ?? 1) > 1)
+    } catch (e) { console.error(e); if (!silent) setError(true) }
+    finally { if (!silent) setLoading(false) }
+  }
+
+  const loadMore = async () => {
+    if (!hasMore || loadingMore || keyword.trim()) return
+    setLoadingMore(true)
+    try {
+      const next = page + 1
+      const res = await getEvents(next, 20)
+      setEvents((prev) => [...prev, ...(res?.data ?? [])])
+      setPage(next)
+      setHasMore((res?.totalPages ?? next) > next)
+    } catch (e) { console.error(e) }
+    finally { setLoadingMore(false) }
   }
 
   const toCategory = (id: string) => Taro.navigateTo({ url: `/pages/category/index?id=${id}` })
@@ -138,7 +164,11 @@ export default function Discover() {
             ) : events.length === 0 ? (
               <View className='empty-state'><Text className='empty-text'>暂无活动</Text></View>
             ) : (
-              events.map((ev) => <EventCard key={ev.id} event={ev} onClick={() => toEvent(ev.id)} />)
+              <>
+                {events.map((ev) => <EventCard key={ev.id} event={ev} onClick={() => toEvent(ev.id)} />)}
+                {loadingMore && <View className='empty-state'><Text className='empty-text'>加载中…</Text></View>}
+                {!hasMore && events.length > 0 && <View className='empty-state'><Text className='empty-text' style={{ fontSize: '24rpx', color: '#bbb' }}>没有更多了</Text></View>}
+              </>
             )}
           </View>
         </>
