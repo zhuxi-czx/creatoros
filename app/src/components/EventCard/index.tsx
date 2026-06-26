@@ -28,9 +28,13 @@ export default function EventCard({ event, onClick }: EventCardProps) {
   const t = dateStr ? formatDate(dateStr, 'time') : ''
   const displayDate = d && t ? `${d} ${t}` : d
   const isEmpty = signupCount === 0
-  const PLACEHOLDER_COUNT = 4 // 无人报名时的灰色占位头像数
+  // 无人报名时的 3 个彩色占位圈：起始色与步长按活动 id 区分，使不同活动配色/排布不同
+  const placeStep = 1 + (colorIndex % 2) // 1 或 2，保证 3 个颜色互不重复
+  const placeholderColors = [0, 1, 2].map(
+    (i) => AVATAR_COLORS[(colorIndex + i * placeStep) % AVATAR_COLORS.length],
+  )
   const avatarCount = isEmpty
-    ? PLACEHOLDER_COUNT
+    ? placeholderColors.length
     : avatars.length > 0
       ? avatars.length
       : Math.min(5, signupCount)
@@ -77,8 +81,10 @@ export default function EventCard({ event, onClick }: EventCardProps) {
         <View className='card-bottom'>
           <View className='avatar-stack' style={{ width: avatarCount > 0 ? `${avatarCount * 32 + 32}rpx` : '0' }}>
             {isEmpty
-              ? [0, 1, 2, 3].map((i) => (
-                  <View key={i} className='avatar-circle avatar-empty' style={{ left: `${i * 32}rpx`, zIndex: i + 1 }} />
+              ? placeholderColors.map((c, i) => (
+                  <View key={i} className='avatar-circle' style={{ left: `${i * 32}rpx`, zIndex: i + 1, background: c }}>
+                    {i === placeholderColors.length - 1 ? <Text className='avatar-q'>?</Text> : null}
+                  </View>
                 ))
               : avatars.length > 0
               ? avatars.map((s, i) => (
@@ -92,7 +98,7 @@ export default function EventCard({ event, onClick }: EventCardProps) {
           </View>
           {signupCount > 0
             ? <Text className='signup-count'>{signupCount}人已报名</Text>
-            : <Text className='signup-count signup-empty'>虚位以待</Text>}
+            : <Text className='signup-count signup-empty'>立即报名</Text>}
         </View>
       </View>
     </View>
