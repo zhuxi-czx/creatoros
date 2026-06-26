@@ -17,7 +17,12 @@ export class EventService {
   ) {}
 
   // Public endpoints
-  async getPublishedEvents(page: number = 1, limit: number = 20, city?: string) {
+  async getPublishedEvents(
+    page: number = 1,
+    limit: number = 20,
+    city?: string,
+    keyword?: string,
+  ) {
     const skip = (page - 1) * limit;
 
     const where: any = {
@@ -27,6 +32,23 @@ export class EventService {
 
     if (city) {
       where.venue = { city: { contains: city, mode: 'insensitive' } };
+    }
+
+    // 全字段搜索：标题/描述/亮点/流程/须知/发起人/大咖名 + 场地名地址城市
+    const kw = keyword?.trim();
+    if (kw) {
+      where.OR = [
+        { title: { contains: kw, mode: 'insensitive' } },
+        { description: { contains: kw, mode: 'insensitive' } },
+        { highlights: { contains: kw, mode: 'insensitive' } },
+        { schedule: { contains: kw, mode: 'insensitive' } },
+        { notes: { contains: kw, mode: 'insensitive' } },
+        { hostName: { contains: kw, mode: 'insensitive' } },
+        { guestName: { contains: kw, mode: 'insensitive' } },
+        { venue: { name: { contains: kw, mode: 'insensitive' } } },
+        { venue: { city: { contains: kw, mode: 'insensitive' } } },
+        { venue: { address: { contains: kw, mode: 'insensitive' } } },
+      ];
     }
 
     const [events, total] = await Promise.all([

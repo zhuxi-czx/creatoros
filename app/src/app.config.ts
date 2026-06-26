@@ -1,6 +1,7 @@
 export default defineAppConfig({
-  entryPagePath: 'pages/discover/index',
+  entryPagePath: 'pages/index/index',
   pages: [
+    'pages/index/index',
     'pages/discover/index',
     'pages/event-detail/index',
     'pages/venue/index',

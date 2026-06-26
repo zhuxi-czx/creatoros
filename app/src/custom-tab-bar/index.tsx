@@ -21,9 +21,14 @@ const tabs = [
 ]
 
 function currentIndex(): number {
-  const path = (Taro.getCurrentInstance().router?.path || '').replace(/^\//, '').split('?')[0]
-  const idx = tabs.findIndex((t) => t.pagePath === path)
-  return idx >= 0 ? idx : 0
+  try {
+    const inst = Taro.getCurrentInstance()
+    const path = (inst?.router?.path || '').replace(/^\//, '').split('?')[0]
+    const idx = tabs.findIndex((t) => t.pagePath === path)
+    return idx >= 0 ? idx : 0
+  } catch {
+    return 0
+  }
 }
 
 export default function CustomTabBar() {

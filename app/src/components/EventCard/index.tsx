@@ -69,15 +69,15 @@ export default function EventCard({ event, onClick }: EventCardProps) {
           </View>
         </View>
         <View className='card-bottom'>
-          <View className='avatar-stack' style={{ width: avatarCount > 0 ? `${avatarCount * 44 + 28}rpx` : '0' }}>
+          <View className='avatar-stack' style={{ width: avatarCount > 0 ? `${avatarCount * 40 + 24}rpx` : '0' }}>
             {avatars.length > 0
               ? avatars.map((s, i) => (
-                  <View key={s.user.id} className='avatar-circle' style={{ left: `${i * 44}rpx`, zIndex: 3 - i, background: s.user.avatarUrl ? undefined : AVATAR_COLORS[i % AVATAR_COLORS.length] }}>
+                  <View key={s.user.id} className='avatar-circle' style={{ left: `${i * 40}rpx`, zIndex: 3 - i, background: s.user.avatarUrl ? undefined : AVATAR_COLORS[i % AVATAR_COLORS.length] }}>
                     {s.user.avatarUrl ? <Image className='avatar-img' src={resolveImageUrl(s.user.avatarUrl)} mode='aspectFill' /> : null}
                   </View>
                 ))
               : [0, 1, 2].slice(0, avatarCount).map((i) => (
-                  <View key={i} className='avatar-circle' style={{ left: `${i * 44}rpx`, zIndex: 3 - i, background: AVATAR_COLORS[(colorIndex + i) % AVATAR_COLORS.length] }} />
+                  <View key={i} className='avatar-circle' style={{ left: `${i * 40}rpx`, zIndex: 3 - i, background: AVATAR_COLORS[(colorIndex + i) % AVATAR_COLORS.length] }} />
                 ))}
           </View>
           {signupCount > 0 && <Text className='signup-count'>{signupCount}人已报名</Text>}

@@ -68,8 +68,9 @@ export default function Profile() {
   }
 
   const displayName = user?.nickname || '未设置昵称'
+  const genderSymbol = user?.gender === '男' ? '♂' : user?.gender === '女' ? '♀' : user?.gender
   const tags = [
-    user?.gender,
+    genderSymbol,
     user?.mbti,
     user?.zodiac,
     user?.generation,

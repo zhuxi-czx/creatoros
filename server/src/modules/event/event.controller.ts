@@ -31,8 +31,9 @@ export class EventController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Query('city') city?: string,
+    @Query('keyword') keyword?: string,
   ) {
-    return this.eventService.getPublishedEvents(page, limit, city);
+    return this.eventService.getPublishedEvents(page, limit, city, keyword);
   }
 
   @Get('api/events/featured')
