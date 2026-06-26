@@ -347,7 +347,14 @@ export default function EventDetail() {
         {/* PlanF 引导气泡：常驻按钮上方；仅非会员 + 付费/专享 + 未报名 + 未结束时显示 */}
         {!event.isSignedUp && !signupClosed && event.pricing && !event.pricing.isMember && ((event.price ?? 0) > 0 || event.isPlanfExclusive) && (
           <View className='member-bubble' onClick={() => Taro.navigateTo({ url: '/pages/membership/index' })}>
-            <Text className='member-bubble-text'>♛ 开通 PlanF 会员，{event.isPlanfExclusive ? '专享活动免费畅享' : '日常活动享 8 折'}</Text>
+            <View className='mb-left'>
+              <View className='mb-crown' style={{ backgroundImage: `url("${lucideUri('crown', '#A9824A')}")` }} />
+              <Text className='member-bubble-text'>开通 PlanF 会员，{event.isPlanfExclusive ? '专享活动免费畅享' : '日常活动享 8 折'}</Text>
+            </View>
+            <View className='mb-right'>
+              <Text className='mb-view'>查看</Text>
+              <View className='mb-arrow' style={{ backgroundImage: `url("${lucideUri('chevron-right', '#A9824A')}")` }} />
+            </View>
           </View>
         )}
         <View

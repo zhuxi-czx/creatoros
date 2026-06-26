@@ -428,12 +428,19 @@ $accent: #C9A96E;
 .member-price { font-size: 24rpx; color: #C9A96E; font-weight: 600; margin-top: 4rpx; }
 .member-bubble {
   position: relative;
-  align-self: center; // 在底栏内居中，hug 内容形成小气泡
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 20rpx;
   background: #FBF4E6;
   border-radius: 20rpx;
-  padding: 14rpx 30rpx;
+  padding: 16rpx 28rpx;
 }
+.mb-left { display: flex; align-items: center; gap: 12rpx; min-width: 0; }
+.mb-crown { width: 32rpx; height: 32rpx; background-size: contain; background-repeat: no-repeat; background-position: center; flex-shrink: 0; }
+.mb-right { display: flex; align-items: center; gap: 4rpx; flex-shrink: 0; }
+.mb-view { font-size: 25rpx; color: #A9824A; font-weight: 600; }
+.mb-arrow { width: 28rpx; height: 28rpx; background-size: contain; background-repeat: no-repeat; background-position: center; }
 .member-bubble::after { // 向下三角，指向报名按钮
   content: '';
   position: absolute;

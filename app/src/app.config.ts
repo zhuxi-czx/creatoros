@@ -1,4 +1,5 @@
 export default defineAppConfig({
+  entryPagePath: 'pages/discover/index',
   pages: [
     'pages/discover/index',
     'pages/event-detail/index',
@@ -13,7 +14,7 @@ export default defineAppConfig({
   window: {
     backgroundTextStyle: 'light',
     navigationBarBackgroundColor: '#ffffff',
-    navigationBarTitleText: 'CreatorOS',
+    navigationBarTitleText: '',
     navigationBarTextStyle: 'black'
   },
   tabBar: {
