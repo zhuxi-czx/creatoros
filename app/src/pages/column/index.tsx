@@ -3,6 +3,7 @@ import { View, Text } from '@tarojs/components'
 import Taro, { useShareAppMessage } from '@tarojs/taro'
 import { getColumnPage, type ColumnPage } from '../../services/column'
 import EventCard from '../../components/EventCard'
+import { resolveImageUrl } from '../../services/api'
 import { lucideUri, pathToUri } from '../../utils/lucide'
 import './index.scss'
 
@@ -30,7 +31,10 @@ export default function ColumnPageView() {
 
   return (
     <View className='col-page'>
-      <View className='col-header' style={{ background: bg }}>
+      <View className='col-header' style={data.config?.bgUrl
+        ? { backgroundImage: `url("${resolveImageUrl(data.config.bgUrl)}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : { background: bg }}>
+        {data.config?.bgUrl ? <View className='col-header-mask' /> : null}
         <View className='col-toprow'>
           <View className='col-iconbox'>
             {(data.config?.iconPath || data.config?.icon) ? <View className='col-icon' style={{ backgroundImage: `url("${data.config.iconPath ? pathToUri(data.config.iconPath, bg) : lucideUri(data.config.icon!, bg)}")` }} /> : null}

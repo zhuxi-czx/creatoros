@@ -51,6 +51,10 @@ export default function ProfileEdit() {
       Taro.showToast({ title: '请输入昵称', icon: 'none' })
       return
     }
+    if (!tempAvatar && !user?.avatarUrl) {
+      Taro.showToast({ title: '请选择头像', icon: 'none' })
+      return
+    }
     try {
       setSaving(true)
       let avatarUrl = user?.avatarUrl
