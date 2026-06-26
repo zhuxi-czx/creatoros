@@ -116,9 +116,8 @@ $accent: #C9A96E;
   justify-content: center;
   min-width: 40rpx;
 }
-.gender-symbol { font-size: 28rpx; line-height: 1; color: #fff; font-weight: 700; }
-.gender-male .gender-symbol { color: #6BB0F5; }   // 男：蓝
-.gender-female .gender-symbol { color: #F58FB4; } // 女：粉
+.gender-symbol { font-size: 26rpx; line-height: 1; color: #fff; font-weight: 700; }
+.gender-icon { width: 28rpx; height: 28rpx; background-size: contain; background-repeat: no-repeat; background-position: center; }
 
 // 头图上的简介 + 编辑资料按钮
 .header-bio {

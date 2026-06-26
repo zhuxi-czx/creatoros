@@ -115,8 +115,12 @@ export default function Profile() {
         {token && (user?.gender || otherTags.length > 0) && (
           <View className='tags-row'>
             {user?.gender && (
-              <View className={`tag-badge gender-badge ${user.gender === '男' ? 'gender-male' : user.gender === '女' ? 'gender-female' : 'gender-other'}`}>
-                <Text className='gender-symbol'>{user.gender === '男' ? '♂' : user.gender === '女' ? '♀' : user.gender}</Text>
+              <View className='tag-badge gender-badge'>
+                {(user.gender === '男' || user.gender === '女') ? (
+                  <View className='gender-icon' style={{ backgroundImage: `url("${lucideUri(user.gender === '男' ? 'mars' : 'venus', user.gender === '男' ? '#6BB0F5' : '#F58FB4')}")` }} />
+                ) : (
+                  <Text className='gender-symbol'>{user.gender}</Text>
+                )}
               </View>
             )}
             {otherTags.map((tag, i) => (
