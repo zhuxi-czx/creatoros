@@ -375,10 +375,10 @@ export default function EventForm() {
             <Form.Item name="featured" valuePropName="checked" label="社区精选" style={{ marginBottom: 8 }}>
               <Switch checkedChildren="是" unCheckedChildren="否" />
             </Form.Item>
-            <Form.Item name="isPlanfExclusive" valuePropName="checked" label="PlanF 专享" style={{ marginBottom: 8 }} extra="会员专属·自动免费（价格清零）">
+            <Form.Item name="isPlanfExclusive" valuePropName="checked" label="PlanF 专享" style={{ marginBottom: 8 }} extra="勾选=会员免费专属（自动清零价格）">
               <Switch checkedChildren="是" unCheckedChildren="否" />
             </Form.Item>
-            <Form.Item name="isGuestShare" valuePropName="checked" label="大咖分享" style={{ marginBottom: 8 }} extra="可付费·会员每月1次免费（配价格请勿勾 PlanF 专享）">
+            <Form.Item name="isGuestShare" valuePropName="checked" label="大咖分享" style={{ marginBottom: 8 }} extra="请了大咖的活动；可配价格(会员每月1次免费)，也可叠加PlanF专享设为会员免费">
               <Switch checkedChildren="是" unCheckedChildren="否" />
             </Form.Item>
           </div>
