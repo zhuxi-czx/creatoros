@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import {
   Card, Table, Tag, Space, Typography, Statistic, Row, Col,
-  Avatar, message, Grid
+  Avatar, message, Grid, Modal, Input
 } from 'antd'
-import { UserOutlined, TeamOutlined, CalendarOutlined } from '@ant-design/icons'
+import { UserOutlined, TeamOutlined, CalendarOutlined, EyeOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { getUsers, type User } from '../services/user'
+import { maskPhone, PHONE_VIEW_PASSWORD } from '../utils/phone'
 
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid
@@ -17,6 +18,21 @@ export default function UserList() {
   const [users, setUsers] = useState<User[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
+  // 手机号默认脱敏；输入查看密码后整页解锁完整号（停留本页期间有效）
+  const [phoneRevealed, setPhoneRevealed] = useState(false)
+  const [pwdOpen, setPwdOpen] = useState(false)
+  const [pwdInput, setPwdInput] = useState('')
+
+  const verifyPwd = () => {
+    if (pwdInput === PHONE_VIEW_PASSWORD) {
+      setPhoneRevealed(true)
+      setPwdOpen(false)
+      setPwdInput('')
+      message.success('已解锁完整手机号')
+    } else {
+      message.error('查看密码错误')
+    }
+  }
 
   useEffect(() => { loadUsers() }, [])
 
@@ -69,8 +85,21 @@ export default function UserList() {
       title: '手机号',
       dataIndex: 'phone',
       key: 'phone',
-      width: 130,
-      render: (phone: string) => phone || <Text type="secondary">-</Text>
+      width: 160,
+      render: (phone: string) => {
+        if (!phone) return <Text type="secondary">-</Text>
+        if (phoneRevealed) {
+          return <Text style={{ fontFamily: 'monospace' }} copyable>{phone}</Text>
+        }
+        return (
+          <Space size={4}>
+            <Text style={{ fontFamily: 'monospace' }}>{maskPhone(phone)}</Text>
+            <Typography.Link style={{ fontSize: 12 }} onClick={() => setPwdOpen(true)}>
+              <EyeOutlined /> 查看
+            </Typography.Link>
+          </Space>
+        )
+      }
     },
     ...(!isMobile ? [{
       title: '标签',
@@ -147,6 +176,26 @@ export default function UserList() {
           pagination={{ pageSize: 10, showSizeChanger: false, size: 'small' }}
         />
       </Card>
+
+      <Modal
+        title="查看完整手机号"
+        open={pwdOpen}
+        onOk={verifyPwd}
+        onCancel={() => { setPwdOpen(false); setPwdInput('') }}
+        okText="确认"
+        cancelText="取消"
+        destroyOnClose
+        width={360}
+      >
+        <p style={{ color: '#888', marginBottom: 8 }}>请输入查看密码以显示完整手机号</p>
+        <Input.Password
+          value={pwdInput}
+          onChange={e => setPwdInput(e.target.value)}
+          onPressEnter={verifyPwd}
+          placeholder="查看密码"
+          autoFocus
+        />
+      </Modal>
     </div>
   )
 }

@@ -6,6 +6,7 @@ import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { getEventDetail, getEventSignups, refundSignup, adminAddSignup, type Event } from '../services/event'
 import { getUsers } from '../services/user'
+import { maskPhone } from '../utils/phone'
 
 const { Title, Text } = Typography
 
@@ -90,7 +91,7 @@ export default function EventSignups() {
       const res: any = await getUsers(1, 200)
       setUserOptions((res?.data || []).map((u: any) => ({
         value: u.id,
-        label: `${u.nickname || '未设置'}（${u.uid || u.phone || u.id.slice(-4)}）`,
+        label: `${u.nickname || '未设置'}（${u.uid || maskPhone(u.phone) || u.id.slice(-4)}）`,
       })))
     } catch { message.error('加载用户失败') }
   }
@@ -136,7 +137,7 @@ export default function EventSignups() {
           </Avatar>
           <Space direction="vertical" size={0}>
             <Text strong>{r.user.nickname || '未设置'}</Text>
-            {r.user.phone && <Text type="secondary" style={{ fontSize: 11 }}>{r.user.phone}</Text>}
+            {r.user.phone && <Text type="secondary" style={{ fontSize: 11 }}>{maskPhone(r.user.phone)}</Text>}
           </Space>
         </Space>
       ),
