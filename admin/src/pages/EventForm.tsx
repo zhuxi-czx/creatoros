@@ -9,7 +9,8 @@ import {
   ArrowUpOutlined, ArrowDownOutlined, DeleteOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
-import { createEvent, updateEvent, updateEventStatus, getEventDetail, getVenues, uploadImage, type EventFormData } from '../services/event'
+import { createEvent, updateEvent, updateEventStatus, getEventDetail, uploadImage, type EventFormData } from '../services/event'
+import { getVenues } from '../services/venue'
 import { resolveImageUrl } from '../services/api'
 import RichEditor from '../components/RichEditor'
 import { getCategories } from '../services/category'

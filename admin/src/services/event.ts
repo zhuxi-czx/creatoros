@@ -93,14 +93,6 @@ export async function getStats(): Promise<any> {
   return api.get('/admin/stats') as any
 }
 
-export async function getVenues(): Promise<any[]> {
-  return api.get('/admin/venues') as any
-}
-
-export async function createVenue(data: any): Promise<any> {
-  return api.post('/admin/venues', data) as any
-}
-
 export async function getEventSignups(id: string, page = 1, limit = 50): Promise<any> {
   return api.get(`/admin/events/${id}/signups?page=${page}&limit=${limit}`) as any
 }

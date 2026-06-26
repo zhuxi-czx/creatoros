@@ -29,7 +29,3 @@ interface PaginatedResponse {
 export async function getUsers(page = 1, limit = 50): Promise<PaginatedResponse> {
   return api.get(`/admin/users?page=${page}&limit=${limit}`) as any
 }
-
-export async function updateUserStatus(id: string, status: string): Promise<void> {
-  return api.put(`/admin/users/${id}/status`, { status }) as any
-}

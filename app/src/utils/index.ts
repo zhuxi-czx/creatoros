@@ -23,26 +23,3 @@ export function formatDate(dateStr: string | number | undefined, format: 'full' 
       return `${year}年${month}月${day}日 ${hours}:${minutes}`
   }
 }
-
-/**
- * Truncate text with ellipsis
- */
-export function truncate(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text
-  return text.slice(0, maxLength) + '...'
-}
-
-/**
- * Generate a color from a string (for avatars etc.)
- */
-export function stringToColor(str: string): string {
-  const colors = [
-    '#6366f1', '#8b5cf6', '#ec4899',
-    '#10b981', '#3b82f6', '#f59e0b'
-  ]
-  let hash = 0
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  return colors[Math.abs(hash) % colors.length]
-}

@@ -77,7 +77,7 @@ export default function EventSignups() {
       }
       if (id) await loadData(id)
     } catch (err: any) {
-      message.error(err?.response?.data?.message || err?.message || '退款失败')
+      message.error(err?.message || '退款失败')
     } finally {
       setRefundingId(null)
     }
@@ -103,7 +103,7 @@ export default function EventSignups() {
       setAddOpen(false)
       await loadData(id)
     } catch (err: any) {
-      message.error(err?.response?.data?.message || '添加失败')
+      message.error(err?.message || '添加失败')
     } finally { setAdding(false) }
   }
 

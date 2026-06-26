@@ -22,7 +22,3 @@ export const updateCategory = (id: string, data: Partial<Category>): Promise<Cat
 
 export const deleteCategory = (id: string): Promise<void> =>
   api.delete(`/admin/categories/${id}`) as any
-
-// 活动表单「快速新建分类」
-export const quickCreateCategory = (name: string): Promise<Category> =>
-  api.post('/admin/categories/quick', { name }) as any

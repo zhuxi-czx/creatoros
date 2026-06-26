@@ -14,8 +14,3 @@ export function getCached<T>(key: string): T | null {
 export function setCache(key: string, data: any, ttlMs: number = 60000) {
   cache.set(key, { data, expiry: Date.now() + ttlMs })
 }
-
-export function clearCache(key?: string) {
-  if (key) cache.delete(key)
-  else cache.clear()
-}
