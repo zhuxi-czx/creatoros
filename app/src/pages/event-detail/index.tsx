@@ -226,7 +226,6 @@ export default function EventDetail() {
                     className='cover-image'
                     src={img}
                     mode='aspectFill'
-                    lazyLoad
                     onClick={() => previewImages(detailImages, img)}
                   />
                 </SwiperItem>
