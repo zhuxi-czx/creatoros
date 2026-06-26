@@ -73,16 +73,21 @@ export class MembershipService {
     return !!m && m.status === 'ACTIVE';
   }
 
-  /** 支付成功后开通/续费。 */
-  async activate(userId: string) {
+  /** 开通/续费（可传事务 client；confirmPaid 在支付回调事务内复用此方法）。 */
+  async activateInTx(tx: any, userId: string) {
     const now = new Date();
-    const existing = await this.prisma.membership.findUnique({ where: { userId } });
+    const existing = await tx.membership.findUnique({ where: { userId } });
     const { expireAt, renewing } = computeRenewExpiry(existing, now);
-    return this.prisma.membership.upsert({
+    return tx.membership.upsert({
       where: { userId },
       create: { userId, status: 'ACTIVE', startAt: now, expireAt },
       update: { status: 'ACTIVE', ...(renewing ? {} : { startAt: now }), expireAt },
     });
+  }
+
+  /** 支付成功后开通/续费。 */
+  async activate(userId: string) {
+    return this.activateInTx(this.prisma, userId);
   }
 
   /** 价格计算：传入的 event 需 include category。 */

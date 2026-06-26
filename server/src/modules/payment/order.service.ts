@@ -13,7 +13,6 @@ import { WechatPayService, JsapiPayParams } from './wechat-pay.service';
 import {
   MembershipService,
   MEMBERSHIP_PRICE,
-  computeRenewExpiry,
   periodKeyOf,
   freeTypeOf,
 } from '../membership/membership.service';
@@ -186,16 +185,9 @@ export class OrderService {
       });
       if (locked.count === 0) return; // 已被其它请求处理
 
-      // 会员订单：支付成功即开通/续费（续费从原到期日顺延，入会日不变）
+      // 会员订单：支付成功即开通/续费（复用 MembershipService，避免两份实现）
       if (order.type === 'MEMBERSHIP') {
-        const now = new Date();
-        const existing = await tx.membership.findUnique({ where: { userId: order.userId } });
-        const { expireAt, renewing } = computeRenewExpiry(existing, now);
-        await tx.membership.upsert({
-          where: { userId: order.userId },
-          create: { userId: order.userId, status: 'ACTIVE', startAt: now, expireAt },
-          update: { status: 'ACTIVE', ...(renewing ? {} : { startAt: now }), expireAt },
-        });
+        await this.membership.activateInTx(tx, order.userId);
         return;
       }
       const eventId = order.eventId;

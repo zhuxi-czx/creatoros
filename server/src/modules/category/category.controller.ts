@@ -42,8 +42,8 @@ export class CategoryController {
 
   @UseGuards(AdminGuard)
   @Post('api/admin/categories/quick')
-  quick(@Body() body: { name: string }) {
-    return this.svc.quickCreate(body.name);
+  quick(@Body() dto: UpsertCategoryDto) {
+    return this.svc.quickCreate(dto.name);
   }
 
   @UseGuards(AdminGuard)

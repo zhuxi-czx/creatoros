@@ -17,6 +17,7 @@ import { EventService } from './event.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { UpdateEventStatusDto } from './dto/update-event-status.dto';
+import { AddSignupDto } from './dto/add-signup.dto';
 import { AdminGuard } from '../auth/admin.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -123,7 +124,7 @@ export class EventController {
 
   @UseGuards(AdminGuard)
   @Post('api/admin/events/:id/signups')
-  async adminAddSignup(@Param('id') id: string, @Body() dto: { userId: string }) {
+  async adminAddSignup(@Param('id') id: string, @Body() dto: AddSignupDto) {
     return this.eventService.adminAddSignup(id, dto.userId);
   }
 }

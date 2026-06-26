@@ -37,6 +37,8 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
+      // forbidNonWhitelisted 保持关闭：前端（如 EventForm 发布流程）会附带 DTO 未声明的字段，
+      // whitelist 已静默剥离它们；若改为报错会破坏现有提交链路。DTO 仍校验所有已声明字段。
       forbidNonWhitelisted: false,
       transform: true,
       transformOptions: {
