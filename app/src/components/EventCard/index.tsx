@@ -35,13 +35,13 @@ export default function EventCard({ event, onClick }: EventCardProps) {
   const placeholderColors = [0, 1, 2].map(
     (i) => AVATAR_COLORS[(colorIndex + i * placeStep) % AVATAR_COLORS.length],
   )
-  const avatarCount = canSignup
+  // 彩色占位圈(末位带?)：报名中无人 或 已结束未参与且无人
+  const showPlaceholder = canSignup || (endedNotJoined && isEmpty)
+  const avatarCount = showPlaceholder
     ? placeholderColors.length
     : avatars.length > 0
       ? avatars.length
-      : endedNotJoined
-        ? placeholderColors.length
-        : Math.min(5, signupCount)
+      : Math.min(5, signupCount)
 
   return (
     <View className='event-card' onClick={onClick} hoverClass='card-hover' hoverStayTime={80}>
@@ -84,7 +84,7 @@ export default function EventCard({ event, onClick }: EventCardProps) {
         </View>
         <View className='card-bottom'>
           <View className='avatar-stack' style={{ width: avatarCount > 0 ? `${avatarCount * 32 + 32}rpx` : '0' }}>
-            {canSignup
+            {showPlaceholder
               ? placeholderColors.map((c, i) => (
                   <View key={i} className='avatar-circle' style={{ left: `${i * 32}rpx`, zIndex: i + 1, background: c }}>
                     {i === placeholderColors.length - 1 ? <Text className='avatar-q'>?</Text> : null}
