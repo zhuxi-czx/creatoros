@@ -113,7 +113,7 @@ creatoros/
 ## 数据库模型（2.0）
 
 - **User**：`uid`（11 位运营编号，唯一）、微信、昵称、头像、城市、性别、MBTI、星座、`tags[]`
-- **Event**：标题 / 富文本描述 / 亮点 / 流程 / 须知 / 多图 / 3:4 封面 / 价格 / 状态 + `categoryId` / `isPlanfExclusive` / `isGuestShare` / `guestName` / `featured`
+- **Event**：标题 / 富文本描述 / 亮点 / 流程 / 须知 / 多图 / 3:4 封面 / 价格 / `priceNote`（费用说明文案，解释价格含什么）/ 状态 + `categoryId` / `isPlanfExclusive` / `isGuestShare` / `guestName` / `featured`
 - **Category**：名称 / 简介 / 封面 / `icon` / `order` / `memberFreeMonthly`
 - **ColumnConfig**：`type`(FEATURED/PLANF/GUEST) / 标题 / 简介 / `icon` / `bgUrl` / `order`
 - **Membership** + **MembershipBenefitUsage**：PlanF 会员 + 每月免费名额用量（periodKey + benefitType 唯一）
