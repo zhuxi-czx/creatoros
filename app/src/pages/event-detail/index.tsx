@@ -194,6 +194,15 @@ export default function EventDetail() {
   const signupClosed = status.state !== 'OPEN' // 报名结束/已结束 → 不能报名
   // PlanF 专属活动 + 非会员 + 未报名 + 仍可报名：拦截下单，按钮引导开通会员
   const planfBlocked = !!event.isPlanfExclusive && !event.pricing?.isMember && !event.isSignedUp && !signupClosed
+  // 费用区 PlanF 引导文案：专享 / 大咖(本月免费或已用转8折) / 普通付费8折
+  const memberPriceYuan = Math.round((event.price ?? 0) * 0.8 / 100)
+  const planfHint = event.isPlanfExclusive
+    ? '开通会员免费参加'
+    : event.isGuestShare
+    ? (event.pricing?.isMember
+        ? (event.pricing.freeAvailable ? 'PlanF 会员本月免费' : `PlanF 会员 ¥${memberPriceYuan}（8折）`)
+        : 'PlanF 会员每月 1 次免费')
+    : `PlanF 会员 ¥${memberPriceYuan}（8折）`
 
   // 详情多图：优先 imageUrls，回退 coverUrl
   const detailImages = (
@@ -304,9 +313,7 @@ export default function EventDetail() {
                   </Text>
                   {(event.isPlanfExclusive || event.price! > 0) && (
                     <Text className='planf-link' onClick={() => Taro.navigateTo({ url: '/pages/membership/index' })}>
-                      {event.isPlanfExclusive
-                        ? '开通会员免费参加'
-                        : `PlanF 会员 ¥${Math.round(event.price! * 0.8 / 100)}（8折）`} ›
+                      {planfHint} ›
                     </Text>
                   )}
                 </View>
