@@ -41,3 +41,20 @@ export async function grantMembership(id: string): Promise<void> {
 export async function revokeMembership(id: string): Promise<void> {
   return api.delete(`/admin/users/${id}/membership`) as any
 }
+
+export interface UserOrder {
+  id: string
+  outTradeNo: string
+  type: string
+  title: string
+  eventId?: string
+  amount: number
+  status: string
+  paidAt?: string
+  createdAt: string
+}
+
+// 管理员查看某用户的全部支付订单
+export async function getUserOrders(id: string): Promise<UserOrder[]> {
+  return api.get(`/admin/users/${id}/orders`) as any
+}

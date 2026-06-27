@@ -3,10 +3,10 @@ import {
   Card, Table, Tag, Space, Typography, Statistic, Row, Col,
   Avatar, message, Grid, Modal, Input, Popconfirm, Button
 } from 'antd'
-import { UserOutlined, TeamOutlined, CalendarOutlined, EyeOutlined, CrownOutlined } from '@ant-design/icons'
+import { UserOutlined, TeamOutlined, CalendarOutlined, EyeOutlined, CrownOutlined, ProfileOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { getUsers, grantMembership, revokeMembership, type User } from '../services/user'
+import { getUsers, grantMembership, revokeMembership, getUserOrders, type User, type UserOrder } from '../services/user'
 import { maskPhone, PHONE_VIEW_PASSWORD } from '../utils/phone'
 
 /** 是否有效 PlanF 会员 */
@@ -16,6 +16,15 @@ function isActiveMember(u: User): boolean {
 
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid
+
+// 订单状态 → 展示文案 / 颜色
+const ORDER_STATUS: Record<string, { text: string; color: string }> = {
+  PAID: { text: '已支付', color: 'green' },
+  PENDING: { text: '待支付', color: 'orange' },
+  CLOSED: { text: '已关闭', color: 'default' },
+  REFUNDING: { text: '退款中', color: 'blue' },
+  REFUNDED: { text: '已退款', color: 'red' },
+}
 
 export default function UserList() {
   const screens = useBreakpoint()
@@ -41,6 +50,26 @@ export default function UserList() {
 
   const [granting, setGranting] = useState<string | null>(null)
   const [revoking, setRevoking] = useState<string | null>(null)
+
+  // 用户支付订单查看
+  const [ordersOpen, setOrdersOpen] = useState(false)
+  const [ordersUser, setOrdersUser] = useState<User | null>(null)
+  const [orders, setOrders] = useState<UserOrder[]>([])
+  const [ordersLoading, setOrdersLoading] = useState(false)
+
+  const openOrders = async (u: User) => {
+    setOrdersUser(u)
+    setOrdersOpen(true)
+    setOrders([])
+    setOrdersLoading(true)
+    try {
+      setOrders(await getUserOrders(u.id))
+    } catch (err: any) {
+      message.error(err?.message || '加载订单失败')
+    } finally {
+      setOrdersLoading(false)
+    }
+  }
 
   useEffect(() => { loadUsers() }, [])
 
@@ -191,9 +220,12 @@ export default function UserList() {
     {
       title: '操作',
       key: 'action',
-      width: isMobile ? 150 : 190,
+      width: isMobile ? 150 : 280,
       render: (_: any, r: User) => (
-        <Space size={0}>
+        <Space size={0} wrap>
+          <Button size="small" type="link" icon={<ProfileOutlined />} onClick={() => openOrders(r)}>
+            查看订单
+          </Button>
           <Popconfirm
             title="设为 PlanF 会员"
             description={isActiveMember(r) ? '该用户已是会员，确认续费一年？' : '确认为该用户开通 PlanF 会员（一年期）？'}
@@ -277,6 +309,62 @@ export default function UserList() {
           onPressEnter={verifyPwd}
           placeholder="查看密码"
           autoFocus
+        />
+      </Modal>
+
+      <Modal
+        title={`支付订单 · ${ordersUser?.nickname || ordersUser?.uid || '该用户'}`}
+        open={ordersOpen}
+        onCancel={() => setOrdersOpen(false)}
+        footer={null}
+        width={isMobile ? '94%' : 720}
+        centered
+        destroyOnClose
+      >
+        <Table
+          dataSource={orders}
+          rowKey="id"
+          loading={ordersLoading}
+          size="small"
+          pagination={false}
+          scroll={{ y: 420 }}
+          locale={{ emptyText: '暂无支付订单' }}
+          columns={[
+            {
+              title: '商品', key: 'title',
+              render: (_: any, o: UserOrder) => (
+                <Space direction="vertical" size={0}>
+                  <Text strong style={{ fontSize: 13 }}>{o.title}</Text>
+                  <Text type="secondary" style={{ fontSize: 11 }}>
+                    {o.type === 'MEMBERSHIP' ? '会员' : '活动报名'}
+                  </Text>
+                </Space>
+              ),
+            },
+            {
+              title: '金额', dataIndex: 'amount', key: 'amount', width: 90, align: 'right' as const,
+              render: (a: number) => <Text strong>¥{(a / 100).toFixed(2)}</Text>,
+            },
+            {
+              title: '状态', dataIndex: 'status', key: 'status', width: 90, align: 'center' as const,
+              render: (s: string) => {
+                const m = ORDER_STATUS[s] || { text: s, color: 'default' }
+                return <Tag color={m.color}>{m.text}</Tag>
+              },
+            },
+            {
+              title: '下单时间', dataIndex: 'createdAt', key: 'createdAt', width: 150,
+              render: (t: string) => dayjs(t).format('YYYY-MM-DD HH:mm'),
+            },
+            {
+              title: '订单号', dataIndex: 'outTradeNo', key: 'outTradeNo', width: 160,
+              render: (no: string) => (
+                <Text style={{ fontFamily: 'monospace', fontSize: 11 }} copyable={{ text: no }}>
+                  {no ? `${no.slice(0, 8)}…` : '-'}
+                </Text>
+              ),
+            },
+          ]}
         />
       </Modal>
     </div>

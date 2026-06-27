@@ -59,6 +59,13 @@ export class OrderController {
     return this.orderService.adminRefundSignup(signupId);
   }
 
+  /** 后台查看某用户的全部支付订单。 */
+  @UseGuards(AdminGuard)
+  @Get('api/admin/users/:id/orders')
+  async adminUserOrders(@Param('id') userId: string) {
+    return this.orderService.getMyOrders(userId);
+  }
+
   /**
    * 微信支付结果回调。验签 + 解密 + 幂等确认。
    * 成功返回 200 {code:SUCCESS}；失败返回非 200，微信会重试。
