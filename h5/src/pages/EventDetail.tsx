@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { getEventDetail, getEventSignups, signup, cancelSignup, Event, Participant } from '../services/event'
 import ImageCarousel from '../components/ImageCarousel'
+import { enrichHtml } from '../utils/richText'
+import { formatEventDateTime } from '../utils/date'
 
 const AVATAR_COLORS = ['#8B5CF6', '#EC4899', '#F97316', '#06B6D4', '#10B981', '#EF4444']
 
@@ -122,23 +124,33 @@ export default function EventDetail() {
   // Determine event date to display
   const eventDate = event.date || event.startTime
 
-  // Price: divide by 100 if likely stored in fen, show yuan
-  const priceDisplay = event.price == null
+  // 费用展示（与小程序详情页一致）：专享/免费/原价 + PlanF 引导文案
+  const priceMain = event.isPlanfExclusive
+    ? 'PlanF 专属'
+    : (event.price ?? 0) === 0
     ? '免费'
-    : event.price === 0
-    ? '免费'
-    : `¥${(event.price / 100).toFixed(0)}`
+    : `¥${(event.price! / 100).toFixed(0)}`
+  const memberPriceYuan = Math.round((event.price ?? 0) * 0.8 / 100)
+  const planfHint = event.isPlanfExclusive
+    ? '开通会员免费参加'
+    : event.isGuestShare
+    ? (event.pricing?.isMember
+        ? (event.pricing.freeAvailable ? 'PlanF 会员本月免费' : `PlanF 会员 ¥${memberPriceYuan}（8折）`)
+        : 'PlanF 会员每月 1 次免费')
+    : (event.price ?? 0) > 0
+    ? `PlanF 会员 ¥${memberPriceYuan}（8折）`
+    : ''
 
   return (
     <div className="page-container" style={{ paddingBottom: 90 }}>
       {/* Cover */}
-      <div style={{ position: 'relative', height: 260, flexShrink: 0 }}>
+      <div style={{ position: 'relative', width: '100%', aspectRatio: '3 / 4', flexShrink: 0 }}>
         {(event.imageUrls && event.imageUrls.length > 0) || event.coverUrl ? (
           <ImageCarousel
             images={event.imageUrls && event.imageUrls.length > 0 ? event.imageUrls : [event.coverUrl!]}
             autoplay={event.imageUrls && event.imageUrls.length > 1 ? event.autoplay : false}
             interval={event.interval || 3000}
-            height={260}
+            height={'100%'}
           />
         ) : (
           <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #8B5CF6, #EC4899)' }} />
@@ -188,9 +200,7 @@ export default function EventDetail() {
         </h1>
 
         {event.description && (
-          <p style={{ marginTop: 12, fontSize: 14, color: '#666', lineHeight: 1.7, whiteSpace: 'pre-line' }}>
-            {event.description}
-          </p>
+          <div style={{ marginTop: 12 }} dangerouslySetInnerHTML={{ __html: enrichHtml(event.description) }} />
         )}
 
         {/* Structured sections */}
@@ -223,7 +233,7 @@ export default function EventDetail() {
         <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 14 }}>
           {eventDate && (
             <DetailRow icon={<CalendarIcon />} label="时间">
-              {dayjs(eventDate).format('YYYY年MM月DD日 HH:mm')}
+              {formatEventDateTime(eventDate)}
               {event.endTime && ` — ${dayjs(event.endTime).format('HH:mm')}`}
             </DetailRow>
           )}
@@ -240,7 +250,17 @@ export default function EventDetail() {
           {event.hostName && (
             <DetailRow icon={<UserIcon />} label="主办方">{event.hostName}</DetailRow>
           )}
-          <DetailRow icon={<TicketIcon />} label="费用">{priceDisplay}</DetailRow>
+          <DetailRow icon={<TicketIcon />} label="费用">
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+              <span>{priceMain}</span>
+              {planfHint && <span style={{ color: '#C9A96E', fontSize: 13, fontWeight: 600 }}>{planfHint}</span>}
+            </div>
+            {event.priceNote && (
+              <div style={{ fontSize: 13, color: '#999', marginTop: 4, lineHeight: 1.5, fontWeight: 400 }}>
+                {event.priceNote}
+              </div>
+            )}
+          </DetailRow>
           {(event.maxCapacity || event.maxParticipants) && (() => {
             const max = event.maxCapacity || event.maxParticipants || 0
             const remain = max - signupCount

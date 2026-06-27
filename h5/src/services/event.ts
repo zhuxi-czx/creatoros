@@ -9,6 +9,18 @@ export interface Venue {
   coverUrl?: string
 }
 
+export interface Pricing {
+  originalPrice: number
+  isMember: boolean
+  isFreeEvent: boolean
+  memberPrice: number
+  finalPrice: number
+  freeType: 'GUEST_FREE' | null
+  freeAvailable: boolean
+  memberOnly?: boolean
+  canSignup?: boolean
+}
+
 export interface Event {
   id: string
   title: string
@@ -24,6 +36,11 @@ export interface Event {
   hostName?: string
   hostAvatar?: string
   price?: number
+  priceNote?: string
+  isPlanfExclusive?: boolean
+  isGuestShare?: boolean
+  guestName?: string
+  pricing?: Pricing
   maxCapacity?: number
   maxParticipants?: number
   highlights?: string
