@@ -192,6 +192,8 @@ export default function EventDetail() {
   const signupCount = event._count?.signups ?? event.currentParticipants ?? 0
   const status = getEventDisplay(event.date || event.startTime, signupCount, event.maxCapacity || event.maxParticipants)
   const signupClosed = status.state !== 'OPEN' // 报名结束/已结束 → 不能报名
+  // PlanF 专属活动 + 非会员 + 未报名 + 仍可报名：拦截下单，按钮引导开通会员
+  const planfBlocked = !!event.isPlanfExclusive && !event.pricing?.isMember && !event.isSignedUp && !signupClosed
 
   // 详情多图：优先 imageUrls，回退 coverUrl
   const detailImages = (
@@ -298,12 +300,12 @@ export default function EventDetail() {
                 <Text className='info-label'>费用</Text>
                 <View className='price-line'>
                   <Text className='info-value'>
-                    {event.isPlanfExclusive ? '会员免费' : event.price === 0 ? '免费' : `¥${(event.price! / 100).toFixed(0)}`}
+                    {event.isPlanfExclusive ? 'PlanF 专属' : event.price === 0 ? '免费' : `¥${(event.price! / 100).toFixed(0)}`}
                   </Text>
                   {(event.isPlanfExclusive || event.price! > 0) && (
                     <Text className='planf-link' onClick={() => Taro.navigateTo({ url: '/pages/membership/index' })}>
                       {event.isPlanfExclusive
-                        ? 'PlanF 专享 · 仅会员可报名'
+                        ? '开通会员免费参加'
                         : `PlanF 会员 ¥${Math.round(event.price! * 0.8 / 100)}（8折）`} ›
                     </Text>
                   )}
@@ -365,7 +367,7 @@ export default function EventDetail() {
         )}
         <View
           className={`action-btn ${event.isSignedUp ? 'signed' : ''} ${!event.isSignedUp && signupClosed ? 'disabled' : ''} ${signing ? 'loading' : ''}`}
-          onClick={handleSignup}
+          onClick={planfBlocked ? () => Taro.navigateTo({ url: '/pages/membership/index' }) : handleSignup}
         >
           <Text className='action-btn-text'>
             {signing
@@ -374,6 +376,8 @@ export default function EventDetail() {
               ? '已报名'
               : signupClosed
               ? (status.state === 'ENDED' ? '活动已结束' : '报名已结束')
+              : planfBlocked
+              ? 'PlanF 专属活动 · 开通会员'
               : (event.price ?? 0) > 0
               ? `立即报名 · ${event.pricing ? (event.pricing.finalPrice === 0 ? '免费' : `¥${(event.pricing.finalPrice / 100).toFixed(0)}`) : `¥${(event.price! / 100).toFixed(0)}`}`
               : '立即报名 · 免费'}
