@@ -39,6 +39,13 @@ export class OrderController {
   }
 
   /** 查询订单/报名状态（前端支付后轮询）。 */
+  // 订单中心页：用户订单列表（必须在 :id 之前注册，否则 mine 会被 :id 匹配）
+  @UseGuards(JwtAuthGuard)
+  @Get('api/orders/mine')
+  async getMyOrders(@Req() req: any) {
+    return this.orderService.getMyOrders(req.user.id);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('api/orders/:id')
   async getOrder(@Req() req: any, @Param('id') orderId: string) {

@@ -1,0 +1,19 @@
+.order-page { min-height: 100vh; background: #F5F5F7; padding: 24rpx 24rpx 60rpx; box-sizing: border-box; }
+.order-loading { display: block; text-align: center; padding: 100rpx; color: #999; font-size: 28rpx; }
+.order-empty { text-align: center; padding: 140rpx 0; }
+.order-empty-text { font-size: 28rpx; color: #999; }
+
+.order-list { display: flex; flex-direction: column; gap: 20rpx; }
+.order-card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+}
+.order-top { display: flex; align-items: center; justify-content: space-between; }
+.order-title { font-size: 30rpx; font-weight: 600; color: #1A1A1A; flex: 1; margin-right: 16rpx; }
+.order-status { font-size: 26rpx; font-weight: 600; flex-shrink: 0; }
+.order-mid { display: flex; align-items: center; justify-content: space-between; margin-top: 16rpx; }
+.order-type { font-size: 24rpx; color: #999; }
+.order-amount { font-size: 34rpx; font-weight: 700; color: #1A1A1A; }
+.order-time { display: block; font-size: 22rpx; color: #BBB; margin-top: 16rpx; }
+.order-no { display: block; font-size: 22rpx; color: #BBB; margin-top: 6rpx; }

@@ -197,6 +197,20 @@ export default function Profile() {
           </View>
         )}
 
+        {/* 我的订单入口（小程序订单中心页） */}
+        {token && (
+          <View className='coupon-entry' onClick={() => Taro.navigateTo({ url: '/pages/order/index' })}>
+            <View className='coupon-icon'>
+              <View className='coupon-ticket' style={{ backgroundImage: `url("${lucideUri('receipt', '#C9A96E')}")` }} />
+            </View>
+            <View className='coupon-text'>
+              <Text className='coupon-title'>我的订单</Text>
+              <Text className='coupon-sub'>查看支付与报名记录</Text>
+            </View>
+            <View className='coupon-arrow' style={{ backgroundImage: `url("${lucideUri('chevron-right', '#cccccc')}")` }} />
+          </View>
+        )}
+
         {/* My Signups */}
         {token && (
           <View className='signups-card'>

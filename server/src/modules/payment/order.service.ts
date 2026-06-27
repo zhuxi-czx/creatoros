@@ -229,6 +229,27 @@ export class OrderService {
   }
 
   /** 查询订单（含报名状态），供前端轮询；校验归属。 */
+  /** 用户订单列表（小程序订单中心页）。 */
+  async getMyOrders(userId: string) {
+    const orders = await this.prisma.order.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: { event: { select: { id: true, title: true } } },
+      take: 100,
+    });
+    return orders.map((o) => ({
+      id: o.id,
+      outTradeNo: o.outTradeNo,
+      type: o.type,
+      title: o.type === 'MEMBERSHIP' ? 'PlanF 会员（年）' : o.event?.title || '活动报名',
+      eventId: o.eventId,
+      amount: o.amount,
+      status: o.status,
+      paidAt: o.paidAt,
+      createdAt: o.createdAt,
+    }));
+  }
+
   async getOrder(userId: string, orderId: string) {
     let order = await this.prisma.order.findUnique({
       where: { id: orderId },
