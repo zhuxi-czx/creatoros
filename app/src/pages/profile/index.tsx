@@ -79,10 +79,6 @@ export default function Profile() {
     ...(user?.tags || []),
   ].filter(Boolean) as string[]
   const usableCoupons = coupons.filter((c) => c.status === 'UNUSED')
-  const couponMax = usableCoupons.reduce((m, c) => Math.max(m, c.amount), 0)
-  const couponSub = usableCoupons.length > 0
-    ? `${usableCoupons.length} 张可用 · ${couponMax / 100} 元酒水券`
-    : '暂无可用优惠券'
 
   return (
     <View className='profile-page'>
@@ -183,31 +179,19 @@ export default function Profile() {
           </View>
         )}
 
-        {/* 我的优惠券入口 */}
+        {/* 优惠券 / 订单 同行入口 */}
         {token && (
-          <View className='coupon-entry' onClick={() => Taro.navigateTo({ url: '/pages/coupon/index' })}>
-            <View className='coupon-icon'>
-              <View className='coupon-ticket' style={{ backgroundImage: `url("${lucideUri('ticket', '#C9A96E')}")` }} />
+          <View className='entry-row'>
+            <View className='entry-card' onClick={() => Taro.navigateTo({ url: '/pages/coupon/index' })}>
+              <View className='entry-icon' style={{ backgroundImage: `url("${lucideUri('ticket', '#C9A96E')}")` }} />
+              <Text className='entry-title'>我的优惠券</Text>
+              <Text className='entry-sub'>{usableCoupons.length > 0 ? `${usableCoupons.length} 张可用` : '暂无可用'}</Text>
             </View>
-            <View className='coupon-text'>
-              <Text className='coupon-title'>我的优惠券</Text>
-              <Text className='coupon-sub'>{couponSub}</Text>
+            <View className='entry-card' onClick={() => Taro.navigateTo({ url: '/pages/order/index' })}>
+              <View className='entry-icon' style={{ backgroundImage: `url("${lucideUri('receipt', '#C9A96E')}")` }} />
+              <Text className='entry-title'>我的订单</Text>
+              <Text className='entry-sub'>查看支付记录</Text>
             </View>
-            <View className='coupon-arrow' style={{ backgroundImage: `url("${lucideUri('chevron-right', '#cccccc')}")` }} />
-          </View>
-        )}
-
-        {/* 我的订单入口（小程序订单中心页） */}
-        {token && (
-          <View className='coupon-entry' onClick={() => Taro.navigateTo({ url: '/pages/order/index' })}>
-            <View className='coupon-icon'>
-              <View className='coupon-ticket' style={{ backgroundImage: `url("${lucideUri('receipt', '#C9A96E')}")` }} />
-            </View>
-            <View className='coupon-text'>
-              <Text className='coupon-title'>我的订单</Text>
-              <Text className='coupon-sub'>查看支付与报名记录</Text>
-            </View>
-            <View className='coupon-arrow' style={{ backgroundImage: `url("${lucideUri('chevron-right', '#cccccc')}")` }} />
           </View>
         )}
 
