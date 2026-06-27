@@ -23,10 +23,10 @@ export class ReminderService {
   }
 
   /**
-   * 每 10 分钟扫描：活动开始前约 2 小时、已授权、未发送、状态 CONFIRMED 的报名，
-   * 发送微信订阅消息提醒。需配置 WX_SUBSCRIBE_TMPL_ID（未配则不发送）。
+   * 每 30 分钟扫描：活动开始前约 2 小时（1h45m~2h15m 窗口）、已授权、未发送、
+   * 状态 CONFIRMED 的报名，发送微信订阅消息提醒。
    */
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_30_MINUTES)
   async sendStartReminders() {
     if (this.running) return;
     const tmplId =
@@ -36,8 +36,8 @@ export class ReminderService {
     this.running = true;
     try {
       const now = Date.now();
-      const from = new Date(now + 110 * 60 * 1000); // 1h50m 后
-      const to = new Date(now + 130 * 60 * 1000); // 2h10m 后
+      const from = new Date(now + 105 * 60 * 1000); // 1h45m 后
+      const to = new Date(now + 135 * 60 * 1000); // 2h15m 后（30 分钟窗口，匹配扫描频率防漏）
       const signups = await this.prisma.signup.findMany({
         where: {
           status: 'CONFIRMED',
