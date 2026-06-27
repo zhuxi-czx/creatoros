@@ -3,6 +3,7 @@ import { View, Text, Image } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { useAuthStore } from '../../stores/useAuthStore'
 import PhoneLoginSheet from '../../components/PhoneLoginSheet'
+import StatusPicker from '../../components/StatusPicker'
 import { resolveImageUrl } from '../../services/api'
 import { getMySignups } from '../../services/user'
 import type { SignupRecord } from '../../services/user'
@@ -18,6 +19,7 @@ export default function Profile() {
   const [showLogin, setShowLogin] = useState(false)
   const [mem, setMem] = useState<MembershipInfo | null>(null)
   const [coupons, setCoupons] = useState<Coupon[]>([])
+  const [showStatus, setShowStatus] = useState(false)
 
   useEffect(() => {
     if (token) {
@@ -29,6 +31,8 @@ export default function Profile() {
   useDidShow(() => {
     if (token) {
       loadSignups()
+      // 已注册但未完善状态的用户，进入我的页引导补充（含忽略后不再弹）
+      if (user && !user.statusPrompted) setShowStatus(true)
     }
   })
 
@@ -265,6 +269,13 @@ export default function Profile() {
         onClose={() => setShowLogin(false)}
         onSuccess={loadSignups}
         tabBar
+      />
+      <StatusPicker
+        visible={showStatus}
+        onDone={() => {
+          setShowStatus(false)
+          useAuthStore.getState().updateUser({ statusPrompted: true })
+        }}
       />
     </View>
   )
