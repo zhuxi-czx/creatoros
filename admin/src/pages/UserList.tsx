@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react'
 import {
   Card, Table, Tag, Space, Typography, Statistic, Row, Col,
-  Avatar, message, Grid, Modal, Input
+  Avatar, message, Grid, Modal, Input, Popconfirm, Button
 } from 'antd'
-import { UserOutlined, TeamOutlined, CalendarOutlined, EyeOutlined } from '@ant-design/icons'
+import { UserOutlined, TeamOutlined, CalendarOutlined, EyeOutlined, CrownOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { getUsers, type User } from '../services/user'
+import { getUsers, grantMembership, type User } from '../services/user'
 import { maskPhone, PHONE_VIEW_PASSWORD } from '../utils/phone'
+
+/** 是否有效 PlanF 会员 */
+function isActiveMember(u: User): boolean {
+  return !!u.membership && u.membership.status === 'ACTIVE' && dayjs(u.membership.expireAt).isAfter(dayjs())
+}
 
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid
@@ -34,6 +39,8 @@ export default function UserList() {
     }
   }
 
+  const [granting, setGranting] = useState<string | null>(null)
+
   useEffect(() => { loadUsers() }, [])
 
   const loadUsers = async () => {
@@ -46,6 +53,19 @@ export default function UserList() {
       message.error('加载用户失败')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleGrant = async (u: User) => {
+    setGranting(u.id)
+    try {
+      await grantMembership(u.id)
+      message.success(`已为「${u.nickname || u.uid || '该用户'}」开通 PlanF 会员`)
+      await loadUsers()
+    } catch (err: any) {
+      message.error(err?.message || '开通失败')
+    } finally {
+      setGranting(null)
     }
   }
 
@@ -137,7 +157,33 @@ export default function UserList() {
       key: 'createdAt',
       width: 120,
       render: (time: string) => dayjs(time).format('YYYY-MM-DD')
-    } as any] : [])
+    } as any] : []),
+    {
+      title: 'PlanF 会员',
+      key: 'membership',
+      width: isMobile ? 110 : 150,
+      render: (_: any, r: User) => isActiveMember(r)
+        ? <Tag color="gold">{dayjs(r.membership!.expireAt).format('YYYY-MM-DD')} 到期</Tag>
+        : <Text type="secondary">非会员</Text>
+    },
+    {
+      title: '操作',
+      key: 'action',
+      width: isMobile ? 100 : 120,
+      render: (_: any, r: User) => (
+        <Popconfirm
+          title="设为 PlanF 会员"
+          description={isActiveMember(r) ? '该用户已是会员，确认续费一年？' : '确认为该用户开通 PlanF 会员（一年期）？'}
+          okText="确认开通"
+          cancelText="取消"
+          onConfirm={() => handleGrant(r)}
+        >
+          <Button size="small" type="link" icon={<CrownOutlined />} loading={granting === r.id}>
+            {isActiveMember(r) ? '续费' : '设为会员'}
+          </Button>
+        </Popconfirm>
+      )
+    },
   ]
 
   return (

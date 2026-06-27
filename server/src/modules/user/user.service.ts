@@ -98,6 +98,7 @@ export class UserService {
           status: true,
           city: true,
           createdAt: true,
+          membership: { select: { status: true, expireAt: true } },
           _count: {
             select: { signups: true },
           },

@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Put,
   Body,
   Param,
@@ -11,6 +12,7 @@ import {
   DefaultValuePipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
+import { MembershipService } from '../membership/membership.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -18,7 +20,10 @@ import { AdminGuard } from '../auth/admin.guard';
 
 @Controller()
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly membershipService: MembershipService,
+  ) {}
 
   // User routes
   @UseGuards(JwtAuthGuard)
@@ -62,5 +67,12 @@ export class UserController {
     @Body() dto: UpdateUserStatusDto,
   ) {
     return this.userService.adminUpdateUserStatus(id, dto);
+  }
+
+  // 管理员手动开通/续费 PlanF 会员（一年期，已是会员则从到期日顺延）
+  @UseGuards(AdminGuard)
+  @Post('api/admin/users/:id/membership')
+  async adminGrantMembership(@Param('id') id: string) {
+    return this.membershipService.activate(id);
   }
 }
