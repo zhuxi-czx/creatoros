@@ -8,8 +8,6 @@ import { getColumns, type ColumnConfig } from '../../services/column'
 import { resolveImageUrl } from '../../services/api'
 import { lucideUri, pathToUri } from '../../utils/lucide'
 import EventCard from '../../components/EventCard'
-import StatusPicker from '../../components/StatusPicker'
-import { useAuthStore } from '../../stores/useAuthStore'
 import './index.scss'
 
 const COLUMN_FALLBACK_BG: Record<string, string> = {
@@ -30,15 +28,11 @@ export default function Discover() {
   const [keyword, setKeyword] = useState('')
   const [searchResults, setSearchResults] = useState<Event[]>([])
   const [searching, setSearching] = useState(false)
-  const [showStatus, setShowStatus] = useState(false)
   const searchTimer = useRef<any>(null)
 
   useEffect(() => { loadAll() }, [])
   const firstShow = useRef(true)
   useDidShow(() => {
-    // 首次登录后引导填写状态（忽略后 statusPrompted=true，不再弹）
-    const auth = useAuthStore.getState()
-    if (auth.token && auth.user && !auth.user.statusPrompted) setShowStatus(true)
     if (firstShow.current) { firstShow.current = false; return }
     loadEvents(true) // 返回时静默刷新，不触发 loading、不破坏滚动位置
   })
@@ -179,13 +173,6 @@ export default function Discover() {
           </View>
         </>
       )}
-      <StatusPicker
-        visible={showStatus}
-        onDone={() => {
-          setShowStatus(false)
-          useAuthStore.getState().updateUser({ statusPrompted: true })
-        }}
-      />
     </View>
   )
 }
