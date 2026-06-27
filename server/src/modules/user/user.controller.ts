@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Delete,
   Body,
   Param,
   Query,
@@ -74,5 +75,12 @@ export class UserController {
   @Post('api/admin/users/:id/membership')
   async adminGrantMembership(@Param('id') id: string) {
     return this.membershipService.activate(id);
+  }
+
+  // 管理员取消用户 PlanF 会员资格（置为过期）
+  @UseGuards(AdminGuard)
+  @Delete('api/admin/users/:id/membership')
+  async adminRevokeMembership(@Param('id') id: string) {
+    return this.membershipService.deactivate(id);
   }
 }

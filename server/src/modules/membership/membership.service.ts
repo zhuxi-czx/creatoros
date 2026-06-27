@@ -91,6 +91,14 @@ export class MembershipService {
     return this.activateInTx(this.prisma, userId);
   }
 
+  /** 管理员取消会员：置为过期（保留记录与免费名额用量，可再次开通）。 */
+  async deactivate(userId: string) {
+    return this.prisma.membership.updateMany({
+      where: { userId },
+      data: { status: 'EXPIRED' },
+    });
+  }
+
   /** 价格计算：传入的 event 需 include category。 */
   async computePricing(event: any, userId?: string): Promise<Pricing> {
     const price = event.price as number;

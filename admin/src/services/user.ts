@@ -35,3 +35,8 @@ export async function getUsers(page = 1, limit = 50): Promise<PaginatedResponse>
 export async function grantMembership(id: string): Promise<void> {
   return api.post(`/admin/users/${id}/membership`) as any
 }
+
+// 管理员取消用户 PlanF 会员资格
+export async function revokeMembership(id: string): Promise<void> {
+  return api.delete(`/admin/users/${id}/membership`) as any
+}

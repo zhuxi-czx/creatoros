@@ -6,7 +6,7 @@ import {
 import { UserOutlined, TeamOutlined, CalendarOutlined, EyeOutlined, CrownOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { getUsers, grantMembership, type User } from '../services/user'
+import { getUsers, grantMembership, revokeMembership, type User } from '../services/user'
 import { maskPhone, PHONE_VIEW_PASSWORD } from '../utils/phone'
 
 /** 是否有效 PlanF 会员 */
@@ -40,6 +40,7 @@ export default function UserList() {
   }
 
   const [granting, setGranting] = useState<string | null>(null)
+  const [revoking, setRevoking] = useState<string | null>(null)
 
   useEffect(() => { loadUsers() }, [])
 
@@ -66,6 +67,19 @@ export default function UserList() {
       message.error(err?.message || '开通失败')
     } finally {
       setGranting(null)
+    }
+  }
+
+  const handleRevoke = async (u: User) => {
+    setRevoking(u.id)
+    try {
+      await revokeMembership(u.id)
+      message.success(`已取消「${u.nickname || u.uid || '该用户'}」的 PlanF 会员`)
+      await loadUsers()
+    } catch (err: any) {
+      message.error(err?.message || '取消失败')
+    } finally {
+      setRevoking(null)
     }
   }
 
@@ -169,19 +183,33 @@ export default function UserList() {
     {
       title: '操作',
       key: 'action',
-      width: isMobile ? 100 : 120,
+      width: isMobile ? 150 : 190,
       render: (_: any, r: User) => (
-        <Popconfirm
-          title="设为 PlanF 会员"
-          description={isActiveMember(r) ? '该用户已是会员，确认续费一年？' : '确认为该用户开通 PlanF 会员（一年期）？'}
-          okText="确认开通"
-          cancelText="取消"
-          onConfirm={() => handleGrant(r)}
-        >
-          <Button size="small" type="link" icon={<CrownOutlined />} loading={granting === r.id}>
-            {isActiveMember(r) ? '续费' : '设为会员'}
-          </Button>
-        </Popconfirm>
+        <Space size={0}>
+          <Popconfirm
+            title="设为 PlanF 会员"
+            description={isActiveMember(r) ? '该用户已是会员，确认续费一年？' : '确认为该用户开通 PlanF 会员（一年期）？'}
+            okText="确认开通"
+            cancelText="取消"
+            onConfirm={() => handleGrant(r)}
+          >
+            <Button size="small" type="link" icon={<CrownOutlined />} loading={granting === r.id}>
+              {isActiveMember(r) ? '续费' : '设为会员'}
+            </Button>
+          </Popconfirm>
+          {isActiveMember(r) && (
+            <Popconfirm
+              title="取消 PlanF 会员"
+              description="确认取消该用户的 PlanF 会员资格？（保留记录，可再次开通）"
+              okText="确认取消"
+              cancelText="返回"
+              okButtonProps={{ danger: true }}
+              onConfirm={() => handleRevoke(r)}
+            >
+              <Button size="small" type="link" danger loading={revoking === r.id}>取消会员</Button>
+            </Popconfirm>
+          )}
+        </Space>
       )
     },
   ]
