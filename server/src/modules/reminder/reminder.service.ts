@@ -29,8 +29,10 @@ export class ReminderService {
   @Cron(CronExpression.EVERY_10_MINUTES)
   async sendStartReminders() {
     if (this.running) return;
-    const tmplId = process.env.WX_SUBSCRIBE_TMPL_ID;
-    if (!tmplId) return; // 模板未配置，跳过（链路已就绪，配置后即生效）
+    const tmplId =
+      process.env.WX_SUBSCRIBE_TMPL_ID ||
+      'wixZ0YldvXWTivHsvz-PFcTEYD0RrK2EU02owRMTZPE'; // 活动开始提醒模板
+    if (!tmplId) return;
     this.running = true;
     try {
       const now = Date.now();
@@ -75,15 +77,17 @@ export class ReminderService {
     const d = new Date(event.date);
     const pad = (n: number) => String(n).padStart(2, '0');
     const timeStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    // ⚠️ data 的字段 key（thing1/time2/thing3）需按实际申请的订阅消息模板调整
+    // 模板「活动开始提醒」字段：商家名/活动主题/活动时间/活动地点/活动描述
     const body = {
       touser: openId,
       template_id: tmplId,
       page: `pages/event-detail/index?id=${event.id}`,
       data: {
-        thing1: { value: String(event.title || '活动').slice(0, 20) },
-        time2: { value: timeStr },
-        thing3: { value: String(event.venue?.name || event.location || '待定').slice(0, 20) },
+        thing1: { value: String(event.hostName || event.venue?.name || '敞开酒馆').slice(0, 20) },
+        thing5: { value: String(event.title || '活动').slice(0, 20) },
+        time6: { value: timeStr },
+        thing7: { value: String(event.venue?.name || event.location || '待定').slice(0, 20) },
+        thing2: { value: '活动即将开始，记得准时参加' },
       },
     };
     const res: any = await fetch(

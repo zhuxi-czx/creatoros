@@ -83,8 +83,8 @@ export const getFeaturedEvents = (): Promise<Event[]> =>
 export const getEventDetail = (id: string, userId?: string): Promise<Event> =>
   request<Event>(`/events/${id}${userId ? `?userId=${userId}` : ''}`)
 
-/** 微信「活动开始提醒」订阅消息模板 ID。⚠️ 待小程序后台申请后填入，为空则不请求订阅 */
-export const SUBSCRIBE_TMPL_ID = ''
+/** 微信「活动开始提醒」订阅消息模板 ID */
+export const SUBSCRIBE_TMPL_ID = 'wixZ0YldvXWTivHsvz-PFcTEYD0RrK2EU02owRMTZPE'
 
 /** 报名成功并授权后，记录开始提醒订阅 */
 export const subscribeReminder = (eventId: string): Promise<{ ok: boolean }> =>
