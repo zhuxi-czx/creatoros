@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
-import { View, Text, Image } from '@tarojs/components'
+import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { getCategoryPage, type CategoryPage } from '../../services/category'
-import { resolveImageUrl } from '../../services/api'
 import EventCard from '../../components/EventCard'
 import './index.scss'
 
@@ -26,7 +25,6 @@ export default function CategoryPageView() {
   return (
     <View className='cat-page'>
       <View className='cat-header'>
-        {data.coverUrl ? <Image className='cat-banner' src={resolveImageUrl(data.coverUrl)} mode='aspectFill' /> : null}
         <View className='cat-info'>
           <Text className='cat-name'>{data.name}</Text>
           {data.intro ? <Text className='cat-intro'>{data.intro}</Text> : null}

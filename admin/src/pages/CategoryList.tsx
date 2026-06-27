@@ -57,12 +57,12 @@ export default function CategoryList() {
   }
 
   const columns: ColumnsType<Category> = [
-    { title: '图标', dataIndex: 'icon', width: 70, align: 'center' as const, render: (i: string) => i ? <IconImg name={i} size={20} /> : '—' },
-    { title: '名称', dataIndex: 'name' },
-    { title: '活动数', width: 80, render: (_, r) => r._count?.events ?? 0 },
-    { title: '排序', dataIndex: 'order', width: 70 },
+    { title: '图标', dataIndex: 'icon', width: 80, align: 'center' as const, render: (i: string) => i ? <IconImg name={i} size={20} /> : '—' },
+    { title: '名称', dataIndex: 'name', width: 300 },
+    { title: '活动数', width: 120, align: 'center' as const, render: (_, r) => r._count?.events ?? 0 },
+    { title: '排序', dataIndex: 'order', width: 100, align: 'center' as const },
     {
-      title: '操作', width: 140,
+      title: '操作', width: 160,
       render: (_, r) => (
         <Space>
           <Button size="small" onClick={() => openModal(r)}>编辑</Button>
