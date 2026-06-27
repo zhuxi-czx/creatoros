@@ -199,8 +199,61 @@ export default function EventDetail() {
           {event.title}
         </h1>
 
+        {/* 活动信息（置于正文上方，与小程序一致；名额在费用上方）*/}
+        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {eventDate && (
+            <DetailRow icon={<CalendarIcon />} label="时间">
+              {formatEventDateTime(eventDate)}
+              {event.endTime && ` — ${dayjs(event.endTime).format('HH:mm')}`}
+            </DetailRow>
+          )}
+          {event.venue && (
+            <DetailRow icon={<MapPinIcon />} label="地点">
+              {event.venue.name}
+              {event.venue.address && (
+                <span style={{ color: '#999', fontSize: 12, display: 'block', marginTop: 2 }}>
+                  {event.venue.address}
+                </span>
+              )}
+            </DetailRow>
+          )}
+          {event.hostName && (
+            <DetailRow icon={<UserIcon />} label="主办方">{event.hostName}</DetailRow>
+          )}
+          {(event.maxCapacity || event.maxParticipants) && (() => {
+            const max = event.maxCapacity || event.maxParticipants || 0
+            const remain = max - signupCount
+            return (
+              <DetailRow icon={<UsersIcon />} label="名额">
+                <span>{signupCount}/{max} 人</span>
+                {remain > 0 && remain <= 5 && (
+                  <span style={{ color: '#EF4444', fontWeight: 600, marginLeft: 8, fontSize: 13 }}>
+                    仅剩{remain}个名额
+                  </span>
+                )}
+                {remain > 5 && (
+                  <span style={{ color: '#999', marginLeft: 8, fontSize: 13 }}>
+                    剩余{remain}个名额
+                  </span>
+                )}
+              </DetailRow>
+            )
+          })()}
+          <DetailRow icon={<TicketIcon />} label="费用">
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+              <span>{priceMain}</span>
+              {planfHint && <span style={{ color: '#C9A96E', fontSize: 13, fontWeight: 600 }}>{planfHint}</span>}
+            </div>
+            {event.priceNote && (
+              <div style={{ fontSize: 13, color: '#999', marginTop: 4, lineHeight: 1.5, fontWeight: 400 }}>
+                {event.priceNote}
+              </div>
+            )}
+          </DetailRow>
+        </div>
+
         {event.description && (
-          <div style={{ marginTop: 12 }} dangerouslySetInnerHTML={{ __html: enrichHtml(event.description) }} />
+          <div style={{ marginTop: 24 }} dangerouslySetInnerHTML={{ __html: enrichHtml(event.description) }} />
         )}
 
         {/* Structured sections */}
@@ -228,59 +281,6 @@ export default function EventDetail() {
             </p>
           </div>
         )}
-
-        {/* Info rows */}
-        <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {eventDate && (
-            <DetailRow icon={<CalendarIcon />} label="时间">
-              {formatEventDateTime(eventDate)}
-              {event.endTime && ` — ${dayjs(event.endTime).format('HH:mm')}`}
-            </DetailRow>
-          )}
-          {event.venue && (
-            <DetailRow icon={<MapPinIcon />} label="地点">
-              {event.venue.name}
-              {event.venue.address && (
-                <span style={{ color: '#999', fontSize: 12, display: 'block', marginTop: 2 }}>
-                  {event.venue.address}
-                </span>
-              )}
-            </DetailRow>
-          )}
-          {event.hostName && (
-            <DetailRow icon={<UserIcon />} label="主办方">{event.hostName}</DetailRow>
-          )}
-          <DetailRow icon={<TicketIcon />} label="费用">
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-              <span>{priceMain}</span>
-              {planfHint && <span style={{ color: '#C9A96E', fontSize: 13, fontWeight: 600 }}>{planfHint}</span>}
-            </div>
-            {event.priceNote && (
-              <div style={{ fontSize: 13, color: '#999', marginTop: 4, lineHeight: 1.5, fontWeight: 400 }}>
-                {event.priceNote}
-              </div>
-            )}
-          </DetailRow>
-          {(event.maxCapacity || event.maxParticipants) && (() => {
-            const max = event.maxCapacity || event.maxParticipants || 0
-            const remain = max - signupCount
-            return (
-              <DetailRow icon={<UsersIcon />} label="名额">
-                <span>{signupCount}/{max} 人</span>
-                {remain > 0 && remain <= 5 && (
-                  <span style={{ color: '#EF4444', fontWeight: 600, marginLeft: 8, fontSize: 13 }}>
-                    仅剩{remain}个名额
-                  </span>
-                )}
-                {remain > 5 && (
-                  <span style={{ color: '#999', marginLeft: 8, fontSize: 13 }}>
-                    剩余{remain}个名额
-                  </span>
-                )}
-              </DetailRow>
-            )
-          })()}
-        </div>
 
         {/* Participants */}
         {signupCount > 0 && (
