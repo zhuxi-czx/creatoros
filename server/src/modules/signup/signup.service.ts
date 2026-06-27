@@ -185,12 +185,13 @@ export class SignupService {
           where: { membershipId: m.id, eventId },
         });
       }
-      // If event was FULL, reopen it to PUBLISHED
-      if (event.status === 'FULL') {
-        await tx.event.update({
-          where: { id: eventId },
-          data: { status: 'PUBLISHED' },
-        });
+      // 若活动已满且取消后未满 → 恢复 PUBLISHED（事务内重查，避免事务外快照竞态导致 FULL 卡死）
+      const fresh = await tx.event.findUnique({ where: { id: eventId } });
+      if (fresh && fresh.status === 'FULL') {
+        const count = await tx.signup.count({ where: { eventId, status: 'CONFIRMED' } });
+        if (count < fresh.maxCapacity) {
+          await tx.event.update({ where: { id: eventId }, data: { status: 'PUBLISHED' } });
+        }
       }
     });
 

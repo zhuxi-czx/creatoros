@@ -25,7 +25,9 @@ async function bootstrap() {
   // Enable CORS
   const corsOrigin = process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
-    : true; // Allow all origins in development; set CORS_ORIGIN in production
+    : process.env.NODE_ENV === 'production'
+      ? ['https://creatorbar.cn', 'https://admin.creatorbar.cn'] // 生产兜底白名单：避免漏配 CORS_ORIGIN 时放行所有来源
+      : true; // 开发放行所有来源
   app.enableCors({
     origin: corsOrigin,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],

@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsArray, ArrayMaxSize, MaxLength } from 'class-validator';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -33,17 +33,19 @@ export class UpdateProfileDto {
   @IsString()
   generation?: string;
 
-  @IsOptional()
-  @IsString()
-  phone?: string;
+  // phone 不在此处更新：仅通过微信换码登录(phoneLogin)绑定，避免被任意篡改
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @ArrayMaxSize(20)
+  @MaxLength(30, { each: true })
   tags?: string[]; // 自定义个性标签（2.0）
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @ArrayMaxSize(20)
+  @MaxLength(30, { each: true })
   statuses?: string[]; // 用户状态（多选）
 }

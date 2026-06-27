@@ -90,10 +90,22 @@ export class ReminderService {
         thing2: { value: '活动即将开始，记得准时参加' },
       },
     };
-    const res: any = await fetch(
-      `https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=${token}`,
-      { method: 'POST', body: JSON.stringify(body) },
-    ).then((r) => r.json());
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 6000); // 防微信抖动挂起 cron
+    let res: any;
+    try {
+      res = await fetch(
+        `https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token=${token}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        },
+      ).then((r) => r.json());
+    } finally {
+      clearTimeout(timer);
+    }
     if (res.errcode && res.errcode !== 0) {
       throw new Error(`微信发送失败: ${res.errcode} ${res.errmsg}`);
     }

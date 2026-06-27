@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 export const MEMBERSHIP_PRICE = 99800; // 998 元（分）
@@ -86,8 +86,10 @@ export class MembershipService {
     });
   }
 
-  /** 支付成功后开通/续费。 */
+  /** 支付成功 / 管理员手动开通-续费。 */
   async activate(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('用户不存在');
     return this.activateInTx(this.prisma, userId);
   }
 

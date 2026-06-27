@@ -140,12 +140,15 @@ export class OrderService {
       throw new BadRequestException('用户缺少 openId，无法发起支付');
     }
     const now = new Date();
-    let order = await this.prisma.order.findFirst({
-      where: { userId, type: 'MEMBERSHIP', status: 'PENDING', expiresAt: { gt: now } },
-    });
-    if (!order) {
+    // 事务 + 行锁序列化同用户的会员下单，避免并发创建多笔 PENDING 会员订单
+    const order = await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${userId} FOR UPDATE`;
+      const existing = await tx.order.findFirst({
+        where: { userId, type: 'MEMBERSHIP', status: 'PENDING', expiresAt: { gt: now } },
+      });
+      if (existing) return existing;
       const expiresAt = new Date(now.getTime() + ORDER_TTL_MIN * 60 * 1000);
-      order = await this.prisma.order.create({
+      return tx.order.create({
         data: {
           outTradeNo: this.genOutTradeNo(),
           userId,
@@ -155,7 +158,7 @@ export class OrderService {
           expiresAt,
         },
       });
-    }
+    });
     const payParams = await this.wechatPay.createJsapiOrder({
       description: 'PlanF 会员（年）',
       outTradeNo: order.outTradeNo,

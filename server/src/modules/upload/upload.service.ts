@@ -76,8 +76,14 @@ export class UploadService {
 
       return { mainPath: mainFile, thumbPath: thumbFile };
     } catch (error) {
-      console.error('Image processing failed, using original file:', error);
-      return { mainPath: filePath, thumbPath: filePath };
+      console.error('Image processing failed:', error);
+      // 删除未能处理的原始文件，避免非图片/损坏文件残留并被静态服务暴露
+      try {
+        fs.unlinkSync(filePath);
+      } catch {
+        /* 原文件可能已不存在，忽略 */
+      }
+      throw new Error('图片处理失败，请上传有效的图片文件');
     }
   }
 }
