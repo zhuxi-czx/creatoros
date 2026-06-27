@@ -196,7 +196,8 @@ export class AuthService {
     }
   }
 
-  private async getAccessToken(): Promise<string> {
+  // 供其它模块复用（如订阅消息发送）；进程内缓存 access_token
+  async getAccessToken(): Promise<string> {
     const now = Date.now();
     if (accessTokenCache && accessTokenCache.expireAt > now) {
       return accessTokenCache.token;

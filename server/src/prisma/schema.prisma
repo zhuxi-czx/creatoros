@@ -196,6 +196,8 @@ model Signup {
   userId    String
   eventId   String
   status    SignupStatus @default(CONFIRMED)
+  reminderSubscribed Boolean @default(false) // 用户是否授权活动开始提醒（微信订阅消息）
+  reminderSent       Boolean @default(false) // 是否已发送开始提醒（开始前 2 小时）
   orderId   String?      @unique // 付费报名关联订单；免费报名为 null
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt

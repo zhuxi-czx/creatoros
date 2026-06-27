@@ -23,6 +23,8 @@ module.exports = {
         WX_PAY_PRIVATE_KEY_PATH: '/root/creatoros/server/cert/apiclient_key.pem',
         WX_PAY_CERT_PATH: '/root/creatoros/server/cert/apiclient_cert.pem',
         WX_PAY_NOTIFY_URL: 'https://creatorbar.cn/api/payment/notify',
+        // 微信订阅消息「活动开始提醒」模板 ID（小程序后台申请后填入；为空则 cron 不发送提醒）
+        WX_SUBSCRIBE_TMPL_ID: '',
       },
     },
     {

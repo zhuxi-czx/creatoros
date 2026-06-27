@@ -4,7 +4,7 @@ import { enrichHtml } from '../../utils/richText'
 import Taro, { useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { lucideUri } from '../../utils/lucide'
 import { getEventDisplay } from '../../utils/eventStatus'
-import { getEventDetail, signup, cancelSignup, getEventSignups, checkout, getOrder } from '../../services/event'
+import { getEventDetail, signup, cancelSignup, getEventSignups, checkout, getOrder, SUBSCRIBE_TMPL_ID, subscribeReminder } from '../../services/event'
 import type { Event, Participant } from '../../services/event'
 import { useAuthStore } from '../../stores/useAuthStore'
 import PhoneLoginSheet from '../../components/PhoneLoginSheet'
@@ -81,6 +81,17 @@ export default function EventDetail() {
     doSignup()
   }
 
+  // 报名成功后请求「活动开始提醒」订阅授权（模板未配置则跳过）
+  const requestEventReminder = async (eventId: string) => {
+    if (!SUBSCRIBE_TMPL_ID) return
+    try {
+      const res: any = await Taro.requestSubscribeMessage({ tmplIds: [SUBSCRIBE_TMPL_ID] } as any)
+      if (res[SUBSCRIBE_TMPL_ID] === 'accept') await subscribeReminder(eventId)
+    } catch (e) {
+      // 用户拒绝授权或接口异常，忽略
+    }
+  }
+
   // 实际报名（已确保登录、可报名）
   const doSignup = async () => {
     if (!event || !id) return
@@ -92,6 +103,7 @@ export default function EventDetail() {
         if (res.free) {
           await loadEvent(true)
           Taro.showToast({ title: '报名成功', icon: 'success' })
+          await requestEventReminder(id)
         } else if (res.payParams && res.orderId) {
           await Taro.requestPayment({
             timeStamp: res.payParams.timeStamp,
@@ -104,6 +116,7 @@ export default function EventDetail() {
           if (paid) {
             await loadEvent(true)
             Taro.showToast({ title: '报名成功', icon: 'success' })
+          await requestEventReminder(id)
           } else {
             Taro.showToast({ title: '支付确认中，请稍后刷新', icon: 'none' })
           }

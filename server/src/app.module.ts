@@ -17,6 +17,7 @@ import { ColumnModule } from './modules/column/column.module';
 import { CouponModule } from './modules/coupon/coupon.module';
 import { MembershipModule } from './modules/membership/membership.module';
 import { IconModule } from './modules/icon/icon.module';
+import { ReminderModule } from './modules/reminder/reminder.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { IconModule } from './modules/icon/icon.module';
     CouponModule,
     MembershipModule,
     IconModule,
+    ReminderModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
