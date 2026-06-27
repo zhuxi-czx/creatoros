@@ -184,13 +184,17 @@ export default function Profile() {
           <View className='entry-row'>
             <View className='entry-card' onClick={() => Taro.navigateTo({ url: '/pages/coupon/index' })}>
               <View className='entry-icon' style={{ backgroundImage: `url("${lucideUri('ticket', '#C9A96E')}")` }} />
-              <Text className='entry-title'>我的优惠券</Text>
-              <Text className='entry-sub'>{usableCoupons.length > 0 ? `${usableCoupons.length} 张可用` : '暂无可用'}</Text>
+              <View className='entry-text'>
+                <Text className='entry-title'>我的优惠券</Text>
+                <Text className='entry-sub'>{usableCoupons.length > 0 ? `${usableCoupons.length} 张可用` : '暂无可用'}</Text>
+              </View>
             </View>
             <View className='entry-card' onClick={() => Taro.navigateTo({ url: '/pages/order/index' })}>
               <View className='entry-icon' style={{ backgroundImage: `url("${lucideUri('receipt', '#C9A96E')}")` }} />
-              <Text className='entry-title'>我的订单</Text>
-              <Text className='entry-sub'>查看支付记录</Text>
+              <View className='entry-text'>
+                <Text className='entry-title'>我的订单</Text>
+                <Text className='entry-sub'>查看支付记录</Text>
+              </View>
             </View>
           </View>
         )}
