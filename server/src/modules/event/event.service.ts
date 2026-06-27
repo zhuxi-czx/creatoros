@@ -236,7 +236,7 @@ export class EventService {
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { date: 'desc' }, // 按活动时间倒序（最新/最近活动在前）
         include: {
           venue: {
             select: {

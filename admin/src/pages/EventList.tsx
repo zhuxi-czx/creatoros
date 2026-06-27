@@ -101,8 +101,8 @@ export default function EventList() {
       title: '时间',
       dataIndex: 'date',
       key: 'date',
-      width: 110,
-      render: (date: string) => dayjs(date).format('MM-DD HH:mm')
+      width: 150,
+      render: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm')
     } as any] : []),
     {
       title: '报名',
