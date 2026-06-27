@@ -32,16 +32,16 @@
 .status-chip-text { font-size: 26rpx; color: #666; }
 .status-chip-text.active { color: #C9A96E; font-weight: 600; }
 
-.status-footer {
+.status-footer { margin-top: 44rpx; }
+.status-confirm-full {
+  width: 100%;
+  height: 84rpx;
+  border-radius: 42rpx;
+  background: #C9A96E;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-top: 44rpx;
+  justify-content: center;
+  box-sizing: border-box;
 }
-.status-ignore { font-size: 28rpx; color: #999; padding: 16rpx 8rpx; }
-.status-confirm {
-  padding: 18rpx 56rpx;
-  border-radius: 40rpx;
-  background: #C9A96E;
-}
+.status-confirm-full.disabled { background: #E5D9BE; }
 .status-confirm-text { font-size: 30rpx; font-weight: 600; color: #fff; }

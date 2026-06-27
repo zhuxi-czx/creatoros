@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Taro from '@tarojs/taro'
 import { View, Text } from '@tarojs/components'
 import { setStatuses } from '../../services/user'
 import './index.scss'
@@ -53,8 +54,16 @@ export default function StatusPicker({ visible, onDone }: Props) {
           })}
         </View>
         <View className='status-footer'>
-          <Text className='status-ignore' onClick={() => submit([])}>忽略</Text>
-          <View className='status-confirm' onClick={() => submit(selected)}>
+          <View
+            className={`status-confirm-full ${selected.length === 0 ? 'disabled' : ''}`}
+            onClick={() => {
+              if (selected.length === 0) {
+                Taro.showToast({ title: '请至少选择一项', icon: 'none' })
+                return
+              }
+              submit(selected)
+            }}
+          >
             <Text className='status-confirm-text'>确认</Text>
           </View>
         </View>
