@@ -384,7 +384,11 @@ export default function EventDetail() {
               : signupClosed
               ? (status.state === 'ENDED' ? '活动已结束' : '报名已结束')
               : planfBlocked
-              ? 'PlanF 专属活动 · 开通会员'
+              ? '立即报名 · 升级 PlanF 会员'
+              : event.isPlanfExclusive
+              ? '立即报名 · PlanF 免费专享'
+              : (event.pricing?.freeType === 'GUEST_FREE' && event.pricing?.freeAvailable)
+              ? '立即报名 · PlanF 会员本次免费'
               : (event.price ?? 0) > 0
               ? `立即报名 · ${event.pricing ? (event.pricing.finalPrice === 0 ? '免费' : `¥${(event.pricing.finalPrice / 100).toFixed(0)}`) : `¥${(event.price! / 100).toFixed(0)}`}`
               : '立即报名 · 免费'}
