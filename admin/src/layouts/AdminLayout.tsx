@@ -9,7 +9,8 @@ import {
   UserOutlined,
   LogoutOutlined,
   MenuOutlined,
-  ReadOutlined
+  ReadOutlined,
+  AlertOutlined
 } from '@ant-design/icons'
 import { logout, getCurrentUser } from '../stores/useAuthStore'
 
@@ -23,7 +24,8 @@ const menuItems = [
   { key: '/venues', icon: <EnvironmentOutlined />, label: '场馆管理' },
   { key: '/categories', icon: <ReadOutlined />, label: '分类管理' },
   { key: '/columns', icon: <PictureOutlined />, label: '专栏配置' },
-  { key: '/users', icon: <UserOutlined />, label: '用户管理' }
+  { key: '/users', icon: <UserOutlined />, label: '用户管理' },
+  { key: '/logs', icon: <AlertOutlined />, label: '系统监控' }
 ]
 
 function useIsMobile() {

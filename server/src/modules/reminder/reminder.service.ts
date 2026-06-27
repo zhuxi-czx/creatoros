@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuthService } from '../auth/auth.service';
+import { LogService } from '../log/log.service';
 
 @Injectable()
 export class ReminderService {
@@ -11,6 +12,7 @@ export class ReminderService {
   constructor(
     private prisma: PrismaService,
     private auth: AuthService,
+    private logService: LogService,
   ) {}
 
   /** 报名后用户授权了「活动开始提醒」订阅消息 */
@@ -60,11 +62,13 @@ export class ReminderService {
           ok++;
         } catch (e: any) {
           this.logger.error(`开始提醒发送失败 signup=${s.id}: ${e?.message}`);
+          void this.logService.record('WARN', 'reminder', `提醒发送失败 signup=${s.id}: ${e?.message}`);
         }
       }
       this.logger.log(`开始提醒：命中 ${signups.length} 条，成功 ${ok} 条`);
     } catch (e: any) {
       this.logger.error(`开始提醒任务异常: ${e?.message}`);
+      void this.logService.record('ERROR', 'reminder', `开始提醒任务异常: ${e?.message}`, e?.stack);
     } finally {
       this.running = false;
     }

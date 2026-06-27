@@ -4,7 +4,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import * as path from 'path';
 import 'reflect-metadata';
 import { AppModule } from './app.module';
-import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 /** 启动期校验必需环境变量，缺失直接 fail-fast，避免运行时才崩。 */
 function validateEnv() {
@@ -48,7 +47,7 @@ async function bootstrap() {
       },
     }),
   );
-  app.useGlobalFilters(new AllExceptionsFilter());
+  // AllExceptionsFilter 已通过 app.module 的 APP_FILTER 注册（DI 注入 LogService）
 
   // Serve static files from /uploads
   app.useStaticAssets(path.join(process.cwd(), 'uploads'), {

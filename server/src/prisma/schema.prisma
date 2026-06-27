@@ -153,6 +153,20 @@ model ColumnConfig {
   @@index([order])
 }
 
+// 系统运行日志（异常/告警），供后台监控查看
+model SystemLog {
+  id        String   @id @default(cuid())
+  level     String // ERROR / WARN
+  source    String // http / cron / payment / reminder / wechat ...
+  message   String // 简要信息
+  detail    String? // 详情（堆栈摘要 / JSON）
+  path      String? // HTTP 请求路径（http 来源时）
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([level])
+}
+
 model Event {
   id               String      @id @default(cuid())
   title            String

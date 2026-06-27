@@ -7,11 +7,14 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { LogService } from '../../modules/log/log.service';
 
-/** 全局异常过滤器：统一响应结构、5xx 记日志、不向客户端泄露内部细节。 */
+/** 全局异常过滤器：统一响应结构、5xx 记日志+落库（后台监控）、不向客户端泄露内部细节。 */
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger('Exception');
+
+  constructor(private readonly logService: LogService) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -29,11 +32,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message = body?.message ?? exception.message;
     }
 
-    // 5xx 记录堆栈便于排障；非 HttpException 不把内部细节返回客户端
+    // 5xx 记录堆栈便于排障 + 落库供后台监控；非 HttpException 不把内部细节返回客户端
     if (status >= 500) {
-      this.logger.error(
+      const stack =
+        exception instanceof Error ? exception.stack : String(exception);
+      this.logger.error(`${req?.method} ${req?.url} -> ${status}`, stack);
+      void this.logService.record(
+        'ERROR',
+        'http',
         `${req?.method} ${req?.url} -> ${status}`,
-        exception instanceof Error ? exception.stack : String(exception),
+        stack,
+        req?.url,
       );
     }
 

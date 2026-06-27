@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { OrderService } from './order.service';
+import { LogService } from '../log/log.service';
 
 /** 每 5 分钟关闭超时未支付订单，及时释放名额。 */
 @Injectable()
@@ -9,7 +10,10 @@ export class OrderCronService {
   private closing = false;
   private reconciling = false;
 
-  constructor(private readonly orderService: OrderService) {}
+  constructor(
+    private readonly orderService: OrderService,
+    private readonly logService: LogService,
+  ) {}
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   async handleCloseExpired() {
@@ -18,7 +22,9 @@ export class OrderCronService {
     try {
       await this.orderService.closeExpiredOrders();
     } catch (e) {
-      this.logger.error('closeExpiredOrders 失败', e instanceof Error ? e.stack : String(e));
+      const stack = e instanceof Error ? e.stack : String(e);
+      this.logger.error('closeExpiredOrders 失败', stack);
+      void this.logService.record('ERROR', 'cron', 'closeExpiredOrders 失败', stack);
     } finally {
       this.closing = false;
     }
@@ -32,7 +38,9 @@ export class OrderCronService {
     try {
       await this.orderService.reconcileRefundingOrders();
     } catch (e) {
-      this.logger.error('reconcileRefundingOrders 失败', e instanceof Error ? e.stack : String(e));
+      const stack = e instanceof Error ? e.stack : String(e);
+      this.logger.error('reconcileRefundingOrders 失败', stack);
+      void this.logService.record('ERROR', 'cron', 'reconcileRefundingOrders 失败', stack);
     } finally {
       this.reconciling = false;
     }

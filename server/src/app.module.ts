@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_FILTER } from '@nestjs/core';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { PaymentModule } from './modules/payment/payment.module';
@@ -18,6 +18,8 @@ import { CouponModule } from './modules/coupon/coupon.module';
 import { MembershipModule } from './modules/membership/membership.module';
 import { IconModule } from './modules/icon/icon.module';
 import { ReminderModule } from './modules/reminder/reminder.module';
+import { LogModule } from './modules/log/log.module';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 @Module({
   imports: [
@@ -39,7 +41,11 @@ import { ReminderModule } from './modules/reminder/reminder.module';
     MembershipModule,
     IconModule,
     ReminderModule,
+    LogModule,
   ],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_FILTER, useClass: AllExceptionsFilter },
+  ],
 })
 export class AppModule {}

@@ -10,6 +10,7 @@ import VenueList from './pages/VenueList'
 import UserList from './pages/UserList'
 import CategoryList from './pages/CategoryList'
 import ColumnConfig from './pages/ColumnConfig'
+import SystemMonitor from './pages/SystemMonitor'
 import { getToken } from './stores/useAuthStore'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -43,6 +44,7 @@ export default function App() {
         <Route path="users" element={<UserList />} />
         <Route path="categories" element={<CategoryList />} />
         <Route path="columns" element={<ColumnConfig />} />
+        <Route path="logs" element={<SystemMonitor />} />
       </Route>
     </Routes>
   )
