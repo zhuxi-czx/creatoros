@@ -223,12 +223,17 @@ export class EventService {
     page: number = 1,
     limit: number = 20,
     status?: string,
+    search?: string,
   ) {
     const skip = (page - 1) * limit;
 
     const where: any = {};
     if (status) {
       where.status = status;
+    }
+    const kw = search?.trim();
+    if (kw) {
+      where.title = { contains: kw, mode: 'insensitive' }; // 仅按活动名称搜索
     }
 
     const [events, total] = await Promise.all([

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Card, Table, Button, Tag, Space, Typography, Statistic, Row, Col,
-  message, Select, Grid, Popconfirm
+  message, Select, Grid, Popconfirm, Input
 } from 'antd'
 import {
   PlusOutlined, EditOutlined, CopyOutlined,
@@ -37,6 +37,7 @@ export default function EventList() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [searchKeyword, setSearchKeyword] = useState('')
   const [stats, setStats] = useState<any>({})
 
   useEffect(() => { loadData() }, [])
@@ -84,9 +85,9 @@ export default function EventList() {
     }
   }
 
-  const filteredEvents = statusFilter === 'all'
-    ? events
-    : events.filter(e => e.status === statusFilter)
+  const filteredEvents = events
+    .filter(e => statusFilter === 'all' || e.status === statusFilter)
+    .filter(e => !searchKeyword.trim() || (e.title || '').toLowerCase().includes(searchKeyword.trim().toLowerCase()))
 
   const columns: ColumnsType<Event> = [
     {
@@ -96,6 +97,16 @@ export default function EventList() {
       width: 180,
       ellipsis: true,
       render: (title: string) => <Text strong>{title}</Text>
+    },
+    {
+      title: '活动类型',
+      key: 'eventType',
+      width: 110,
+      render: (_: any, r: Event) => r.isPlanfExclusive
+        ? <Tag color="gold">PlanF</Tag>
+        : r.isGuestShare
+        ? <Tag color="purple">大咖分享</Tag>
+        : <Tag>普通活动</Tag>
     },
     ...(!isMobile ? [{
       title: '时间',
@@ -191,6 +202,14 @@ export default function EventList() {
         title={<Title level={5} style={{ margin: 0 }}>活动列表</Title>}
         extra={
           <Space size={8} wrap>
+            <Input
+              placeholder="搜索活动名称"
+              allowClear
+              value={searchKeyword}
+              onChange={e => setSearchKeyword(e.target.value)}
+              style={{ width: isMobile ? 130 : 200 }}
+              size={isMobile ? 'small' : 'middle'}
+            />
             <Select
               value={statusFilter}
               onChange={setStatusFilter}

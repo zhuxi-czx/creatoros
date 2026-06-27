@@ -67,8 +67,9 @@ export class EventController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Query('status') status?: string,
+    @Query('search') search?: string,
   ) {
-    return this.eventService.adminGetEvents(page, limit, status);
+    return this.eventService.adminGetEvents(page, limit, status, search);
   }
 
   @UseGuards(AdminGuard)
