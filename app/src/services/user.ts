@@ -37,5 +37,9 @@ export const getProfile = (): Promise<User> =>
 export const updateProfile = (data: UpdateProfileInput): Promise<User> =>
   request<User>('/users/profile', 'PUT', data)
 
+/** 状态选择弹窗：保存状态（忽略传空数组），后端会标记已弹过 */
+export const setStatuses = (statuses: string[]): Promise<User> =>
+  request<User>('/users/statuses', 'PUT', { statuses })
+
 export const getMySignups = (): Promise<SignupRecord[]> =>
   request<SignupRecord[]>('/users/signups')

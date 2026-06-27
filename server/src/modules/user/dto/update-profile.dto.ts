@@ -41,4 +41,9 @@ export class UpdateProfileDto {
   @IsArray()
   @IsString({ each: true })
   tags?: string[]; // 自定义个性标签（2.0）
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  statuses?: string[]; // 用户状态（多选）
 }

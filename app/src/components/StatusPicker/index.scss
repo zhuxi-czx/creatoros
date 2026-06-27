@@ -1,0 +1,47 @@
+.status-mask {
+  position: fixed;
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 0 40rpx;
+  box-sizing: border-box;
+}
+
+.status-card {
+  width: 100%;
+  background: #fff;
+  border-radius: 28rpx;
+  padding: 48rpx 40rpx 40rpx;
+  box-sizing: border-box;
+}
+
+.status-title { display: block; font-size: 38rpx; font-weight: 700; color: #1A1A1A; }
+.status-sub { display: block; font-size: 24rpx; color: #999; margin-top: 12rpx; }
+
+.status-chips { display: flex; flex-wrap: wrap; gap: 18rpx; margin-top: 36rpx; }
+.status-chip {
+  padding: 14rpx 28rpx;
+  border-radius: 36rpx;
+  background: #F5F5F5;
+  border: 2rpx solid transparent;
+}
+.status-chip.active { background: #FBF4E6; border-color: #C9A96E; }
+.status-chip-text { font-size: 26rpx; color: #666; }
+.status-chip-text.active { color: #C9A96E; font-weight: 600; }
+
+.status-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 44rpx;
+}
+.status-ignore { font-size: 28rpx; color: #999; padding: 16rpx 8rpx; }
+.status-confirm {
+  padding: 18rpx 56rpx;
+  border-radius: 40rpx;
+  background: #C9A96E;
+}
+.status-confirm-text { font-size: 30rpx; font-weight: 600; color: #fff; }

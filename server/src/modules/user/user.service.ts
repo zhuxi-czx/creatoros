@@ -19,6 +19,15 @@ export class UserService {
     return this.sanitizeUser(user);
   }
 
+  /** 状态选择弹窗（含忽略）：保存状态并标记已弹过，避免重复打扰。 */
+  async setStatuses(userId: string, statuses: string[]) {
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { statuses: statuses ?? [], statusPrompted: true },
+    });
+    return this.sanitizeUser(user);
+  }
+
   async getPublicProfile(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
@@ -98,6 +107,7 @@ export class UserService {
           status: true,
           city: true,
           createdAt: true,
+          statuses: true,
           membership: { select: { status: true, expireAt: true } },
           _count: {
             select: { signups: true },

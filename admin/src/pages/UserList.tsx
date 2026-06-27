@@ -148,6 +148,14 @@ export default function UserList() {
       )
     } as any] : []),
     {
+      title: '状态',
+      key: 'statuses',
+      width: isMobile ? 130 : 200,
+      render: (_: any, record: User) => record.statuses?.length
+        ? <Space size={4} wrap>{record.statuses.map(s => <Tag key={s} color="cyan">{s}</Tag>)}</Space>
+        : <Text type="secondary">-</Text>
+    },
+    {
       title: '活动',
       key: 'signups',
       width: 70,

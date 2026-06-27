@@ -20,6 +20,8 @@ export interface User {
   zodiac?: string
   generation?: string
   tags?: string[]
+  statuses?: string[]
+  statusPrompted?: boolean
 }
 
 interface LoginResponse {

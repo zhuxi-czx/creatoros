@@ -89,6 +89,8 @@ model User {
   zodiac     String?
   generation String?
   tags       String[]   @default([]) // 自定义个性标签（2.0）
+  statuses       String[] @default([]) // 用户状态（多选：自由职业者/创业者/学生/上班族…）
+  statusPrompted Boolean  @default(false) // 是否已弹过状态选择(含忽略)，避免重复打扰
   phone      String?
   role       Role       @default(USER)
   status     UserStatus @default(ACTIVE)

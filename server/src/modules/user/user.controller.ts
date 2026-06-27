@@ -15,6 +15,7 @@ import {
 import { UserService } from './user.service';
 import { MembershipService } from '../membership/membership.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { SetStatusesDto } from './dto/set-statuses.dto';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../auth/admin.guard';
@@ -31,6 +32,13 @@ export class UserController {
   @Put('api/users/profile')
   async updateProfile(@Request() req: any, @Body() dto: UpdateProfileDto) {
     return this.userService.updateProfile(req.user.id, dto);
+  }
+
+  // 状态选择弹窗：保存用户状态（忽略则传空数组），标记已弹过
+  @UseGuards(JwtAuthGuard)
+  @Put('api/users/statuses')
+  async setStatuses(@Request() req: any, @Body() dto: SetStatusesDto) {
+    return this.userService.setStatuses(req.user.id, dto.statuses);
   }
 
   @UseGuards(JwtAuthGuard)

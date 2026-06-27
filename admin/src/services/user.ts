@@ -15,6 +15,7 @@ export interface User {
   role: string
   status: string
   createdAt: string
+  statuses?: string[]
   membership?: { status: string; expireAt: string } | null
   _count?: { signups: number }
 }
