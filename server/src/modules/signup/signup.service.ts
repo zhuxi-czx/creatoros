@@ -44,6 +44,15 @@ export class SignupService {
         throw new BadRequestException('该活动需支付报名，请通过支付完成报名');
       }
 
+      // PlanF 专享：仅会员可报名（非会员引导开通会员）
+      if (event.isPlanfExclusive) {
+        const m = await tx.membership.findUnique({ where: { userId } });
+        const isMember = !!m && m.status === 'ACTIVE' && m.expireAt > new Date();
+        if (!isMember) {
+          throw new BadRequestException('该活动为 PlanF 会员专属，请先开通 PlanF 会员');
+        }
+      }
+
       // Check if already signed up
       const existingSignup = await tx.signup.findUnique({
         where: {

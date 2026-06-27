@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import {
-  Card, Table, Button, Modal, Form, Input, InputNumber, Switch,
+  Card, Table, Button, Modal, Form, Input, InputNumber,
   Space, message, Popconfirm, Image, Upload, Select,
 } from 'antd'
 import { PlusOutlined, UploadOutlined } from '@ant-design/icons'
@@ -31,8 +31,8 @@ export default function CategoryList() {
     setCover(c?.coverUrl || '')
     form.setFieldsValue(
       c
-        ? { name: c.name, intro: c.intro, icon: c.icon, order: c.order, memberFreeMonthly: c.memberFreeMonthly }
-        : { order: 0, memberFreeMonthly: false },
+        ? { name: c.name, intro: c.intro, icon: c.icon, order: c.order }
+        : { order: 0 },
     )
     setOpen(true)
   }
@@ -60,7 +60,6 @@ export default function CategoryList() {
     { title: '图标', dataIndex: 'icon', width: 70, align: 'center' as const, render: (i: string) => i ? <IconImg name={i} size={20} /> : '—' },
     { title: '名称', dataIndex: 'name' },
     { title: '活动数', width: 80, render: (_, r) => r._count?.events ?? 0 },
-    { title: '群友聚会·会员每月免费', dataIndex: 'memberFreeMonthly', width: 170, render: (v) => (v ? '是' : '否') },
     { title: '排序', dataIndex: 'order', width: 70 },
     {
       title: '操作', width: 140,
@@ -91,7 +90,6 @@ export default function CategoryList() {
             </Space>
           </Form.Item>
           <Form.Item label="排序（越小越前）" name="order"><InputNumber min={0} /></Form.Item>
-          <Form.Item label="群友聚会（会员每月免费 1 场）" name="memberFreeMonthly" valuePropName="checked" extra="勾选后，该分类活动 PlanF 会员每月可免费报名 1 场"><Switch /></Form.Item>
         </Form>
       </Modal>
     </Card>

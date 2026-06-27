@@ -7,7 +7,6 @@ export interface Category {
   coverUrl?: string
   icon?: string
   order: number
-  memberFreeMonthly: boolean
   _count?: { events: number }
 }
 

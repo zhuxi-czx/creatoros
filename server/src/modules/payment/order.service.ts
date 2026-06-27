@@ -65,6 +65,11 @@ export class OrderService {
 
     const pricing = await this.membership.computePricing(eventFull, userId);
 
+    // PlanF 专享：仅会员可报名（防御性拦截非会员下单）
+    if (!pricing.canSignup) {
+      throw new BadRequestException('该活动为 PlanF 会员专属，请先开通 PlanF 会员');
+    }
+
     // 会员免费名额：占名额 + 扣免费名额在同一事务，不走支付
     if (pricing.finalPrice === 0) {
       await this.prisma.$transaction(async (tx) => {

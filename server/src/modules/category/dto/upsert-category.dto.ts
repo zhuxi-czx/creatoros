@@ -20,8 +20,4 @@ export class UpsertCategoryDto {
   @IsOptional()
   @IsInt()
   order?: number;
-
-  @IsOptional()
-  @IsBoolean()
-  memberFreeMonthly?: boolean; // 「群友聚会」类：会员每月免费 1 场
 }

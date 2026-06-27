@@ -5,7 +5,7 @@ export const MEMBERSHIP_PRICE = 99800; // 998 元（分）
 const MEMBER_DISCOUNT = 0.8; // 日常活动 8 折
 export const MEMBERSHIP_DAYS = 365; // 一年期
 
-export type FreeBenefit = 'GUEST_FREE' | 'GATHERING_FREE';
+export type FreeBenefit = 'GUEST_FREE';
 
 export interface Pricing {
   originalPrice: number;
@@ -15,6 +15,8 @@ export interface Pricing {
   finalPrice: number;
   freeType: FreeBenefit | null;
   freeAvailable: boolean;
+  memberOnly: boolean; // PlanF 专享：仅会员可报名
+  canSignup: boolean; // 当前用户是否可报名（专享非会员为 false）
 }
 
 // ===== 纯函数（无副作用，供 service 与下单事务复用）=====
@@ -30,10 +32,9 @@ export function periodKeyOf(startAt: Date, now = new Date()): string {
   return String(months);
 }
 
-/** 活动对应的免费名额类型（大咖 / 群友聚会分类）。 */
+/** 活动对应的免费名额类型（仅大咖分享，每月 1 次）。群友聚会已并入 PlanF 专享。 */
 export function freeTypeOf(event: any): FreeBenefit | null {
   if (event.isGuestShare) return 'GUEST_FREE';
-  if (event.category?.memberFreeMonthly) return 'GATHERING_FREE';
   return null;
 }
 
@@ -93,16 +94,20 @@ export class MembershipService {
   /** 价格计算：传入的 event 需 include category。 */
   async computePricing(event: any, userId?: string): Promise<Pricing> {
     const price = event.price as number;
-    const isFreeEvent = price <= 0 || event.isPlanfExclusive;
     const member = userId ? await this.getMembership(userId) : null;
     const isMember = !!member && member.status === 'ACTIVE';
 
-    if (isFreeEvent) {
-      return { originalPrice: price, isMember, isFreeEvent: true, memberPrice: 0, finalPrice: 0, freeType: null, freeAvailable: false };
+    // PlanF 专享：仅会员可报名，会员免费（非会员 canSignup=false → 引导开通会员）
+    if (event.isPlanfExclusive) {
+      return { originalPrice: price, isMember, isFreeEvent: true, memberPrice: 0, finalPrice: 0, freeType: null, freeAvailable: false, memberOnly: true, canSignup: isMember };
+    }
+    // 普通免费活动：所有人免费
+    if (price <= 0) {
+      return { originalPrice: price, isMember, isFreeEvent: true, memberPrice: 0, finalPrice: 0, freeType: null, freeAvailable: false, memberOnly: false, canSignup: true };
     }
     const memberPrice = Math.round(price * MEMBER_DISCOUNT);
     if (!isMember) {
-      return { originalPrice: price, isMember: false, isFreeEvent: false, memberPrice, finalPrice: price, freeType: null, freeAvailable: false };
+      return { originalPrice: price, isMember: false, isFreeEvent: false, memberPrice, finalPrice: price, freeType: null, freeAvailable: false, memberOnly: false, canSignup: true };
     }
     const freeType = freeTypeOf(event);
     let freeAvailable = false;
@@ -115,7 +120,7 @@ export class MembershipService {
     }
     return {
       originalPrice: price, isMember: true, isFreeEvent: false, memberPrice, freeType, freeAvailable,
-      finalPrice: freeAvailable ? 0 : memberPrice,
+      finalPrice: freeAvailable ? 0 : memberPrice, memberOnly: false, canSignup: true,
     };
   }
 
@@ -130,7 +135,6 @@ export class MembershipService {
       isMember: true,
       expireAt: m.expireAt,
       guestFreeLeft: used.includes('GUEST_FREE' as any) ? 0 : 1,
-      gatheringFreeLeft: used.includes('GATHERING_FREE' as any) ? 0 : 1,
     };
   }
 }
