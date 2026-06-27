@@ -28,6 +28,7 @@ export interface Event {
   hostName?: string
   hostAvatar?: string
   price?: number
+  priceNote?: string
   maxCapacity?: number
   maxParticipants?: number
   currentParticipants?: number

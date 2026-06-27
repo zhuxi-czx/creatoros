@@ -296,14 +296,19 @@ export default function EventDetail() {
               <View className='info-icon-svg' style={{ backgroundImage: `url("${lucideUri('ticket', '#C9A96E')}")` }} />
               <View className='info-content'>
                 <Text className='info-label'>费用</Text>
-                <Text className='info-value'>
-                  {event.isPlanfExclusive ? 'PlanF 会员免费' : event.price === 0 ? '免费' : `¥${(event.price! / 100).toFixed(0)}`}
-                </Text>
-                {event.pricing && event.pricing.isMember && !event.pricing.isFreeEvent && (
-                  <Text className='member-price'>
-                    {event.pricing.finalPrice === 0 ? 'PlanF 会员免费（本月名额）' : `PlanF 会员 ¥${(event.pricing.memberPrice / 100).toFixed(0)}（8折）`}
+                <View className='price-line'>
+                  <Text className='info-value'>
+                    {event.isPlanfExclusive ? '会员免费' : event.price === 0 ? '免费' : `¥${(event.price! / 100).toFixed(0)}`}
                   </Text>
-                )}
+                  {(event.isPlanfExclusive || event.price! > 0) && (
+                    <Text className='planf-link' onClick={() => Taro.navigateTo({ url: '/pages/membership/index' })}>
+                      {event.isPlanfExclusive
+                        ? 'PlanF 专享 · 仅会员可报名'
+                        : `PlanF 会员 ¥${Math.round(event.price! * 0.8 / 100)}（8折）`} ›
+                    </Text>
+                  )}
+                </View>
+                {event.priceNote && <Text className='price-note'>{event.priceNote}</Text>}
               </View>
             </View>
           )}

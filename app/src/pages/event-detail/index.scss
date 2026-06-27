@@ -426,6 +426,12 @@ $accent: #C9A96E;
 
 // 会员价 / 轻引导（2.0）
 .member-price { font-size: 24rpx; color: #C9A96E; font-weight: 600; margin-top: 4rpx; }
+
+// 费用：价格 + PlanF 同行（PlanF 可点击跳会员页）+ 下方说明
+.price-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8rpx 16rpx; margin-top: 4rpx; }
+.price-line .info-value { margin-top: 0; }
+.planf-link { font-size: 24rpx; color: #C9A96E; font-weight: 600; }
+.price-note { display: block; font-size: 24rpx; color: #999; line-height: 1.5; margin-top: 8rpx; }
 .member-bubble {
   position: relative;
   display: flex;

@@ -70,6 +70,10 @@ export class UpdateEventDto {
   price?: number;
 
   @IsOptional()
+  @IsString()
+  priceNote?: string; // 费用说明文案
+
+  @IsOptional()
   @IsBoolean()
   featured?: boolean;
 

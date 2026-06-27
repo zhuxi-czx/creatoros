@@ -69,6 +69,10 @@ export class CreateEventDto {
   price?: number;
 
   @IsOptional()
+  @IsString()
+  priceNote?: string; // 费用说明文案（解释价格包含什么）
+
+  @IsOptional()
   @IsBoolean()
   featured?: boolean; // 社区精选
 

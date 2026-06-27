@@ -69,6 +69,7 @@ export default function EventForm() {
         maxCapacity: event.maxCapacity,
         isFree: !event.price,
         price: event.price ? event.price / 100 : 0,
+        priceNote: event.priceNote,
         date: event.date ? dayjs(event.date) : undefined,
         venueId: event.venueId,
         featured: event.featured,
@@ -160,6 +161,7 @@ export default function EventForm() {
       hostName: values.hostName as string,
       maxCapacity: values.maxCapacity as number,
       price: values.isFree ? 0 : ((values.price as number) || 0) * 100,
+      priceNote: (values.priceNote as string)?.trim() || undefined,
       coverUrl: imageUrls[0] || undefined,
       imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
       autoplay: imageUrls.length > 1 ? (values.autoplay as boolean) : undefined,
@@ -363,6 +365,10 @@ export default function EventForm() {
               }
             </Form.Item>
           </div>
+
+          <Form.Item label="费用说明" name="priceNote" extra="显示在详情页费用区，解释这个价格包含什么（选填，留空不显示）">
+            <Input placeholder="如：费用包含 1 杯精酿特调 + 现场小食拼盘" maxLength={50} showCount />
+          </Form.Item>
 
           <Form.Item label="分类" name="categoryId">
             <Select

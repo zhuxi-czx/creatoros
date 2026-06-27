@@ -16,6 +16,7 @@ export interface Event {
   hostName?: string
   maxCapacity: number
   price: number
+  priceNote?: string
   status: string
   featured: boolean
   categoryId?: string
@@ -45,6 +46,7 @@ export interface EventFormData {
   hostName?: string
   maxCapacity: number
   price?: number
+  priceNote?: string
   status?: string
   featured?: boolean
   categoryId?: string
