@@ -9,7 +9,7 @@ import type { Event, Participant } from '../../services/event'
 import { useAuthStore } from '../../stores/useAuthStore'
 import PhoneLoginSheet from '../../components/PhoneLoginSheet'
 import { resolveImageUrl } from '../../services/api'
-import { formatDate } from '../../utils'
+import { formatEventDateTime } from '../../utils'
 import './index.scss'
 
 export default function EventDetail() {
@@ -260,7 +260,7 @@ export default function EventDetail() {
             <View className='info-content'>
               <Text className='info-label'>时间</Text>
               <Text className='info-value'>
-                {formatDate(event.date || event.startTime)}
+                {formatEventDateTime(event.date || event.startTime)}
               </Text>
             </View>
           </View>
@@ -396,7 +396,7 @@ export default function EventDetail() {
             <View className='sm-info'>
               <View className='sm-row'>
                 <Text className='sm-label'>时间</Text>
-                <Text className='sm-value'>{formatDate(event.date || event.startTime)}</Text>
+                <Text className='sm-value'>{formatEventDateTime(event.date || event.startTime)}</Text>
               </View>
               <View className='sm-row'>
                 <Text className='sm-label'>地点</Text>

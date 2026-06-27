@@ -1,7 +1,7 @@
 import { View, Text, Image } from '@tarojs/components'
 import type { Event } from '../../services/event'
 import { resolveImageUrl } from '../../services/api'
-import { formatDate } from '../../utils'
+import { formatEventDateTime } from '../../utils'
 import { getEventDisplay } from '../../utils/eventStatus'
 import './index.scss'
 
@@ -24,9 +24,7 @@ export default function EventCard({ event, onClick }: EventCardProps) {
   const colorIndex = hashId(event.id)
   const avatars = event.signups?.slice(0, 5) ?? []
   const dateStr = event.date || event.startTime
-  const d = dateStr ? formatDate(dateStr, 'short') : ''
-  const t = dateStr ? formatDate(dateStr, 'time') : ''
-  const displayDate = d && t ? `${d} ${t}` : d
+  const displayDate = dateStr ? formatEventDateTime(dateStr) : ''
   const isEmpty = signupCount === 0
   const notJoined = (status.state === 'CLOSED' || status.state === 'ENDED') && !event.isSignedUp // 已无法报名(报名结束/已结束)且本人未参与
   const canSignup = isEmpty && status.state === 'OPEN' // 仅「报名中」且无人时才引导报名
