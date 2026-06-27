@@ -48,11 +48,11 @@ export class SystemMonitorService {
     }
   }
 
-  /** 每天 3:00 清理 30 天前的系统日志，避免表无限增长 */
+  /** 每天 3:00 清理 7 天前的系统日志，避免表无限增长 */
   @Cron(CronExpression.EVERY_DAY_AT_3AM)
   async cleanOldLogs() {
     try {
-      const cutoff = new Date(Date.now() - 30 * 86400000);
+      const cutoff = new Date(Date.now() - 7 * 86400000);
       const r = await this.prisma.systemLog.deleteMany({
         where: { createdAt: { lt: cutoff } },
       });
