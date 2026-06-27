@@ -200,7 +200,7 @@ export default function EventDetail() {
     ? '开通会员免费参加'
     : event.isGuestShare
     ? (event.pricing?.isMember
-        ? (event.pricing.freeAvailable ? 'PlanF 会员本月免费' : `PlanF 会员 ¥${memberPriceYuan}（8折）`)
+        ? (event.pricing.freeAvailable ? 'PlanF 会员本次免费' : `PlanF 会员 ¥${memberPriceYuan}（8折）`)
         : 'PlanF 会员每月 1 次免费')
     : `PlanF 会员 ¥${memberPriceYuan}（8折）`
 
