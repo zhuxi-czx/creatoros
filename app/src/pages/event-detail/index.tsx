@@ -92,6 +92,23 @@ export default function EventDetail() {
     }
   }
 
+  // 已报名用户在报名详情弹窗主动开启提醒（微信要求点击触发授权，带结果反馈）
+  const handleEnableReminder = async () => {
+    if (!id) return
+    if (!SUBSCRIBE_TMPL_ID) { Taro.showToast({ title: '提醒暂未开放', icon: 'none' }); return }
+    try {
+      const res: any = await Taro.requestSubscribeMessage({ tmplIds: [SUBSCRIBE_TMPL_ID] } as any)
+      if (res[SUBSCRIBE_TMPL_ID] === 'accept') {
+        await subscribeReminder(id)
+        Taro.showToast({ title: '已开启开始提醒', icon: 'success' })
+      } else {
+        Taro.showToast({ title: '未开启提醒', icon: 'none' })
+      }
+    } catch (e) {
+      Taro.showToast({ title: '开启失败', icon: 'none' })
+    }
+  }
+
   // 实际报名（已确保登录、可报名）
   const doSignup = async () => {
     if (!event || !id) return
@@ -430,6 +447,9 @@ export default function EventDetail() {
                 <Text className='sm-label'>地点</Text>
                 <Text className='sm-value' selectable userSelect>{event.venue?.name || event.location || '待定'}</Text>
               </View>
+            </View>
+            <View className='sm-remind' onClick={handleEnableReminder}>
+              <Text className='sm-remind-text'>🔔 开启开始提醒（开始前 2 小时通知）</Text>
             </View>
             <View className='sm-ok' onClick={() => setShowInfo(false)}>
               <Text className='sm-ok-text'>知道了</Text>
