@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { getCategoryPage, type CategoryPage } from '../../services/category'
 import EventCard from '../../components/EventCard'
 import './index.scss'
@@ -16,6 +16,17 @@ export default function CategoryPageView() {
     getCategoryPage(id).then(setData).catch(() => setError(true))
   }
   useEffect(() => { load() }, [id])
+
+  useShareAppMessage(() => ({
+    title: data?.name ? `${data.name} · 敞开酒馆` : '敞开酒馆',
+    path: `/pages/category/index?id=${id || ''}`,
+    imageUrl: '/assets/offenbar-logo.png',
+  }))
+  useShareTimeline(() => ({
+    title: data?.name ? `${data.name} · 敞开酒馆` : '敞开酒馆',
+    query: `id=${id || ''}`,
+    imageUrl: '/assets/offenbar-logo.png',
+  }))
 
   const toEvent = (eid: string) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${eid}` })
 

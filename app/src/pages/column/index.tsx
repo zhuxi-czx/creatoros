@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text } from '@tarojs/components'
-import Taro, { useDidShow } from '@tarojs/taro'
+import Taro, { useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { getColumnPage, type ColumnPage } from '../../services/column'
 import EventCard from '../../components/EventCard'
 import { resolveImageUrl } from '../../services/api'
@@ -20,7 +20,16 @@ export default function ColumnPageView() {
     getColumnPage(type).then(setData).catch(() => setError(true))
   }
   useEffect(() => { load() }, [type])
-  useDidShow(() => { Taro.hideShareMenu() }) // 专栏页不提供分享，隐藏右上角转发/朋友圈菜单
+  useShareAppMessage(() => ({
+    title: data?.config?.title ? `${data.config.title} · 敞开酒馆` : '敞开酒馆 · 精选活动',
+    path: `/pages/column/index?type=${type || ''}`,
+    imageUrl: '/assets/offenbar-logo.png',
+  }))
+  useShareTimeline(() => ({
+    title: data?.config?.title ? `${data.config.title} · 敞开酒馆` : '敞开酒馆 · 精选活动',
+    query: `type=${type || ''}`,
+    imageUrl: '/assets/offenbar-logo.png',
+  }))
 
   const toEvent = (eid: string) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${eid}` })
   const toMembership = () => Taro.navigateTo({ url: '/pages/membership/index' })

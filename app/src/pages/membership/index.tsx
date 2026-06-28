@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { getMembership, purchaseMembership, type MembershipInfo } from '../../services/membership'
 import { useAuthStore } from '../../stores/useAuthStore'
 import './index.scss'
@@ -19,6 +19,16 @@ export default function MembershipPage() {
 
   const load = () => getMembership().then(setInfo).catch(() => {})
   useEffect(() => { load() }, [])
+
+  useShareAppMessage(() => ({
+    title: '敞开酒馆 PlanF 会员 · 专享活动免费 + 日常 8 折',
+    path: '/pages/membership/index',
+    imageUrl: '/assets/offenbar-logo.png',
+  }))
+  useShareTimeline(() => ({
+    title: '敞开酒馆 PlanF 会员 · 专享活动免费 + 日常 8 折',
+    imageUrl: '/assets/offenbar-logo.png',
+  }))
 
   const handlePurchase = async () => {
     if (paying) return

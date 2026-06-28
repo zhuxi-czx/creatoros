@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Image, ScrollView } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { getVenueDetail, getVenueEvents } from '../../services/venue'
 import type { Venue } from '../../services/venue'
 import type { Event } from '../../services/event'
@@ -17,6 +17,17 @@ export default function VenuePage() {
   useEffect(() => {
     if (id) loadData()
   }, [id])
+
+  useShareAppMessage(() => ({
+    title: venue?.name ? `${venue.name} · 敞开酒馆` : '敞开酒馆',
+    path: `/pages/venue/index?id=${id || ''}`,
+    imageUrl: '/assets/offenbar-logo.png',
+  }))
+  useShareTimeline(() => ({
+    title: venue?.name ? `${venue.name} · 敞开酒馆` : '敞开酒馆',
+    query: `id=${id || ''}`,
+    imageUrl: '/assets/offenbar-logo.png',
+  }))
 
   const loadData = async () => {
     try {
