@@ -431,51 +431,96 @@ export class EventService {
   }
 
   async adminGetStats() {
-    const [totalUsers, totalEvents, totalSignups, activeEvents, activeSignups] = await Promise.all([
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const weekAgo = new Date(now); weekAgo.setDate(now.getDate() - 7);
+    const trendStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13);
+    const in24h = new Date(now.getTime() + 24 * 3600 * 1000);
+    const in7d = new Date(now); in7d.setDate(now.getDate() + 7);
+
+    const [
+      totalUsers, totalEvents, totalSignups, activeEvents,
+      topEvents, recentEvents,
+      revTotal, revMonth, revToday, revEvent, revMember, revRefund,
+      orderGroups,
+      activeMembers, newMembersMonth, expiringSoon,
+      newUsersToday, newUsersWeek,
+      refundPending, todayErrors, upcomingEvents, paidEventOrders,
+    ] = await Promise.all([
       this.prisma.user.count(),
       this.prisma.event.count(),
       this.prisma.signup.count({ where: { status: 'CONFIRMED' } }),
       this.prisma.event.count({ where: { status: { in: ['PUBLISHED', 'FULL', 'ONGOING'] } } }),
-      this.prisma.signup.count({ where: { status: 'CONFIRMED' } }),
+      this.prisma.event.findMany({ take: 5, orderBy: { signups: { _count: 'desc' } }, select: { id: true, title: true, date: true, status: true, maxCapacity: true, _count: { select: { signups: { where: { status: 'CONFIRMED' } } } } } }),
+      this.prisma.event.findMany({ take: 5, orderBy: { createdAt: 'desc' }, select: { id: true, title: true, date: true, status: true, _count: { select: { signups: { where: { status: 'CONFIRMED' } } } } } }),
+      this.prisma.order.aggregate({ _sum: { amount: true }, where: { status: 'PAID' } }),
+      this.prisma.order.aggregate({ _sum: { amount: true }, where: { status: 'PAID', paidAt: { gte: monthStart } } }),
+      this.prisma.order.aggregate({ _sum: { amount: true }, where: { status: 'PAID', paidAt: { gte: todayStart } } }),
+      this.prisma.order.aggregate({ _sum: { amount: true }, where: { status: 'PAID', type: 'EVENT' } }),
+      this.prisma.order.aggregate({ _sum: { amount: true }, where: { status: 'PAID', type: 'MEMBERSHIP' } }),
+      this.prisma.order.aggregate({ _sum: { amount: true }, where: { status: 'REFUNDED' } }),
+      this.prisma.order.groupBy({ by: ['status'], _count: true }),
+      this.prisma.membership.count({ where: { status: 'ACTIVE', expireAt: { gt: now } } }),
+      this.prisma.membership.count({ where: { createdAt: { gte: monthStart } } }),
+      this.prisma.membership.findMany({ where: { status: 'ACTIVE', expireAt: { gt: now, lte: in7d } }, orderBy: { expireAt: 'asc' }, take: 20, include: { user: { select: { nickname: true, uid: true } } } }),
+      this.prisma.user.count({ where: { createdAt: { gte: todayStart } } }),
+      this.prisma.user.count({ where: { createdAt: { gte: weekAgo } } }),
+      this.prisma.order.count({ where: { status: 'REFUNDING' } }),
+      this.prisma.systemLog.count({ where: { level: { in: ['ERROR', 'WARN'] }, createdAt: { gte: todayStart } } }),
+      this.prisma.event.findMany({ where: { status: { in: ['PUBLISHED', 'FULL'] }, date: { gt: now, lte: in24h } }, orderBy: { date: 'asc' }, take: 10, select: { id: true, title: true, date: true, maxCapacity: true, _count: { select: { signups: { where: { status: 'CONFIRMED' } } } } } }),
+      this.prisma.order.count({ where: { status: 'PAID', type: 'EVENT' } }),
     ]);
 
-    // Signups per day (last 14 days)
-    const fourteenDaysAgo = new Date();
-    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+    // 趋势 + 分布（原生 SQL 按日聚合）
+    const [signupRows, revenueRows, userRows, statusRows, strategyRows]: any[] = await Promise.all([
+      this.prisma.$queryRaw`SELECT to_char("createdAt"::date,'YYYY-MM-DD') d, count(*)::int c FROM "Signup" WHERE status='CONFIRMED' AND "createdAt" >= ${trendStart} GROUP BY 1`,
+      this.prisma.$queryRaw`SELECT to_char("paidAt"::date,'YYYY-MM-DD') d, sum(amount)::int c FROM "Order" WHERE status='PAID' AND "paidAt" >= ${trendStart} GROUP BY 1`,
+      this.prisma.$queryRaw`SELECT to_char("createdAt"::date,'YYYY-MM-DD') d, count(*)::int c FROM "User" WHERE "createdAt" >= ${trendStart} GROUP BY 1`,
+      this.prisma.$queryRaw`SELECT unnest(statuses) status, count(*)::int c FROM "User" WHERE array_length(statuses,1) > 0 GROUP BY 1 ORDER BY c DESC`,
+      this.prisma.$queryRaw`SELECT CASE WHEN e."earlyBirdPrice" IS NOT NULL AND o.amount=e."earlyBirdPrice" THEN 'earlyBird' WHEN o.amount=e.price THEN 'original' WHEN o.amount=round(e.price*0.8) THEN 'member' ELSE 'other' END strategy, count(*)::int c FROM "Order" o JOIN "Event" e ON o."eventId"=e.id WHERE o.type='EVENT' AND o.status='PAID' GROUP BY 1`,
+    ]);
 
-    const recentSignups = await this.prisma.signup.groupBy({
-      by: ['createdAt'],
-      where: { createdAt: { gte: fourteenDaysAgo } },
-      _count: true,
-    });
+    const fillTrend = (rows: any[]) => {
+      const map = new Map(rows.map((r) => [r.d, Number(r.c)]));
+      const out: { date: string; value: number }[] = [];
+      for (let i = 0; i < 14; i++) {
+        const dt = new Date(trendStart); dt.setDate(trendStart.getDate() + i);
+        const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+        out.push({ date: key, value: map.get(key) ?? 0 });
+      }
+      return out;
+    };
 
-    // Top events by signups
-    const topEvents = await this.prisma.event.findMany({
-      take: 5,
-      orderBy: { signups: { _count: 'desc' } },
-      select: {
-        id: true,
-        title: true,
-        date: true,
-        status: true,
-        maxCapacity: true,
-        _count: { select: { signups: { where: { status: 'CONFIRMED' } } } },
-      },
-    });
+    const orderCountMap: Record<string, number> = {};
+    for (const g of orderGroups as any[]) orderCountMap[g.status] = (g as any)._count;
+    const fen = (a: any) => Number(a?._sum?.amount || 0);
 
-    // Recent events
-    const recentEvents = await this.prisma.event.findMany({
-      take: 5,
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true, title: true, date: true, status: true,
-        _count: { select: { signups: { where: { status: 'CONFIRMED' } } } },
-      },
-    });
+    const strategy: Record<string, number> = { free: 0, earlyBird: 0, original: 0, member: 0, other: 0 };
+    for (const r of strategyRows) strategy[r.strategy] = Number(r.c);
+    strategy.free = Math.max(0, totalSignups - Number(paidEventOrders));
 
     return {
-      totalUsers, totalEvents, totalSignups, activeEvents, activeSignups,
+      totalUsers, totalEvents, totalSignups, activeEvents, activeSignups: totalSignups,
       topEvents, recentEvents,
+      revenue: {
+        total: fen(revTotal), month: fen(revMonth), today: fen(revToday),
+        event: fen(revEvent), member: fen(revMember), refund: fen(revRefund),
+        orders: { paid: orderCountMap['PAID'] || 0, pending: orderCountMap['PENDING'] || 0, refunded: orderCountMap['REFUNDED'] || 0 },
+      },
+      priceStrategy: strategy,
+      members: {
+        active: activeMembers, newThisMonth: newMembersMonth,
+        penetration: totalUsers ? Math.round((activeMembers / totalUsers) * 1000) / 10 : 0,
+        expiringSoon: (expiringSoon as any[]).map((m) => ({ nickname: m.user?.nickname, uid: m.user?.uid, expireAt: m.expireAt })),
+      },
+      trend: { signups: fillTrend(signupRows), revenue: fillTrend(revenueRows), users: fillTrend(userRows) },
+      newUsersToday, newUsersWeek,
+      statusDist: statusRows.map((r: any) => ({ status: r.status, count: Number(r.c) })),
+      alerts: {
+        refundPending, todayErrors,
+        upcomingEvents: (upcomingEvents as any[]).map((e) => ({ id: e.id, title: e.title, date: e.date, signups: e._count?.signups || 0, maxCapacity: e.maxCapacity })),
+      },
     };
   }
 }
