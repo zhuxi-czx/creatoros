@@ -27,7 +27,7 @@ export default function MembershipPage() {
   }))
   useShareTimeline(() => ({
     title: '敞开酒馆 PlanF 会员 · 专享活动免费 + 日常 8 折',
-    imageUrl: '/assets/share-card.jpg',
+    imageUrl: '/assets/share-square.jpg',
   }))
 
   const handlePurchase = async () => {

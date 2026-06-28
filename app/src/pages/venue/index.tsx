@@ -26,7 +26,7 @@ export default function VenuePage() {
   useShareTimeline(() => ({
     title: venue?.name ? `${venue.name} · 敞开酒馆` : '敞开酒馆',
     query: `id=${id || ''}`,
-    imageUrl: '/assets/share-card.jpg',
+    imageUrl: '/assets/share-square.jpg',
   }))
 
   const loadData = async () => {

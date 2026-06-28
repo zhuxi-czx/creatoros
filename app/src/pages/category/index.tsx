@@ -25,7 +25,7 @@ export default function CategoryPageView() {
   useShareTimeline(() => ({
     title: data?.name ? `${data.name} · 敞开酒馆` : '敞开酒馆',
     query: `id=${id || ''}`,
-    imageUrl: '/assets/share-card.jpg',
+    imageUrl: '/assets/share-square.jpg',
   }))
 
   const toEvent = (eid: string) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${eid}` })

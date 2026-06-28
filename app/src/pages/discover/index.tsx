@@ -49,7 +49,7 @@ export default function Discover() {
   }))
   useShareTimeline(() => ({
     title: '敞开酒馆 · 发现有趣的活动和朋友',
-    imageUrl: '/assets/share-card.jpg',
+    imageUrl: '/assets/share-square.jpg',
   }))
 
   const loadAll = async () => {

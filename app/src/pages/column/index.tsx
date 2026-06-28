@@ -28,7 +28,7 @@ export default function ColumnPageView() {
   useShareTimeline(() => ({
     title: data?.config?.title ? `${data.config.title} · 敞开酒馆` : '敞开酒馆 · 精选活动',
     query: `type=${type || ''}`,
-    imageUrl: '/assets/share-card.jpg',
+    imageUrl: '/assets/share-square.jpg',
   }))
 
   const toEvent = (eid: string) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${eid}` })
