@@ -23,6 +23,29 @@ export default function PhoneLoginSheet({ visible, onClose, onSuccess, tabBar }:
     Taro.navigateTo({ url: `/pages/agreement/index?type=${type}` })
   }
 
+  // 微信隐私授权：与后台《用户隐私保护指引》联动。用户勾选同意时，
+  // 若小程序尚未取得隐私授权，主动拉起微信官方授权框（旧基础库无此 API 时静默跳过，
+  // 由微信在调用手机号接口时自动串联兜底）。
+  const ensurePrivacyAuthorized = () => {
+    if (process.env.TARO_ENV !== 'weapp') return
+    const t: any = Taro
+    if (typeof t.getPrivacySetting !== 'function') return
+    t.getPrivacySetting({
+      success: (res: any) => {
+        if (res?.needAuthorization && typeof t.requirePrivacyAuthorize === 'function') {
+          t.requirePrivacyAuthorize({ fail: () => {} })
+        }
+      },
+      fail: () => {},
+    })
+  }
+
+  const toggleAgree = () => {
+    const next = !agreed
+    setAgreed(next)
+    if (next) ensurePrivacyAuthorized()
+  }
+
   const handleGetPhone = async (e: any) => {
     const code = e?.detail?.code
     // 用户拒绝授权
@@ -79,10 +102,10 @@ export default function PhoneLoginSheet({ visible, onClose, onSuccess, tabBar }:
         <View className='ls-agree-row'>
           <View
             className={`ls-checkbox ${agreed ? 'checked' : ''}`}
-            onClick={() => setAgreed(!agreed)}
+            onClick={toggleAgree}
             style={agreed ? { backgroundImage: `url("${lucideUri('check', '#ffffff')}")` } : undefined}
           />
-          <Text className='ls-agree-text' onClick={() => setAgreed(!agreed)}>
+          <Text className='ls-agree-text' onClick={toggleAgree}>
             我已阅读并同意
             <Text className='ls-agree-link' onClick={(e) => { e.stopPropagation(); openAgreement('user') }}>《用户协议》</Text>
             和
