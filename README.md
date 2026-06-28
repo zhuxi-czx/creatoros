@@ -82,7 +82,25 @@
 **图标库**：lucide-static 全量 1986 图标，`/api/icons` 列表 + `/api/icon/:name?color=` SVG，后台带预览搜索选择
 
 ### 用户端 H5
-- 活动 / 场馆浏览、详情、报名（与小程序共用后端）
+- 活动 / 场馆浏览、详情、报名（与小程序共用后端）；费用区与小程序一致（富文本 / 3:4 图 / 人性化时间 / 早鸟价）
+
+### 计费 / 合规 / 运维（近期迭代）
+
+**计费**
+- **收费规则**：免费活动人人免费 / 付费会员 8 折 / 大咖分享会员每月 1 次免费、之后 8 折 / PlanF 专享仅会员免费；后台可手动设 / 取消会员
+- **早鸟价**：活动可配「早鸟价 + 前 N 名名额」，**非会员**前 N 名享早鸟价，会员不受影响（仍 8 折 / 免费）。名额按占位口径（已确认 + 未过期待支付）计、行锁内重算防超发；后台区间校验「会员价 < 早鸟价 < 原价」。详情页展示「原价 + 🔥早鸟价·仅剩 N 名」，报名按钮带早鸟价文案
+- 后台报名列表展示每人**支付金额 + 命中的价格策略**（早鸟价 / 原价 / 会员价 / 免费）；用户管理可查每人每笔支付订单
+
+**合规（微信审核）**
+- 登录弹窗：去除「微信」字样与微信官方视觉、品牌金按钮 + OFFENBAR/敞开酒馆 logo；**主动勾选**同意《用户协议》《隐私政策》后方可登录（默认不勾）
+- 独立协议页（`pages/agreement`）：用户协议 + 隐私政策完整正文（含第三方微信能力、未成年人保护、境内存储期限、权利行使、联系邮箱）
+- 接入微信隐私授权接口（`requirePrivacyAuthorize`），与后台《用户隐私保护指引》联动
+- 我的订单（订单中心页 `pages/order`，微信支付合规要求）
+
+**运维 / 通知**
+- 活动开始提醒：报名授权 + 开始前 2 小时订阅消息（cron 每 30 分钟扫描窗口）
+- 用户状态收集：我的页首次引导多选（自由职业 / 创业者 / 学生……）
+- 系统监控：接口 5xx 异常 / cron 失败 / 磁盘内存资源告警落库（`SystemLog`），后台监控页看每日异常；每天凌晨清理 7 天前日志
 
 ## 技术栈
 
@@ -113,21 +131,22 @@ creatoros/
 
 ## 数据库模型（2.0）
 
-- **User**：`uid`（11 位运营编号，唯一）、微信、昵称、头像、城市、性别、MBTI、星座、`tags[]`
-- **Event**：标题 / 富文本描述 / 亮点 / 流程 / 须知 / 多图 / 3:4 封面 / 价格 / `priceNote`（费用说明文案，解释价格含什么）/ 状态 + `categoryId` / `isPlanfExclusive` / `isGuestShare` / `guestName` / `featured`
-- **Category**：名称 / 简介 / 封面 / `icon` / `order` / `memberFreeMonthly`
+- **User**：`uid`（11 位运营编号，唯一）、微信、昵称、头像、城市、性别、MBTI、星座、`tags[]`、`statuses[]`（用户状态多选）、`statusPrompted`
+- **Event**：标题 / 富文本描述 / 亮点 / 流程 / 须知 / 多图 / 3:4 封面 / 价格 / `priceNote` / `earlyBirdPrice` + `earlyBirdQuota`（早鸟价 + 前 N 名名额，选填）/ 状态 + `categoryId` / `isPlanfExclusive` / `isGuestShare` / `guestName` / `featured`
+- **Category**：名称 / 简介 / 封面 / `icon` / `order`
 - **ColumnConfig**：`type`(FEATURED/PLANF/GUEST) / 标题 / 简介 / `icon` / `bgUrl` / `order`
 - **Membership** + **MembershipBenefitUsage**：PlanF 会员 + 每月免费名额用量（periodKey + benefitType 唯一）
 - **Coupon**：优惠券（类型 / 面额 / 状态 / 有效期）
-- **Signup**：报名（用户 + 活动唯一约束，事务保护）
-- **Order**：订单（`type` EVENT/MEMBERSHIP，微信支付，幂等确认）
+- **Signup**：报名（用户 + 活动唯一约束，事务保护）+ `reminderSubscribed` / `reminderSent`（活动开始提醒）
+- **Order**：订单（`type` EVENT/MEMBERSHIP，微信支付，幂等确认，金额下单时锁定）
+- **SystemLog**：系统日志（`level` / `source` / `message` / `detail`，接口异常 / cron 失败 / 资源告警）
 - **Venue** / **Banner**
 
 ## 后端要点
 
 - **搜索**：`/api/events?keyword=` 全字段 OR contains（大小写不敏感）
 - **图标**：`/api/icons`（全量名）+ `/api/icon/:name?color=`（SVG）；分类 / 专栏数据附 `iconPath` 供小程序渲染
-- **会员定价**：`MembershipService.computePricing` 返回会员价 / 免费类型 / 免费名额；免费名额按会员月周期（periodKey）计
+- **会员定价**：`MembershipService.computePricing` 返回原价 / 会员价 / 免费类型 / 免费名额 / 早鸟价；免费名额按会员月周期（periodKey）计；早鸟价仅对非会员、按占位口径判定名额，下单在行锁内重算金额防超发
 - **图片**：sharp 居中裁剪到目标比例（event 3:4 / maxWidth 1500 / quality 88）+ WebP + 模糊缩略图
 
 ## 安全 / 性能 / 定时任务
@@ -148,7 +167,7 @@ creatoros/
 
 **部署约定**：
 - 改后端 → `rsync server/src` + `npm run build` + `pm2 restart creatoros-server`
-- schema 变更 → `prisma db push --accept-data-loss`（需带 `DATABASE_URL`，从 ecosystem 读）+ `prisma generate`
+- schema 变更 → 在生产 `server/` 跑 `prisma db push --schema src/prisma/schema.prisma --url "$DATABASE_URL"`（Prisma 7 已移除 `--from-url`；`DATABASE_URL` 从 ecosystem 读，不带 `--accept-data-loss` 时遇破坏性变更会主动中止当保护）+ `prisma generate` + build + restart
 - 后台 / H5 → 本地 build + `rsync dist`
 - **生产 git 有本地分叉，禁止 `git pull` / 全量同步**；push 到 GitHub 不影响生产
 
@@ -156,16 +175,19 @@ creatoros/
 
 **已完成**
 - [x] 三端 HTTPS 上线（`creatorbar.cn` / `admin.creatorbar.cn` / `creatorbar.cn/api`）
-- [x] **2.0 大改版**：移除 Creator / 首页 Tab → 分类 + 专栏 + PlanF 会员 + 优惠券 + 活动竖图卡（3:4）
+- [x] **2.0 大改版**：分类 + 专栏 + PlanF 会员 + 优惠券 + 活动竖图卡（3:4）
 - [x] 服务端全字段搜索、全量 lucide 图标库、富文本公众号式排版、报名手动加成员、专栏左移右移排序、分类按活动数排序
 - [x] 微信支付（活动报名 + 会员开通）、首次登录引导填头像昵称
 - [x] 真机白屏根治（入口页规避冷启动 + custom tabBar component 声明）
-- [x] 稳定性加固：接口限流 / 全局异常过滤器 / 配置校验 / 外部请求超时 / 定时任务健壮化；架构精简（PrismaService 继承、会员逻辑去重、`@Body` 全量 DTO 校验）
-- [x] 手机号脱敏 + 凭密码查看；活动卡片状态化展示（立即报名 / 下次参与 / 已报名）；活动详情朋友圈分享
+- [x] 稳定性加固：接口限流 / 全局异常过滤器 / 配置校验 / 外部请求超时 / 定时任务健壮化
+- [x] 手机号脱敏 + 凭密码查看；活动卡片状态化展示；活动详情朋友圈分享
+- [x] **完整收费体系**（免费 / 会员 8 折 / 大咖每月免费 / PlanF 专享）+ **早鸟价**；后台手动设/取消会员、报名列表价格策略、用户订单查询
+- [x] **微信审核合规整改**：登录去微信元素 + 主动勾选协议 + 独立协议页 + 隐私授权接口；订单中心页
+- [x] 用户报名通知（活动开始前订阅消息）；用户状态收集；系统监控（异常 / 资源告警 + 后台监控页）
 
 **待办**
-- [ ] 小程序正式版提交审核上线
-- [ ] 用户报名通知（微信模板消息）
+- [ ] 小程序正式版提交审核上线（合规整改已完成，待后台配《用户隐私保护指引》+ 重新上传）
+- [ ] 发布上线后设置订单中心 path（`pages/order/index`，`setorderpathinfo`）
 
 ## 微信小程序
 
