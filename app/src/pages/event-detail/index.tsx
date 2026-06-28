@@ -403,15 +403,9 @@ export default function EventDetail() {
               {participants.map((p) => (
                 <View key={p.id} className='participant-item'>
                   <View className='participant-avatar'>
-                    {p.avatarUrl ? (
-                      <Image className='participant-avatar-img' src={resolveImageUrl(p.avatarUrl)} mode='aspectFill' />
-                    ) : (
-                      <Text className='participant-letter'>
-                        {(p.nickname || '?')[0]}
-                      </Text>
-                    )}
+                    <Image className='participant-avatar-img' src={p.avatarUrl ? resolveImageUrl(p.avatarUrl) : '/assets/default-avatar.png'} mode='aspectFill' />
                   </View>
-                  <Text className='participant-name'>{p.nickname || '用户'}</Text>
+                  <Text className='participant-name'>{p.nickname || 'momo'}</Text>
                 </View>
               ))}
             </ScrollView>

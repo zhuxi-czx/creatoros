@@ -90,8 +90,8 @@ export default function EventCard({ event, onClick }: EventCardProps) {
                 ))
               : avatars.length > 0
               ? avatars.map((s, i) => (
-                  <View key={s.user?.id || i} className='avatar-circle' style={{ left: `${i * 32}rpx`, zIndex: i + 1, background: s.user?.avatarUrl ? undefined : AVATAR_COLORS[i % AVATAR_COLORS.length] }}>
-                    {s.user?.avatarUrl ? <Image className='avatar-img' src={resolveImageUrl(s.user.avatarUrl)} mode='aspectFill' /> : null}
+                  <View key={s.user?.id || i} className='avatar-circle' style={{ left: `${i * 32}rpx`, zIndex: i + 1 }}>
+                    <Image className='avatar-img' src={s.user?.avatarUrl ? resolveImageUrl(s.user.avatarUrl) : '/assets/default-avatar.png'} mode='aspectFill' />
                   </View>
                 ))
               : [0, 1, 2, 3, 4].slice(0, avatarCount).map((i) => (

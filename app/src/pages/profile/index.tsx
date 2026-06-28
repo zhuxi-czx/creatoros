@@ -58,7 +58,7 @@ export default function Profile() {
     Taro.navigateTo({ url: `/pages/event-detail/index?id=${eventId}` })
   }
 
-  const displayName = user?.nickname || '未设置昵称'
+  const displayName = user?.nickname || 'momo'
   const otherTags = [
     user?.mbti,
     user?.zodiac,
@@ -76,15 +76,13 @@ export default function Profile() {
 
       {/* Profile Header */}
       <View className='profile-header'>
-        {/* Avatar */}
+        {/* Avatar（无头像用默认笑脸头像）*/}
         <View className='avatar-wrap'>
-          {user?.avatarUrl ? (
-            <Image className='avatar-img' src={resolveImageUrl(user.avatarUrl)} mode='aspectFill' />
-          ) : (
-            <Text className='avatar-letter'>
-              {token ? (displayName[0] || '?') : '👤'}
-            </Text>
-          )}
+          <Image
+            className='avatar-img'
+            src={user?.avatarUrl ? resolveImageUrl(user.avatarUrl) : '/assets/default-avatar.png'}
+            mode='aspectFill'
+          />
         </View>
 
         {/* Name */}
