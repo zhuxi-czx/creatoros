@@ -20,12 +20,12 @@ export default function CategoryPageView() {
   useShareAppMessage(() => ({
     title: data?.name ? `${data.name} · 敞开酒馆` : '敞开酒馆',
     path: `/pages/category/index?id=${id || ''}`,
-    imageUrl: '/assets/offenbar-logo.png',
+    imageUrl: '/assets/share-card.jpg',
   }))
   useShareTimeline(() => ({
     title: data?.name ? `${data.name} · 敞开酒馆` : '敞开酒馆',
     query: `id=${id || ''}`,
-    imageUrl: '/assets/offenbar-logo.png',
+    imageUrl: '/assets/share-card.jpg',
   }))
 
   const toEvent = (eid: string) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${eid}` })

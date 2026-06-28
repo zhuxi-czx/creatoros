@@ -23,12 +23,12 @@ export default function ColumnPageView() {
   useShareAppMessage(() => ({
     title: data?.config?.title ? `${data.config.title} · 敞开酒馆` : '敞开酒馆 · 精选活动',
     path: `/pages/column/index?type=${type || ''}`,
-    imageUrl: '/assets/offenbar-logo.png',
+    imageUrl: '/assets/share-card.jpg',
   }))
   useShareTimeline(() => ({
     title: data?.config?.title ? `${data.config.title} · 敞开酒馆` : '敞开酒馆 · 精选活动',
     query: `type=${type || ''}`,
-    imageUrl: '/assets/offenbar-logo.png',
+    imageUrl: '/assets/share-card.jpg',
   }))
 
   const toEvent = (eid: string) => Taro.navigateTo({ url: `/pages/event-detail/index?id=${eid}` })

@@ -21,12 +21,12 @@ export default function VenuePage() {
   useShareAppMessage(() => ({
     title: venue?.name ? `${venue.name} · 敞开酒馆` : '敞开酒馆',
     path: `/pages/venue/index?id=${id || ''}`,
-    imageUrl: '/assets/offenbar-logo.png',
+    imageUrl: '/assets/share-card.jpg',
   }))
   useShareTimeline(() => ({
     title: venue?.name ? `${venue.name} · 敞开酒馆` : '敞开酒馆',
     query: `id=${id || ''}`,
-    imageUrl: '/assets/offenbar-logo.png',
+    imageUrl: '/assets/share-card.jpg',
   }))
 
   const loadData = async () => {

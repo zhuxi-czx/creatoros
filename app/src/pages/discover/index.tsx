@@ -43,13 +43,13 @@ export default function Discover() {
 
   // 分享小程序（转发好友/群 + 朋友圈）
   useShareAppMessage(() => ({
-    title: '敞开酒馆 · 发现有趣的活动与同好',
+    title: '敞开酒馆 · 发现有趣的活动和朋友',
     path: '/pages/discover/index',
-    imageUrl: '/assets/offenbar-logo.png',
+    imageUrl: '/assets/share-card.jpg',
   }))
   useShareTimeline(() => ({
-    title: '敞开酒馆 · 发现有趣的活动与同好',
-    imageUrl: '/assets/offenbar-logo.png',
+    title: '敞开酒馆 · 发现有趣的活动和朋友',
+    imageUrl: '/assets/share-card.jpg',
   }))
 
   const loadAll = async () => {

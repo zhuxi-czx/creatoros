@@ -23,11 +23,11 @@ export default function MembershipPage() {
   useShareAppMessage(() => ({
     title: '敞开酒馆 PlanF 会员 · 专享活动免费 + 日常 8 折',
     path: '/pages/membership/index',
-    imageUrl: '/assets/offenbar-logo.png',
+    imageUrl: '/assets/share-card.jpg',
   }))
   useShareTimeline(() => ({
     title: '敞开酒馆 PlanF 会员 · 专享活动免费 + 日常 8 折',
-    imageUrl: '/assets/offenbar-logo.png',
+    imageUrl: '/assets/share-card.jpg',
   }))
 
   const handlePurchase = async () => {
