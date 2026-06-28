@@ -20,14 +20,19 @@ jobs:
           echo "code=$code" >> "$GITHUB_OUTPUT"
           if [ "$code" = "200" ]; then exit 0; else exit 1; fi
 
-      - name: 失败时推送微信（可选，配 PUSHPLUS_TOKEN 才生效）
+      - name: 失败时邮件告警到 QQ 邮箱（需配 QQ_MAIL_AUTH 授权码）
         if: failure()
-        env:
-          TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
-        run: |
-          if [ -z "$TOKEN" ]; then
-            echo "未配置 PUSHPLUS_TOKEN，跳过微信推送（仍有 GitHub 邮件通知）"
-            exit 0
-          fi
-          curl -s "http://www.pushplus.plus/send" -H "Content-Type: application/json" \
-            -d "{\"token\":\"$TOKEN\",\"title\":\"敞开酒馆 · 生产告警\",\"content\":\"API 健康检查失败（HTTP ${{ steps.check.outputs.code }}），请尽快检查 creatorbar.cn\"}"
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.qq.com
+          server_port: 465
+          secure: true
+          username: 505428389@qq.com
+          password: ${{ secrets.QQ_MAIL_AUTH }}
+          from: 敞开酒馆监控 <505428389@qq.com>
+          to: 505428389@qq.com
+          subject: 【敞开酒馆】生产告警 · API 健康检查失败
+          body: |
+            API 健康检查失败（HTTP ${{ steps.check.outputs.code }}）。
+            请尽快检查：https://creatorbar.cn
+            （来自 GitHub Actions 外部探针，每 5 分钟巡检一次）
