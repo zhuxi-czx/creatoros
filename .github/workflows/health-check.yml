@@ -1,0 +1,33 @@
+name: 生产健康巡检
+
+# 从 GitHub 服务器（独立于生产机）定时探测 API 健康，宕机即告警。
+# - 默认：workflow 失败时 GitHub 自动邮件通知仓库 owner。
+# - 可选：在仓库 Settings → Secrets 配 PUSHPLUS_TOKEN，失败时额外推送微信。
+on:
+  schedule:
+    - cron: '*/5 * * * *' # 每 5 分钟（GitHub 调度可能有几分钟延迟）
+  workflow_dispatch: {} # 支持手动触发测试
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 探测 API 健康
+        id: check
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 https://creatorbar.cn/api/health || echo "000")
+          echo "HTTP 状态码: $code"
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          if [ "$code" = "200" ]; then exit 0; else exit 1; fi
+
+      - name: 失败时推送微信（可选，配 PUSHPLUS_TOKEN 才生效）
+        if: failure()
+        env:
+          TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "未配置 PUSHPLUS_TOKEN，跳过微信推送（仍有 GitHub 邮件通知）"
+            exit 0
+          fi
+          curl -s "http://www.pushplus.plus/send" -H "Content-Type: application/json" \
+            -d "{\"token\":\"$TOKEN\",\"title\":\"敞开酒馆 · 生产告警\",\"content\":\"API 健康检查失败（HTTP ${{ steps.check.outputs.code }}），请尽快检查 creatorbar.cn\"}"
