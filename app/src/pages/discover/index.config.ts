@@ -1,1 +1,1 @@
-export default definePageConfig({ navigationBarTitleText: "发现", enablePullDownRefresh: true })
+export default definePageConfig({ navigationBarTitleText: "敞开酒馆", enablePullDownRefresh: true })
