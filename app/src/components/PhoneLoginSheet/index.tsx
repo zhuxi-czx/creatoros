@@ -1,4 +1,5 @@
-import { View, Text, Button } from '@tarojs/components'
+import { useState } from 'react'
+import { View, Text, Button, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { phoneLogin } from '../../services/auth'
@@ -15,6 +16,12 @@ interface Props {
 
 export default function PhoneLoginSheet({ visible, onClose, onSuccess, tabBar }: Props) {
   const { login } = useAuthStore()
+  // 隐私合规：默认不勾选，用户须主动同意《用户协议》《隐私政策》后方可登录
+  const [agreed, setAgreed] = useState(false)
+
+  const openAgreement = (type: 'user' | 'privacy') => {
+    Taro.navigateTo({ url: `/pages/agreement/index?type=${type}` })
+  }
 
   const handleGetPhone = async (e: any) => {
     const code = e?.detail?.code
@@ -52,19 +59,36 @@ export default function PhoneLoginSheet({ visible, onClose, onSuccess, tabBar }:
         <View className='ls-close' onClick={onClose} style={{ backgroundImage: `url("${lucideUri('x', '#cccccc')}")` }} />
 
         <View className='ls-logo-row'>
-          <View className='ls-logo'><Text className='ls-logo-text'>C</Text></View>
-          <Text className='ls-app'>CreatorOS</Text>
+          <Image className='ls-logo-img' src='/assets/offenbar-logo.png' mode='aspectFit' />
         </View>
 
         <Text className='ls-title'>登录后报名活动</Text>
-        <Text className='ls-sub'>使用微信手机号快捷登录，用于活动报名与到场联系</Text>
+        <Text className='ls-sub'>使用本机手机号快捷登录，用于活动报名与到场联系</Text>
 
-        <Button className='ls-phone-btn' openType='getPhoneNumber' onGetPhoneNumber={handleGetPhone}>
+        <Button
+          className={`ls-phone-btn ${agreed ? '' : 'disabled'}`}
+          openType={agreed ? 'getPhoneNumber' : undefined}
+          onGetPhoneNumber={handleGetPhone}
+          onClick={() => { if (!agreed) Taro.showToast({ title: '请先阅读并勾选下方协议', icon: 'none' }) }}
+        >
           <View className='ls-phone-icon' style={{ backgroundImage: `url("${lucideUri('smartphone', '#ffffff')}")` }} />
-          <Text className='ls-phone-text'>微信手机号快捷登录</Text>
+          <Text className='ls-phone-text'>手机号快捷登录</Text>
         </Button>
 
-        <Text className='ls-agree'>登录即代表同意《用户协议》和《隐私政策》</Text>
+        {/* 隐私合规：必须主动勾选，协议可点击阅读 */}
+        <View className='ls-agree-row'>
+          <View
+            className={`ls-checkbox ${agreed ? 'checked' : ''}`}
+            onClick={() => setAgreed(!agreed)}
+            style={agreed ? { backgroundImage: `url("${lucideUri('check', '#ffffff')}")` } : undefined}
+          />
+          <Text className='ls-agree-text' onClick={() => setAgreed(!agreed)}>
+            我已阅读并同意
+            <Text className='ls-agree-link' onClick={(e) => { e.stopPropagation(); openAgreement('user') }}>《用户协议》</Text>
+            和
+            <Text className='ls-agree-link' onClick={(e) => { e.stopPropagation(); openAgreement('privacy') }}>《隐私政策》</Text>
+          </Text>
+        </View>
       </View>
     </View>
   )

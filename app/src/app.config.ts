@@ -11,7 +11,8 @@ export default defineAppConfig({
     'pages/column/index',
     'pages/membership/index',
     'pages/coupon/index',
-    'pages/order/index'
+    'pages/order/index',
+    'pages/agreement/index'
   ],
   window: {
     backgroundTextStyle: 'light',

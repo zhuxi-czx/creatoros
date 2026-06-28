@@ -50,20 +50,10 @@
   margin-top: 16rpx;
 }
 
-.ls-logo {
-  width: 88rpx;
-  height: 88rpx;
-  border-radius: 24rpx;
-  background: #C9A96E;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ls-logo-text {
-  font-size: 48rpx;
-  font-weight: 700;
-  color: #fff;
+.ls-logo-img {
+  width: 132rpx;
+  height: 132rpx;
+  border-radius: 28rpx;
 }
 
 .ls-app {
@@ -90,7 +80,7 @@
   width: 100%;
   height: 100rpx;
   border-radius: 50rpx;
-  background: #07C160;
+  background: #C9A96E;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -99,6 +89,8 @@
   margin-top: 8rpx;
 
   &::after { border: none; }
+  // 未勾选协议时置灰，避免误触发授权
+  &.disabled { background: #D8CBB2; }
 }
 
 .ls-phone-icon {
@@ -115,7 +107,38 @@
   color: #fff;
 }
 
-.ls-agree {
+.ls-agree-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 0 8rpx;
+}
+
+.ls-checkbox {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  border: 2rpx solid #CCC;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  background-size: 22rpx 22rpx;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  &.checked {
+    background-color: #C9A96E;
+    border-color: #C9A96E;
+  }
+}
+
+.ls-agree-text {
   font-size: 22rpx;
-  color: #BBB;
+  color: #999;
+  line-height: 1.4;
+}
+
+.ls-agree-link {
+  color: #C9A96E;
 }

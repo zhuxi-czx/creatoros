@@ -65,7 +65,7 @@ export default function Login() {
             C
           </div>
           <Title level={3} style={{ margin: 0, color: '#1d1d1f' }}>
-            CreatorOS
+            敞开酒馆
           </Title>
           <Text type="secondary" style={{ fontSize: 14 }}>
             管理后台

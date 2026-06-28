@@ -13,7 +13,7 @@ import { lucideUri } from '../../utils/lucide'
 import './index.scss'
 
 export default function Profile() {
-  const { token, user, logout } = useAuthStore()
+  const { token, user } = useAuthStore()
   const [signups, setSignups] = useState<SignupRecord[]>([])
   const [loading, setLoading] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
@@ -48,19 +48,6 @@ export default function Profile() {
     }
     try { setMem(await getMembership()) } catch { /* 未登录忽略 */ }
     try { setCoupons((await getCoupons()) || []) } catch { /* 未登录忽略 */ }
-  }
-
-  const handleLogout = () => {
-    Taro.showModal({
-      title: '退出登录',
-      content: '确定要退出登录吗？',
-      success: (res) => {
-        if (res.confirm) {
-          logout()
-          setSignups([])
-        }
-      }
-    })
   }
 
   const handleEditProfile = () => {
@@ -152,7 +139,7 @@ export default function Profile() {
           <View className='login-card'>
             <Text className='login-hint'>登录后报名活动、查看我的报名</Text>
             <View className='login-btn' onClick={() => setShowLogin(true)}>
-              <Text className='login-btn-text'>微信手机号登录</Text>
+              <Text className='login-btn-text'>手机号快捷登录</Text>
             </View>
             <Text className='skip-hint'>头像昵称可在登录后「编辑资料」完善</Text>
           </View>
@@ -257,12 +244,6 @@ export default function Profile() {
           </View>
         )}
 
-        {/* Logout */}
-        {token && (
-          <View className='logout-btn' onClick={handleLogout}>
-            <Text className='logout-text'>退出登录</Text>
-          </View>
-        )}
       </View>
 
       {/* 手机号快捷登录弹窗 */}

@@ -1,0 +1,45 @@
+.agr-page {
+  min-height: 100vh;
+  background: #fff;
+  padding: 32rpx 40rpx 0;
+  box-sizing: border-box;
+}
+
+.agr-date {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 24rpx;
+}
+
+.agr-intro {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.7;
+  margin-bottom: 8rpx;
+}
+
+.agr-sec {
+  margin-top: 28rpx;
+}
+
+.agr-h {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1A1A1A;
+  margin-bottom: 12rpx;
+}
+
+.agr-p {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.agr-bottom {
+  height: calc(48rpx + env(safe-area-inset-bottom, 24rpx));
+}

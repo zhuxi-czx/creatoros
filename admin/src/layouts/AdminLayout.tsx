@@ -75,7 +75,7 @@ export default function AdminLayout() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           color: '#fff', fontWeight: 700, fontSize: 14, flexShrink: 0
         }}>C</div>
-        <Text strong style={{ fontSize: 16 }}>CreatorOS</Text>
+        <Text strong style={{ fontSize: 16 }}>敞开酒馆</Text>
       </div>
       <Menu
         mode="inline"

@@ -48,7 +48,7 @@ export default function Login() {
           }}>
             <span style={{ color: '#fff', fontSize: 24, fontWeight: 800 }}>C</span>
           </div>
-          <h1 className="gradient-text" style={{ fontSize: 24, fontWeight: 700 }}>CreatorOS</h1>
+          <h1 className="gradient-text" style={{ fontSize: 24, fontWeight: 700 }}>敞开酒馆</h1>
           <p style={{ marginTop: 6, fontSize: 14, color: '#999' }}>创作者社区</p>
         </div>
 

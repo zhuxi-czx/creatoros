@@ -31,14 +31,14 @@ export default function EventDetail() {
 
   // 微信转发到对话框（小程序卡片：标题 + 封面图 + 落地路径）
   useShareAppMessage(() => ({
-    title: event?.title || 'CreatorOS · 一起来玩',
+    title: event?.title || '敞开酒馆 · 一起来玩',
     path: `/pages/event-detail/index?id=${id}`,
     imageUrl: event?.coverUrl ? resolveImageUrl(event.coverUrl) : undefined,
   }))
 
   // 分享到朋友圈
   useShareTimeline(() => ({
-    title: event?.title || 'CreatorOS · 一起来玩',
+    title: event?.title || '敞开酒馆 · 一起来玩',
     query: `id=${id}`,
     imageUrl: event?.coverUrl ? resolveImageUrl(event.coverUrl) : undefined,
   }))
