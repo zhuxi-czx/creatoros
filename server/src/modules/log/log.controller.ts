@@ -1,10 +1,21 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { LogService } from './log.service';
+import { SystemMonitorService } from './system-monitor.service';
 import { AdminGuard } from '../auth/admin.guard';
 
 @Controller()
 export class LogController {
-  constructor(private readonly logService: LogService) {}
+  constructor(
+    private readonly logService: LogService,
+    private readonly systemMonitor: SystemMonitorService,
+  ) {}
+
+  /** 实时服务健康快照（API / 数据库 / 磁盘 / 内存 / 运行时长） */
+  @UseGuards(AdminGuard)
+  @Get('api/admin/system-health')
+  health() {
+    return this.systemMonitor.getSnapshot();
+  }
 
   @UseGuards(AdminGuard)
   @Get('api/admin/logs')

@@ -36,3 +36,15 @@ export const getLogs = (
 
 export const getLogSummary = (days = 7): Promise<DailySummary[]> =>
   api.get(`/admin/logs/summary?days=${days}`) as any
+
+export interface SystemHealth {
+  api: 'online'
+  db: 'ok' | 'error' | 'unknown'
+  uptimeSec: number
+  memory: { usedPct: number; totalMB: number; usedMB: number }
+  disk: { usedPct: number; usedHuman: string; sizeHuman: string }
+  at: string
+}
+
+export const getSystemHealth = (): Promise<SystemHealth> =>
+  api.get('/admin/system-health') as any

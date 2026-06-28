@@ -18,6 +18,51 @@ export class SystemMonitorService {
     private readonly prisma: PrismaService,
   ) {}
 
+  /** 实时健康快照：API / 数据库 / 磁盘 / 内存 / 运行时长，供后台监控页展示。 */
+  async getSnapshot() {
+    const snap: any = {
+      api: 'online',
+      uptimeSec: Math.round(process.uptime()),
+      db: 'unknown',
+      memory: { usedPct: 0, totalMB: 0, usedMB: 0 },
+      disk: { usedPct: -1, usedHuman: '', sizeHuman: '' },
+      at: new Date().toISOString(),
+    };
+    // 数据库连接
+    try {
+      await this.prisma.$queryRaw`SELECT 1`;
+      snap.db = 'ok';
+    } catch {
+      snap.db = 'error';
+    }
+    // 内存
+    try {
+      const total = os.totalmem();
+      const used = total - os.freemem();
+      snap.memory = {
+        usedPct: Math.round((used / total) * 100),
+        totalMB: Math.round(total / 1048576),
+        usedMB: Math.round(used / 1048576),
+      };
+    } catch {
+      /* 忽略 */
+    }
+    // 磁盘（df -P / 默认 1K 块）
+    try {
+      const { stdout } = await execAsync('df -P /');
+      const cols = (stdout.trim().split('\n')[1] || '').split(/\s+/);
+      const pct = (stdout.match(/(\d+)%/) || [])[1];
+      snap.disk = {
+        usedPct: pct ? parseInt(pct, 10) : -1,
+        usedHuman: cols[2] ? `${(parseInt(cols[2], 10) / 1048576).toFixed(1)}G` : '',
+        sizeHuman: cols[1] ? `${(parseInt(cols[1], 10) / 1048576).toFixed(0)}G` : '',
+      };
+    } catch {
+      /* 忽略 */
+    }
+    return snap;
+  }
+
   /** 每小时检查根分区磁盘使用率：≥85% 告警、≥95% 紧急（共享服务器，磁盘满影响所有项目） */
   @Cron(CronExpression.EVERY_HOUR)
   async checkResources() {
