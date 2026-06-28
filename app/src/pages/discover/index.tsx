@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { View, Text, ScrollView, Input } from '@tarojs/components'
-import Taro, { useDidShow, useReachBottom, usePullDownRefresh } from '@tarojs/taro'
+import Taro, { useDidShow, useReachBottom, usePullDownRefresh, useShareAppMessage, useShareTimeline } from '@tarojs/taro'
 import { getEvents } from '../../services/event'
 import type { Event } from '../../services/event'
 import { getCategories, type Category } from '../../services/category'
@@ -40,6 +40,17 @@ export default function Discover() {
   usePullDownRefresh(async () => {
     try { await loadEvents() } finally { Taro.stopPullDownRefresh() }
   })
+
+  // 分享小程序（转发好友/群 + 朋友圈）
+  useShareAppMessage(() => ({
+    title: '敞开酒馆 · 发现有趣的活动与同好',
+    path: '/pages/discover/index',
+    imageUrl: '/assets/offenbar-logo.png',
+  }))
+  useShareTimeline(() => ({
+    title: '敞开酒馆 · 发现有趣的活动与同好',
+    imageUrl: '/assets/offenbar-logo.png',
+  }))
 
   const loadAll = async () => {
     loadEvents()
