@@ -45,7 +45,7 @@ export default function EventList() {
   const loadData = async () => {
     try {
       setLoading(true)
-      const [eventsRes, statsRes] = await Promise.all([getEvents(), getStats()])
+      const [eventsRes, statsRes] = await Promise.all([getEvents(1, 1000), getStats()])
       setEvents(eventsRes.data || [])
       setStats(statsRes || {})
     } catch (err) {
@@ -241,7 +241,13 @@ export default function EventList() {
           rowKey="id"
           loading={loading}
           size={isMobile ? 'small' : 'middle'}
-          pagination={{ pageSize: 10, showSizeChanger: false, size: 'small' }}
+          pagination={{
+            defaultPageSize: 20,
+            pageSizeOptions: [10, 15, 20, 30, 100],
+            showSizeChanger: true,
+            size: 'small',
+            showTotal: (t, range) => `第 ${range[0]}-${range[1]} 条 / 共 ${t} 条`,
+          }}
           scroll={{ x: 600 }}
         />
       </Card>

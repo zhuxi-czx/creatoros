@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   Card, Table, Tag, Space, Typography, Statistic, Row, Col,
-  Avatar, message, Grid, Modal, Input, Popconfirm, Button
+  Avatar, message, Grid, Modal, Input, Popconfirm, Button, Image
 } from 'antd'
 import { UserOutlined, TeamOutlined, CalendarOutlined, EyeOutlined, CrownOutlined, ProfileOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
@@ -36,6 +36,10 @@ export default function UserList() {
   const [phoneRevealed, setPhoneRevealed] = useState(false)
   const [pwdOpen, setPwdOpen] = useState(false)
   const [pwdInput, setPwdInput] = useState('')
+  const [avatarPreview, setAvatarPreview] = useState('')
+
+  // 头像/图片相对路径补全域名（微信头像本就是完整 URL）
+  const fullImg = (u?: string) => (!u ? '' : u.startsWith('http') ? u : `https://creatorbar.cn${u}`)
 
   const verifyPwd = () => {
     if (pwdInput === PHONE_VIEW_PASSWORD) {
@@ -76,7 +80,7 @@ export default function UserList() {
   const loadUsers = async () => {
     try {
       setLoading(true)
-      const res = await getUsers()
+      const res = await getUsers(1, 1000)
       setUsers(res.data || [])
       setTotal(res.total || 0)
     } catch (err) {
@@ -120,9 +124,10 @@ export default function UserList() {
       render: (_, record) => (
         <Space>
           <Avatar
-            src={record.avatarUrl}
+            src={fullImg(record.avatarUrl)}
             size={isMobile ? 'small' : 'default'}
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', flexShrink: 0 }}
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', flexShrink: 0, cursor: record.avatarUrl ? 'pointer' : 'default' }}
+            onClick={() => record.avatarUrl && setAvatarPreview(fullImg(record.avatarUrl))}
           >
             {record.nickname?.charAt(0) || '?'}
           </Avatar>
@@ -167,14 +172,18 @@ export default function UserList() {
     ...(!isMobile ? [{
       title: '标签',
       key: 'tags',
-      width: 220,
-      render: (_: any, record: User) => (
-        <Space size={4} wrap>
-          {record.mbti && <Tag color="purple">{record.mbti}</Tag>}
-          {record.zodiac && <Tag>{record.zodiac}</Tag>}
-          {record.generation && <Tag>{record.generation}</Tag>}
-        </Space>
-      )
+      width: 240,
+      render: (_: any, record: User) => {
+        const hasAny = record.tags?.length || record.mbti || record.zodiac || record.generation
+        return hasAny ? (
+          <Space size={4} wrap>
+            {record.tags?.map(t => <Tag key={t} color="gold">{t}</Tag>)}
+            {record.mbti && <Tag color="purple">{record.mbti}</Tag>}
+            {record.zodiac && <Tag>{record.zodiac}</Tag>}
+            {record.generation && <Tag>{record.generation}</Tag>}
+          </Space>
+        ) : <Text type="secondary">-</Text>
+      }
     } as any] : []),
     {
       title: '状态',
@@ -287,9 +296,24 @@ export default function UserList() {
           rowKey="id"
           loading={loading}
           size={isMobile ? 'small' : 'middle'}
-          pagination={{ pageSize: 10, showSizeChanger: false, size: 'small' }}
+          pagination={{
+            defaultPageSize: 20,
+            pageSizeOptions: [10, 15, 20, 30, 100],
+            showSizeChanger: true,
+            size: 'small',
+            showTotal: (t, range) => `第 ${range[0]}-${range[1]} 条 / 共 ${t} 条`,
+          }}
         />
       </Card>
+
+      {/* 头像大图预览 */}
+      {avatarPreview && (
+        <Image
+          style={{ display: 'none' }}
+          src={avatarPreview}
+          preview={{ visible: true, src: avatarPreview, onVisibleChange: (v) => !v && setAvatarPreview('') }}
+        />
+      )}
 
       <Modal
         title="查看完整手机号"
