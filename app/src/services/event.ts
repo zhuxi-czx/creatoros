@@ -57,6 +57,9 @@ export interface Pricing {
   freeAvailable: boolean
   memberOnly?: boolean // PlanF 专享：仅会员可报名
   canSignup?: boolean // 当前用户是否可报名（专享非会员为 false）
+  hasEarlyBird?: boolean // 当前非会员是否正享早鸟价
+  earlyBirdPrice?: number // 早鸟价（分）
+  earlyBirdLeft?: number // 早鸟剩余名额
 }
 
 export interface EventsResponse {

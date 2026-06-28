@@ -15,6 +15,7 @@ import {
   MEMBERSHIP_PRICE,
   periodKeyOf,
   freeTypeOf,
+  earlyBirdInfo,
 } from '../membership/membership.service';
 
 /** 订单超时分钟数（与微信 time_expire 一致，超时释放名额）。 */
@@ -103,6 +104,14 @@ export class OrderService {
       });
       if (reusable) return reusable;
       await this.assertSignable(tx, userId, eventId, eventFull.maxCapacity);
+      // 早鸟价：在行锁内按占位口径（已确认 + 未过期待支付单）重算金额，
+      // 与名额占位口径一致，防止并发把早鸟名额超发
+      let amount = pricing.finalPrice;
+      if (pricing.hasEarlyBird) {
+        const occupied = await this.countOccupied(tx, eventId, now);
+        const eb = earlyBirdInfo(eventFull, occupied);
+        amount = eb.active ? eb.price : eventFull.price;
+      }
       const expiresAt = new Date(now.getTime() + ORDER_TTL_MIN * 60 * 1000);
       return tx.order.create({
         data: {
@@ -110,7 +119,7 @@ export class OrderService {
           userId,
           type: 'EVENT',
           eventId,
-          amount: pricing.finalPrice,
+          amount,
           status: 'PENDING',
           expiresAt,
         },

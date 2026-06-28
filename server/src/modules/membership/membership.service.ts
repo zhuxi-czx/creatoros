@@ -17,7 +17,24 @@ export interface Pricing {
   freeAvailable: boolean;
   memberOnly: boolean; // PlanF 专享：仅会员可报名
   canSignup: boolean; // 当前用户是否可报名（专享非会员为 false）
+  hasEarlyBird: boolean; // 当前非会员是否正享早鸟价（早鸟已配置且名额未满）
+  earlyBirdPrice: number; // 早鸟价（分）
+  earlyBirdLeft: number; // 早鸟剩余名额
 }
+
+/** 早鸟价信息（纯函数）：仅当配置了早鸟价 + 名额且名额未满时生效。 */
+export function earlyBirdInfo(
+  event: any,
+  confirmedCount: number,
+): { active: boolean; price: number; left: number } {
+  const price = event.earlyBirdPrice as number | null;
+  const quota = event.earlyBirdQuota as number | null;
+  if (!price || price <= 0 || !quota || quota <= 0) return { active: false, price: 0, left: 0 };
+  const left = Math.max(0, quota - confirmedCount);
+  return { active: left > 0, price, left };
+}
+
+const NO_EARLY_BIRD = { hasEarlyBird: false, earlyBirdPrice: 0, earlyBirdLeft: 0 };
 
 // ===== 纯函数（无副作用，供 service 与下单事务复用）=====
 
@@ -109,15 +126,31 @@ export class MembershipService {
 
     // PlanF 专享：仅会员可报名，会员免费（非会员 canSignup=false → 引导开通会员）
     if (event.isPlanfExclusive) {
-      return { originalPrice: price, isMember, isFreeEvent: true, memberPrice: 0, finalPrice: 0, freeType: null, freeAvailable: false, memberOnly: true, canSignup: isMember };
+      return { originalPrice: price, isMember, isFreeEvent: true, memberPrice: 0, finalPrice: 0, freeType: null, freeAvailable: false, memberOnly: true, canSignup: isMember, ...NO_EARLY_BIRD };
     }
     // 普通免费活动：所有人免费
     if (price <= 0) {
-      return { originalPrice: price, isMember, isFreeEvent: true, memberPrice: 0, finalPrice: 0, freeType: null, freeAvailable: false, memberOnly: false, canSignup: true };
+      return { originalPrice: price, isMember, isFreeEvent: true, memberPrice: 0, finalPrice: 0, freeType: null, freeAvailable: false, memberOnly: false, canSignup: true, ...NO_EARLY_BIRD };
     }
     const memberPrice = Math.round(price * MEMBER_DISCOUNT);
     if (!isMember) {
-      return { originalPrice: price, isMember: false, isFreeEvent: false, memberPrice, finalPrice: price, freeType: null, freeAvailable: false, memberOnly: false, canSignup: true };
+      // 非会员：在原价基础上，前 X 名报名者享早鸟价（会员价更低、不受影响）
+      let finalPrice = price;
+      let eb = { ...NO_EARLY_BIRD };
+      if (event.earlyBirdPrice > 0 && event.earlyBirdQuota > 0) {
+        // 占位口径（已确认 + 未过期待支付单），与下单口径一致，避免展示价与实付价不一致
+        const now = new Date();
+        const [confirmed, pending] = await Promise.all([
+          this.prisma.signup.count({ where: { eventId: event.id, status: 'CONFIRMED' } }),
+          this.prisma.order.count({ where: { eventId: event.id, status: 'PENDING', expiresAt: { gt: now } } }),
+        ]);
+        const info = earlyBirdInfo(event, confirmed + pending);
+        if (info.active) {
+          finalPrice = info.price;
+          eb = { hasEarlyBird: true, earlyBirdPrice: info.price, earlyBirdLeft: info.left };
+        }
+      }
+      return { originalPrice: price, isMember: false, isFreeEvent: false, memberPrice, finalPrice, freeType: null, freeAvailable: false, memberOnly: false, canSignup: true, ...eb };
     }
     const freeType = freeTypeOf(event);
     let freeAvailable = false;
@@ -130,7 +163,7 @@ export class MembershipService {
     }
     return {
       originalPrice: price, isMember: true, isFreeEvent: false, memberPrice, freeType, freeAvailable,
-      finalPrice: freeAvailable ? 0 : memberPrice, memberOnly: false, canSignup: true,
+      finalPrice: freeAvailable ? 0 : memberPrice, memberOnly: false, canSignup: true, ...NO_EARLY_BIRD,
     };
   }
 

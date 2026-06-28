@@ -73,6 +73,16 @@ export class CreateEventDto {
   priceNote?: string; // 费用说明文案（解释价格包含什么）
 
   @IsOptional()
+  @IsInt()
+  @Min(0)
+  earlyBirdPrice?: number; // 早鸟价（分），与 earlyBirdQuota 同时配置才生效
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  earlyBirdQuota?: number; // 早鸟名额（前 X 名）
+
+  @IsOptional()
   @IsBoolean()
   featured?: boolean; // 社区精选
 

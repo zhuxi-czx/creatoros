@@ -140,6 +140,9 @@ export default function EventDetail() {
     : (event.price ?? 0) > 0
     ? `PlanF 会员 ¥${memberPriceYuan}（8折）`
     : ''
+  const hasEarlyBird = !!event.pricing?.hasEarlyBird
+  const earlyBirdPriceYuan = event.pricing?.earlyBirdPrice ? (event.pricing.earlyBirdPrice / 100).toFixed(0) : ''
+  const earlyBirdLeft = event.pricing?.earlyBirdLeft ?? 0
 
   return (
     <div className="page-container" style={{ paddingBottom: 90 }}>
@@ -242,8 +245,14 @@ export default function EventDetail() {
           <DetailRow icon={<TicketIcon />} label="费用">
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
               <span>{priceMain}</span>
-              {planfHint && <span style={{ color: '#C9A96E', fontSize: 13, fontWeight: 600 }}>{planfHint}</span>}
+              {hasEarlyBird && (
+                <span style={{ color: '#E8743B', fontSize: 13, fontWeight: 600 }}>🔥 早鸟价 ¥{earlyBirdPriceYuan} · 仅剩 {earlyBirdLeft} 名</span>
+              )}
+              {!hasEarlyBird && planfHint && <span style={{ color: '#C9A96E', fontSize: 13, fontWeight: 600 }}>{planfHint}</span>}
             </div>
+            {hasEarlyBird && planfHint && (
+              <div style={{ color: '#C9A96E', fontSize: 13, fontWeight: 600, marginTop: 4 }}>{planfHint}</div>
+            )}
             {event.priceNote && (
               <div style={{ fontSize: 13, color: '#999', marginTop: 4, lineHeight: 1.5, fontWeight: 400 }}>
                 {event.priceNote}

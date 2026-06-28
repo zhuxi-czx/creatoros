@@ -111,6 +111,19 @@ export default function EventSignups() {
   const confirmedCount = signups.filter(s => s.status === 'CONFIRMED').length
   const cancelledCount = signups.filter(s => s.status === 'CANCELLED').length
 
+  // 价格策略：按支付金额与活动价格对比反推命中的策略
+  const strategyOf = (r: SignupRecord): { text: string; color: string } => {
+    const o = r.order
+    const paid = o && (o.status === 'PAID' || o.status === 'REFUNDING' || o.status === 'REFUNDED')
+    if (!paid || !o || o.amount === 0) return { text: '免费', color: 'default' }
+    const price = event?.price || 0
+    const memberPrice = Math.round(price * 0.8)
+    if (event?.earlyBirdPrice && o.amount === event.earlyBirdPrice) return { text: '早鸟价', color: 'orange' }
+    if (o.amount === price) return { text: '原价', color: 'blue' }
+    if (o.amount === memberPrice) return { text: '会员价·8折', color: 'gold' }
+    return { text: '其他', color: 'default' }
+  }
+
   const columns: ColumnsType<SignupRecord> = [
     {
       title: 'UID',
@@ -154,6 +167,15 @@ export default function EventSignups() {
         if (o.status === 'REFUNDED') return <Tag color="orange">已退款 {yuan(o.amount)}</Tag>
         if (o.status === 'REFUNDING') return <Tag color="gold">退款中 {yuan(o.amount)}</Tag>
         return <Tag color="green">已支付 {yuan(o.amount)}</Tag>
+      },
+    },
+    {
+      title: '价格策略',
+      key: 'strategy',
+      width: 110,
+      render: (_, r) => {
+        const s = strategyOf(r)
+        return <Tag color={s.color}>{s.text}</Tag>
       },
     },
     {

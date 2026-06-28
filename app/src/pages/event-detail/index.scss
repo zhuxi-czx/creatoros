@@ -443,6 +443,12 @@ $accent: #C9A96E;
 .price-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8rpx 16rpx; margin-top: 4rpx; }
 .price-line .info-value { margin-top: 0; }
 .planf-link { font-size: 24rpx; color: #C9A96E; font-weight: 600; }
+// 早鸟价：原价后方的橙色提示（火苗 + 早鸟价 + 仅剩名额）
+.eb-tag { display: flex; flex-direction: row; align-items: center; gap: 6rpx; }
+.eb-flame { width: 26rpx; height: 26rpx; background-size: contain; background-repeat: no-repeat; background-position: center; }
+.eb-text { font-size: 24rpx; color: #E8743B; font-weight: 600; }
+// 早鸟态下 planf-link 单独占一行
+.planf-link-block { display: block; margin-top: 8rpx; }
 .price-note { display: block; font-size: 24rpx; color: #999; line-height: 1.5; margin-top: 8rpx; }
 .member-bubble {
   position: relative;

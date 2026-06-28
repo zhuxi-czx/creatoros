@@ -185,6 +185,8 @@ model Event {
   maxCapacity      Int
   price            Int         @default(0) // 单位：分
   priceNote        String? // 费用说明文案（解释价格包含什么，选填）
+  earlyBirdPrice   Int? // 早鸟价（分），选填；与 earlyBirdQuota 同时配置才生效，仅对非会员付费生效
+  earlyBirdQuota   Int? // 早鸟名额（前 X 名报名者享早鸟价），选填
   status           EventStatus @default(DRAFT)
   featured         Boolean     @default(false) // 社区精选
   isPlanfExclusive Boolean     @default(false) // PlanF 专享（免费 + 会员氛围）

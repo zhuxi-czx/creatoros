@@ -296,12 +296,22 @@ export class EventService {
       }
     }
 
+    const finalPrice = dto.isPlanfExclusive ? 0 : (dto.price ?? 0);
+    // 早鸟价：仅付费活动、且价格与名额同时配置时生效，否则清空
+    const ebOk = finalPrice > 0 && !!dto.earlyBirdPrice && !!dto.earlyBirdQuota;
+    if (ebOk) {
+      const memberPrice = Math.round(finalPrice * 0.8);
+      if (dto.earlyBirdPrice! >= finalPrice) throw new BadRequestException('早鸟价需低于原价');
+      if (dto.earlyBirdPrice! <= memberPrice) throw new BadRequestException('早鸟价需高于会员价（原价 8 折）');
+    }
     const event = await this.prisma.event.create({
       data: {
         ...dto,
         venueId,
         date: new Date(dto.date),
-        price: dto.isPlanfExclusive ? 0 : (dto.price ?? 0), // 专享活动强制免费
+        price: finalPrice, // 专享活动强制免费
+        earlyBirdPrice: ebOk ? dto.earlyBirdPrice : null,
+        earlyBirdQuota: ebOk ? dto.earlyBirdQuota : null,
         featured: dto.featured ?? false,
         imageUrls: dto.imageUrls ?? [],
         autoplay: dto.autoplay ?? true,
@@ -335,6 +345,18 @@ export class EventService {
       updateData.date = new Date(dto.date);
     }
     if (dto.isPlanfExclusive) updateData.price = 0; // 专享活动强制免费
+    // 早鸟价：以最终生效价为准，专享/免费 或 价格名额未同时配置 → 清空
+    const effPrice = updateData.price ?? event.price;
+    const ebPrice = updateData.earlyBirdPrice ?? event.earlyBirdPrice;
+    const ebQuota = updateData.earlyBirdQuota ?? event.earlyBirdQuota;
+    if (!(effPrice > 0 && ebPrice && ebQuota)) {
+      updateData.earlyBirdPrice = null;
+      updateData.earlyBirdQuota = null;
+    } else {
+      const memberPrice = Math.round(effPrice * 0.8);
+      if (ebPrice >= effPrice) throw new BadRequestException('早鸟价需低于原价');
+      if (ebPrice <= memberPrice) throw new BadRequestException('早鸟价需高于会员价（原价 8 折）');
+    }
 
     const updated = await this.prisma.event.update({
       where: { id },

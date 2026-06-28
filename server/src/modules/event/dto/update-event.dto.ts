@@ -74,6 +74,16 @@ export class UpdateEventDto {
   priceNote?: string; // 费用说明文案
 
   @IsOptional()
+  @IsInt()
+  @Min(0)
+  earlyBirdPrice?: number; // 早鸟价（分）
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  earlyBirdQuota?: number; // 早鸟名额（前 X 名）
+
+  @IsOptional()
   @IsBoolean()
   featured?: boolean;
 

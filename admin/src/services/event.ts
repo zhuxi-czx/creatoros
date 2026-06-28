@@ -17,6 +17,8 @@ export interface Event {
   maxCapacity: number
   price: number
   priceNote?: string
+  earlyBirdPrice?: number
+  earlyBirdQuota?: number
   status: string
   featured: boolean
   categoryId?: string
@@ -47,6 +49,8 @@ export interface EventFormData {
   maxCapacity: number
   price?: number
   priceNote?: string
+  earlyBirdPrice?: number
+  earlyBirdQuota?: number
   status?: string
   featured?: boolean
   categoryId?: string

@@ -19,6 +19,9 @@ export interface Pricing {
   freeAvailable: boolean
   memberOnly?: boolean
   canSignup?: boolean
+  hasEarlyBird?: boolean
+  earlyBirdPrice?: number
+  earlyBirdLeft?: number
 }
 
 export interface Event {

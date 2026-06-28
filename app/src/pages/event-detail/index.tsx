@@ -233,6 +233,10 @@ export default function EventDetail() {
         ? (event.pricing.freeAvailable ? 'PlanF 会员本次免费' : `PlanF 会员 ¥${memberPriceYuan}（8折）`)
         : 'PlanF 会员每月 1 次免费')
     : `PlanF 会员 ¥${memberPriceYuan}（8折）`
+  // 早鸟价（仅非会员、名额未满时由后端置 hasEarlyBird）
+  const hasEarlyBird = !!event.pricing?.hasEarlyBird
+  const earlyBirdPriceYuan = event.pricing?.earlyBirdPrice ? (event.pricing.earlyBirdPrice / 100).toFixed(0) : ''
+  const earlyBirdLeft = event.pricing?.earlyBirdLeft ?? 0
 
   // 详情多图：优先 imageUrls，回退 coverUrl
   const detailImages = (
@@ -341,12 +345,23 @@ export default function EventDetail() {
                   <Text className='info-value'>
                     {event.isPlanfExclusive ? 'PlanF 专属' : event.price === 0 ? '免费' : `¥${(event.price! / 100).toFixed(0)}`}
                   </Text>
-                  {(event.isPlanfExclusive || event.price! > 0) && (
+                  {hasEarlyBird && (
+                    <View className='eb-tag'>
+                      <View className='eb-flame' style={{ backgroundImage: `url("${lucideUri('flame', '#E8743B')}")` }} />
+                      <Text className='eb-text'>早鸟价 ¥{earlyBirdPriceYuan} · 仅剩 {earlyBirdLeft} 名</Text>
+                    </View>
+                  )}
+                  {!hasEarlyBird && (event.isPlanfExclusive || event.price! > 0) && (
                     <Text className='planf-link' onClick={() => Taro.navigateTo({ url: '/pages/membership/index' })}>
                       {planfHint} ›
                     </Text>
                   )}
                 </View>
+                {hasEarlyBird && (event.isPlanfExclusive || event.price! > 0) && (
+                  <Text className='planf-link planf-link-block' onClick={() => Taro.navigateTo({ url: '/pages/membership/index' })}>
+                    {planfHint} ›
+                  </Text>
+                )}
                 {event.priceNote && <Text className='price-note'>{event.priceNote}</Text>}
               </View>
             </View>
@@ -420,7 +435,7 @@ export default function EventDetail() {
               : (event.pricing?.freeType === 'GUEST_FREE' && event.pricing?.freeAvailable)
               ? '立即报名 · PlanF 会员本次免费'
               : (event.price ?? 0) > 0
-              ? `立即报名 · ${event.pricing ? (event.pricing.finalPrice === 0 ? '免费' : `¥${(event.pricing.finalPrice / 100).toFixed(0)}`) : `¥${(event.price! / 100).toFixed(0)}`}`
+              ? `立即报名 · ${hasEarlyBird ? '早鸟价 ' : ''}${event.pricing ? (event.pricing.finalPrice === 0 ? '免费' : `¥${(event.pricing.finalPrice / 100).toFixed(0)}`) : `¥${(event.price! / 100).toFixed(0)}`}`
               : '立即报名 · 免费'}
           </Text>
         </View>

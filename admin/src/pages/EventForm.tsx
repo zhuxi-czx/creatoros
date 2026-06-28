@@ -70,6 +70,8 @@ export default function EventForm() {
         isFree: !event.price,
         price: event.price ? event.price / 100 : 0,
         priceNote: event.priceNote,
+        earlyBirdPrice: event.earlyBirdPrice ? event.earlyBirdPrice / 100 : undefined,
+        earlyBirdQuota: event.earlyBirdQuota ?? undefined,
         date: event.date ? dayjs(event.date) : undefined,
         venueId: event.venueId,
         featured: event.featured,
@@ -162,6 +164,10 @@ export default function EventForm() {
       maxCapacity: values.maxCapacity as number,
       price: values.isFree ? 0 : ((values.price as number) || 0) * 100,
       priceNote: (values.priceNote as string)?.trim() || undefined,
+      earlyBirdPrice: (!values.isFree && !values.isPlanfExclusive && values.earlyBirdPrice)
+        ? (values.earlyBirdPrice as number) * 100 : undefined,
+      earlyBirdQuota: (!values.isFree && !values.isPlanfExclusive && values.earlyBirdQuota)
+        ? (values.earlyBirdQuota as number) : undefined,
       coverUrl: imageUrls[0] || undefined,
       imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
       autoplay: imageUrls.length > 1 ? (values.autoplay as boolean) : undefined,
@@ -368,6 +374,21 @@ export default function EventForm() {
 
           <Form.Item label="费用说明" name="priceNote" extra="显示在详情页费用区，解释这个价格包含什么（选填，留空不显示）">
             <Input placeholder="如：费用包含 1 杯精酿特调 + 现场小食拼盘" maxLength={50} showCount />
+          </Form.Item>
+
+          <Form.Item noStyle shouldUpdate={(prev, cur) => prev.isFree !== cur.isFree || prev.isPlanfExclusive !== cur.isPlanfExclusive}>
+            {({ getFieldValue }) =>
+              (getFieldValue('isFree') || getFieldValue('isPlanfExclusive')) ? null : (
+                <div style={{ display: 'flex', gap: 16 }}>
+                  <Form.Item label="早鸟价 (元)" name="earlyBirdPrice" style={{ flex: 1, marginBottom: 16 }} extra="前 N 名非会员享此价；需高于会员价、低于原价。需与名额同时填写才生效">
+                    <InputNumber placeholder="如 88" min={0} style={{ width: '100%' }} />
+                  </Form.Item>
+                  <Form.Item label="早鸟名额 (前 N 名)" name="earlyBirdQuota" style={{ flex: 1, marginBottom: 16 }} extra="按报名先后，前 N 名享早鸟价">
+                    <InputNumber placeholder="如 20" min={0} style={{ width: '100%' }} />
+                  </Form.Item>
+                </div>
+              )
+            }
           </Form.Item>
 
           <Form.Item label="分类" name="categoryId">
