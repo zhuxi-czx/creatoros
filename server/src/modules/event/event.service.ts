@@ -465,7 +465,7 @@ export class EventService {
       this.prisma.signup.count({ where: { status: 'CONFIRMED' } }),
       this.prisma.event.count({ where: { status: { in: ['PUBLISHED', 'FULL', 'ONGOING'] } } }),
       this.prisma.event.findMany({ take: 5, orderBy: { signups: { _count: 'desc' } }, select: { id: true, title: true, date: true, status: true, maxCapacity: true, _count: { select: { signups: { where: { status: 'CONFIRMED' } } } } } }),
-      this.prisma.event.findMany({ take: 5, orderBy: { createdAt: 'desc' }, select: { id: true, title: true, date: true, status: true, _count: { select: { signups: { where: { status: 'CONFIRMED' } } } } } }),
+      this.prisma.event.findMany({ take: 5, orderBy: { createdAt: 'desc' }, select: { id: true, title: true, date: true, status: true, maxCapacity: true, _count: { select: { signups: { where: { status: 'CONFIRMED' } } } } } }),
       this.prisma.order.aggregate({ _sum: { amount: true }, where: { status: 'PAID' } }),
       this.prisma.order.aggregate({ _sum: { amount: true }, where: { status: 'PAID', paidAt: { gte: monthStart } } }),
       this.prisma.order.aggregate({ _sum: { amount: true }, where: { status: 'PAID', paidAt: { gte: todayStart } } }),
