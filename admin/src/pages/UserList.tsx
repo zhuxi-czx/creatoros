@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   Card, Table, Tag, Space, Typography, Statistic, Row, Col,
-  Avatar, message, Grid, Modal, Input, Popconfirm, Button, Image
+  Avatar, message, Grid, Modal, Input, Popconfirm, Button, Image, Select
 } from 'antd'
 import { UserOutlined, TeamOutlined, CalendarOutlined, EyeOutlined, CrownOutlined, ProfileOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
@@ -37,6 +37,8 @@ export default function UserList() {
   const [pwdOpen, setPwdOpen] = useState(false)
   const [pwdInput, setPwdInput] = useState('')
   const [avatarPreview, setAvatarPreview] = useState('')
+  const [keyword, setKeyword] = useState('')
+  const [memberFilter, setMemberFilter] = useState<'all' | 'member' | 'nonmember'>('all')
 
   // 头像/图片相对路径补全域名（微信头像本就是完整 URL）
   const fullImg = (u?: string) => (!u ? '' : u.startsWith('http') ? u : `https://creatorbar.cn${u}`)
@@ -115,6 +117,17 @@ export default function UserList() {
       setRevoking(null)
     }
   }
+
+  // 前端搜索（用户/标签/状态字段）+ 会员筛选
+  const kw = keyword.trim().toLowerCase()
+  const filteredUsers = users.filter(u => {
+    if (memberFilter === 'member' && !isActiveMember(u)) return false
+    if (memberFilter === 'nonmember' && isActiveMember(u)) return false
+    if (!kw) return true
+    const hay = [u.nickname, u.uid, u.city, u.phone, u.mbti, u.zodiac, u.generation, ...(u.tags || []), ...(u.statuses || [])]
+      .filter(Boolean).join(' ').toLowerCase()
+    return hay.includes(kw)
+  })
 
   const columns: ColumnsType<User> = [
     {
@@ -289,10 +302,31 @@ export default function UserList() {
         style={{ borderRadius: 12 }}
         styles={{ body: { padding: isMobile ? 8 : 24 } }}
         title={<Title level={5} style={{ margin: 0 }}>用户列表</Title>}
+        extra={
+          <Space wrap>
+            <Input.Search
+              allowClear
+              placeholder="搜索昵称 / UID / 标签 / 状态"
+              style={{ width: isMobile ? 180 : 260 }}
+              value={keyword}
+              onChange={e => setKeyword(e.target.value)}
+            />
+            <Select
+              value={memberFilter}
+              onChange={setMemberFilter}
+              style={{ width: 130 }}
+              options={[
+                { value: 'all', label: '全部用户' },
+                { value: 'member', label: 'PlanF 会员' },
+                { value: 'nonmember', label: '非会员' },
+              ]}
+            />
+          </Space>
+        }
       >
         <Table
           columns={columns}
-          dataSource={users}
+          dataSource={filteredUsers}
           rowKey="id"
           loading={loading}
           size={isMobile ? 'small' : 'middle'}

@@ -12,6 +12,7 @@ export interface User {
   zodiac?: string
   generation?: string
   tags?: string[]
+  phone?: string
   role: string
   status: string
   createdAt: string
