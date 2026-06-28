@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import * as path from 'path';
 import * as fs from 'fs';
 import sharp = require('sharp');
@@ -23,6 +23,19 @@ export class UploadService {
 
   getFileUrl(filename: string): string {
     return `/uploads/${filename}`;
+  }
+
+  /**
+   * 分享卡片用 JPG（微信分享卡片不渲染 WebP）。按需把 {name}.webp 转成 {name}.jpg 落盘缓存，返回 jpg 路径。
+   */
+  async getShareJpg(name: string): Promise<string> {
+    const safe = path.basename(name).replace(/\.(webp|jpe?g|png)$/i, '');
+    const jpg = path.join(this.uploadDir, `${safe}.jpg`);
+    if (fs.existsSync(jpg)) return jpg;
+    const webp = path.join(this.uploadDir, `${safe}.webp`);
+    if (!fs.existsSync(webp)) throw new NotFoundException('图片不存在');
+    await sharp(webp).jpeg({ quality: 85 }).toFile(jpg);
+    return jpg;
   }
 
   async processImage(filePath: string, type: string = 'default'): Promise<{ mainPath: string; thumbPath: string }> {

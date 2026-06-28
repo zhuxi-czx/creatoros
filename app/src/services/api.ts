@@ -14,6 +14,14 @@ export function resolveImageUrl(url: string | undefined): string {
   return url
 }
 
+// 分享卡片专用图：微信分享不渲染 WebP，统一走后端按需转 JPG 的端点
+export function shareCoverUrl(url: string | undefined): string {
+  if (!url) return ''
+  const base = (url.split('/').pop() || '').replace(/\.\w+$/, '')
+  if (!base) return ''
+  return `${SERVER_HOST}/api/upload/share-jpg/${base}`
+}
+
 export async function request<T = any>(url: string, method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET', data?: any): Promise<T> {
   const token = Taro.getStorageSync('h5_token')
   const header: Record<string, string> = { 'Content-Type': 'application/json' }

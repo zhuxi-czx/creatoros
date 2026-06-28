@@ -36,6 +36,7 @@ export interface Event {
   status: 'DRAFT' | 'PUBLISHED' | 'FULL' | 'ONGOING' | 'ENDED' | 'CANCELLED'
   tags?: string[]
   isSignedUp?: boolean
+  mySignup?: { paidAmount: number; freeBenefit: 'GUEST_FREE' | null } | null
   venue?: Venue
   _count?: { signups: number }
   signups?: Array<{ user: { id: string; avatarUrl?: string } }>

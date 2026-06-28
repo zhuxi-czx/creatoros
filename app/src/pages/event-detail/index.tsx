@@ -8,7 +8,7 @@ import { getEventDetail, signup, cancelSignup, getEventSignups, checkout, getOrd
 import type { Event, Participant } from '../../services/event'
 import { useAuthStore } from '../../stores/useAuthStore'
 import PhoneLoginSheet from '../../components/PhoneLoginSheet'
-import { resolveImageUrl } from '../../services/api'
+import { resolveImageUrl, shareCoverUrl } from '../../services/api'
 import { formatEventDateTime } from '../../utils'
 import './index.scss'
 
@@ -22,6 +22,7 @@ export default function EventDetail() {
   const [showInfo, setShowInfo] = useState(false)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
   const [showRefundDone, setShowRefundDone] = useState(false)
+  const [refundedAmount, setRefundedAmount] = useState(0)
   const [cancelling, setCancelling] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
 
@@ -33,14 +34,14 @@ export default function EventDetail() {
   useShareAppMessage(() => ({
     title: event?.title || '敞开酒馆 · 一起来玩',
     path: `/pages/event-detail/index?id=${id}`,
-    imageUrl: event?.coverUrl ? resolveImageUrl(event.coverUrl) : undefined,
+    imageUrl: event?.coverUrl ? shareCoverUrl(event.coverUrl) : undefined,
   }))
 
   // 分享到朋友圈
   useShareTimeline(() => ({
     title: event?.title || '敞开酒馆 · 一起来玩',
     query: `id=${id}`,
-    imageUrl: event?.coverUrl ? resolveImageUrl(event.coverUrl) : undefined,
+    imageUrl: event?.coverUrl ? shareCoverUrl(event.coverUrl) : undefined,
   }))
 
   const loadEvent = async (silent = false) => {
@@ -166,10 +167,12 @@ export default function EventDetail() {
     if (!id || !event || cancelling) return
     try {
       setCancelling(true)
+      const paidBefore = event.mySignup?.paidAmount ?? 0 // 取消前记下实付（刷新后 mySignup 会清空）
       const res = await cancelSignup(id)
       setShowCancelConfirm(false)
       await loadEvent(true) // 重新同步报名状态/人数/参与者列表
       if (res?.refunded) {
+        setRefundedAmount(paidBefore)
         setShowRefundDone(true)
       } else {
         Taro.showToast({ title: '已取消报名', icon: 'success' })
@@ -502,19 +505,25 @@ export default function EventDetail() {
             </View>
             <Text className='sm-title'>确认取消报名？</Text>
             <Text className='sm-sub sm-sub--wrap'>
-              {(event.price ?? 0) > 0
+              {(event.mySignup?.paidAmount ?? 0) > 0
                 ? '取消后名额将释放，已支付款项将原路退回'
+                : event.mySignup?.freeBenefit === 'GUEST_FREE'
+                ? '本次为 PlanF 会员每月一次免费报名，不涉及费用退还'
                 : '取消后名额将释放给其他人'}
             </Text>
-            {(event.price ?? 0) > 0 && (
+            {(event.mySignup?.paidAmount ?? 0) > 0 ? (
               <View className='sm-info sm-info--refund'>
                 <View className='sm-row sm-row--between'>
                   <Text className='sm-label'>退款金额</Text>
-                  <Text className='sm-amount'>¥{((event.price ?? 0) / 100).toFixed(2)}</Text>
+                  <Text className='sm-amount'>¥{((event.mySignup?.paidAmount ?? 0) / 100).toFixed(2)}</Text>
                 </View>
                 <Text className='sm-note'>退款将原路退回到你的微信支付账户，预计几分钟内到账</Text>
               </View>
-            )}
+            ) : event.mySignup?.freeBenefit === 'GUEST_FREE' ? (
+              <View className='sm-info sm-info--refund'>
+                <Text className='sm-note'>取消后，本月的会员免费名额将返还，可再次用于其他大咖活动</Text>
+              </View>
+            ) : null}
             <View
               className={`sm-ok sm-ok--danger ${cancelling ? 'loading' : ''}`}
               onClick={doCancel}
@@ -541,7 +550,7 @@ export default function EventDetail() {
             <View className='sm-info sm-info--refund'>
               <View className='sm-row sm-row--between'>
                 <Text className='sm-label'>退款金额</Text>
-                <Text className='sm-amount'>¥{((event.price ?? 0) / 100).toFixed(2)}</Text>
+                <Text className='sm-amount'>¥{(refundedAmount / 100).toFixed(2)}</Text>
               </View>
               <Text className='sm-note'>已原路退回到你的微信支付账户，预计几分钟内到账</Text>
             </View>

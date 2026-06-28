@@ -1,6 +1,9 @@
 import {
   Controller,
   Post,
+  Get,
+  Param,
+  Res,
   UseGuards,
   UseInterceptors,
   UploadedFile,
@@ -9,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import type { Response } from 'express';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -67,5 +71,13 @@ export class UploadController {
       size: file.size,
       mimeType: 'image/webp',
     };
+  }
+
+  /** 分享卡片专用 JPG（微信分享不渲染 WebP）。按需把 webp 转 jpg 返回。 */
+  @Get('share-jpg/:name')
+  async shareJpg(@Param('name') name: string, @Res() res: Response) {
+    const jpg = await this.uploadService.getShareJpg(name);
+    res.set('Cache-Control', 'public, max-age=31536000');
+    res.sendFile(jpg);
   }
 }

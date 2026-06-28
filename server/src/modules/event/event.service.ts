@@ -152,15 +152,24 @@ export class EventService {
     }
 
     let isSignedUp = false;
+    let mySignup: { paidAmount: number; freeBenefit: 'GUEST_FREE' | null } | null = null;
     if (userId) {
       const signup = await this.prisma.signup.findUnique({
         where: { userId_eventId: { userId, eventId: id } },
+        include: { order: true },
       });
-      isSignedUp = !!signup && signup.status === 'CONFIRMED';
+      if (signup && signup.status === 'CONFIRMED') {
+        isSignedUp = true;
+        // 实付金额（会员免费名额 / 免费活动报名无订单或金额为 0）
+        const paidAmount = signup.order && signup.order.status === 'PAID' ? signup.order.amount : 0;
+        // 是否用了 PlanF 会员「大咖每月一次免费」名额（免费报名 + 大咖活动）
+        const freeBenefit: 'GUEST_FREE' | null = !signup.orderId && (event as any).isGuestShare ? 'GUEST_FREE' : null;
+        mySignup = { paidAmount, freeBenefit };
+      }
     }
 
     const pricing = await this.membership.computePricing(event, userId);
-    return { ...event, isSignedUp, pricing };
+    return { ...event, isSignedUp, mySignup, pricing };
   }
 
   async getEventSignups(id: string) {
