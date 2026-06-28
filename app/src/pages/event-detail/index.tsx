@@ -222,6 +222,8 @@ export default function EventDetail() {
   const signupCount = event._count?.signups ?? event.currentParticipants ?? 0
   const status = getEventDisplay(event.date || event.startTime, signupCount, event.maxCapacity || event.maxParticipants)
   const signupClosed = status.state !== 'OPEN' // 报名结束/已结束 → 不能报名
+  const startTimeMs = (event.date || event.startTime) ? new Date(event.date || event.startTime).getTime() : 0
+  const notStarted = startTimeMs > 0 && Date.now() < startTimeMs // 活动未开始 → 才可取消报名/退费、订阅开始提醒
   // PlanF 专属活动 + 非会员 + 未报名 + 仍可报名：拦截下单，按钮引导开通会员
   const planfBlocked = !!event.isPlanfExclusive && !event.pricing?.isMember && !event.isSignedUp && !signupClosed
   // 费用区 PlanF 引导文案：专享 / 大咖(本月免费或已用转8折) / 普通付费8折
@@ -366,6 +368,18 @@ export default function EventDetail() {
               </View>
             </View>
           )}
+          {/* 退改规则：活动开始前可取消并退费，开始后不可取消 */}
+          <View className='info-row'>
+            <View className='info-icon-svg' style={{ backgroundImage: `url("${lucideUri('info', '#C9A96E')}")` }} />
+            <View className='info-content'>
+              <Text className='info-label'>退改</Text>
+              <Text className='info-value'>
+                {(event.price ?? 0) > 0
+                  ? '活动开始前可取消报名并退费，开始后不可取消、不退费'
+                  : '活动开始前可取消报名，开始后不可取消'}
+              </Text>
+            </View>
+          </View>
         </View>
 
         {/* Description */}
@@ -463,13 +477,15 @@ export default function EventDetail() {
                 <Text className='sm-value' selectable userSelect>{event.venue?.name || event.location || '待定'}</Text>
               </View>
             </View>
-            <View className='sm-remind' onClick={handleEnableReminder}>
-              <Text className='sm-remind-text'>🔔 开启开始提醒（开始前 2 小时通知）</Text>
-            </View>
+            {notStarted && (
+              <View className='sm-remind' onClick={handleEnableReminder}>
+                <Text className='sm-remind-text'>🔔 开启开始提醒（开始前 2 小时通知）</Text>
+              </View>
+            )}
             <View className='sm-ok' onClick={() => setShowInfo(false)}>
               <Text className='sm-ok-text'>知道了</Text>
             </View>
-            <Text className='sm-cancel' onClick={handleCancel}>取消报名</Text>
+            {notStarted && <Text className='sm-cancel' onClick={handleCancel}>取消报名</Text>}
           </View>
         </View>
       )}

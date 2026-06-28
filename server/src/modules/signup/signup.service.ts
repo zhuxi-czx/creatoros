@@ -146,6 +146,11 @@ export class SignupService {
       throw new NotFoundException('Event not found');
     }
 
+    // 活动一旦开始即不可取消报名 / 退费（防前端绕过）
+    if (event.date && Date.now() >= new Date(event.date).getTime()) {
+      throw new BadRequestException('活动已开始，不可取消报名');
+    }
+
     const signup = await this.prisma.signup.findUnique({
       where: {
         userId_eventId: {

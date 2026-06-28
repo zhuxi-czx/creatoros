@@ -119,6 +119,9 @@ export default function EventDetail() {
   const isFull = event.status === 'FULL'
   const isEnded = ['ENDED', 'CANCELLED'].includes(event.status)
   const isSignedUp = event.isSignedUp ?? false
+  const eventStartStr = event.date || event.startTime
+  const eventStartMs = eventStartStr ? new Date(eventStartStr).getTime() : 0
+  const eventNotStarted = eventStartMs > 0 && Date.now() < eventStartMs // 活动未开始 → 才可取消报名/退费
   const signupCount = event._count?.signups ?? participants.length
 
   // Determine event date to display
@@ -258,6 +261,14 @@ export default function EventDetail() {
                 {event.priceNote}
               </div>
             )}
+          </DetailRow>
+          <DetailRow
+            icon={<svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>}
+            label="退改"
+          >
+            {(event.price ?? 0) > 0
+              ? '活动开始前可取消报名并退费，开始后不可取消、不退费'
+              : '活动开始前可取消报名，开始后不可取消'}
           </DetailRow>
         </div>
 
@@ -403,7 +414,7 @@ export default function EventDetail() {
           <button
             className="tap-card"
             onClick={handleSignup}
-            disabled={actionLoading}
+            disabled={actionLoading || (isSignedUp && !eventNotStarted)}
             style={{
               width: '100%',
               padding: '15px',
@@ -417,7 +428,7 @@ export default function EventDetail() {
               transition: 'all 0.2s ease',
             }}
           >
-            {actionLoading ? '处理中...' : isSignedUp ? '取消报名' : '立即报名'}
+            {actionLoading ? '处理中...' : isSignedUp ? (eventNotStarted ? '取消报名' : '已报名') : '立即报名'}
           </button>
         )}
       </div>
