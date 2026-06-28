@@ -25,15 +25,14 @@ const STATUS_MAP: Record<string, { color: string; label: string }> = {
 const yuan = (fen = 0) => `¥${Math.round((fen || 0) / 100).toLocaleString()}`
 const GUTTER: [number, number] = [16, 16]
 
-// 统一 KPI 卡（等高：标题 + 数字 + 副标题占位）
-function Kpi({ icon, title, value, sub, color }: { icon: React.ReactNode; title: string; value: React.ReactNode; sub?: string; color: string }) {
+// 统一 KPI 卡（icon 圆底 + 深色数字 + 副标题占位，等高）
+function Kpi({ icon, iconBg, title, value, sub, subColor, color }: { icon: React.ReactNode; iconBg: string; title: string; value: React.ReactNode; sub?: string; subColor?: string; color: string }) {
   return (
-    <Card bordered={false} style={{ borderRadius: 12, height: '100%' }} styles={{ body: { padding: 16 } }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#8c8c8c', fontSize: 13 }}>
-        <span style={{ color, display: 'inline-flex' }}>{icon}</span>{title}
-      </div>
-      <div style={{ fontSize: 28, fontWeight: 700, color, lineHeight: 1.2, marginTop: 6 }}>{value}</div>
-      <div style={{ fontSize: 12, color: '#bbb', marginTop: 2, minHeight: 16 }}>{sub || ''}</div>
+    <Card bordered={false} style={{ borderRadius: 12, height: '100%' }} styles={{ body: { padding: 20 } }}>
+      <div style={{ width: 44, height: 44, borderRadius: 12, background: iconBg, color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>{icon}</div>
+      <div style={{ fontSize: 13, color: '#8c8c8c', marginTop: 14 }}>{title}</div>
+      <div style={{ fontSize: 28, fontWeight: 700, color: '#1A1A1A', lineHeight: 1.2, marginTop: 4 }}>{value}</div>
+      <div style={{ fontSize: 12, color: subColor || '#bbb', marginTop: 4, minHeight: 16 }}>{sub || ''}</div>
     </Card>
   )
 }
@@ -117,16 +116,23 @@ export default function Dashboard() {
     { title: '状态', dataIndex: 'status', key: 'status', width: 86, render: (s: string) => { const m = STATUS_MAP[s] || { color: 'default', label: s }; return <Tag color={m.color}>{m.label}</Tag> } },
   ]
 
+  // 环比文案（绿涨红跌）
+  const delta = (cur: number, prev: number, label: string): { sub: string; subColor: string } => {
+    if (!prev) return { sub: cur > 0 ? `${label} 新增` : '', subColor: '#10b981' }
+    const pct = Math.round(((cur - prev) / prev) * 100)
+    return { sub: `${label} ${pct >= 0 ? '+' : ''}${pct}%`, subColor: pct >= 0 ? '#10b981' : '#ef4444' }
+  }
+
   // 8 个核心指标
   const kpis = [
-    { icon: <MoneyCollectOutlined />, title: '累计营收', value: yuan(rev.total), color: '#10b981' },
-    { icon: <PayCircleOutlined />, title: '本月营收', value: yuan(rev.month), color: '#6366f1' },
-    { icon: <RiseOutlined />, title: '今日营收', value: yuan(rev.today), color: '#f59e0b' },
-    { icon: <CrownOutlined />, title: '有效会员', value: mem.active || 0, sub: mem.penetration ? `渗透率 ${mem.penetration}%` : '', color: '#C9A96E' },
-    { icon: <UserOutlined />, title: '总用户', value: stats.totalUsers || 0, sub: stats.newUsersToday ? `今日 +${stats.newUsersToday}` : '', color: '#8b5cf6' },
-    { icon: <CheckCircleOutlined />, title: '总报名', value: stats.totalSignups || 0, color: '#10b981' },
-    { icon: <FireOutlined />, title: '进行中活动', value: stats.activeEvents || 0, color: '#f59e0b' },
-    { icon: <WarningOutlined />, title: '待处理退款', value: alerts.refundPending || 0, sub: alerts.refundPending > 0 ? '需尽快处理' : '', color: alerts.refundPending > 0 ? '#ff4d4f' : '#999' },
+    { icon: <MoneyCollectOutlined />, iconBg: '#E6F7F0', title: '累计营收', value: yuan(rev.total), color: '#10b981', sub: rev.month ? `本月 ${yuan(rev.month)}` : '', subColor: '#bbb' },
+    { icon: <PayCircleOutlined />, iconBg: '#ECEDFB', title: '本月营收', value: yuan(rev.month), color: '#6366f1', ...delta(rev.month || 0, rev.lastMonth || 0, '较上月') },
+    { icon: <RiseOutlined />, iconBg: '#FEF3E2', title: '今日营收', value: yuan(rev.today), color: '#f59e0b', ...delta(rev.today || 0, rev.yesterday || 0, '较昨日') },
+    { icon: <CrownOutlined />, iconBg: '#F7F1E6', title: '有效会员', value: mem.active || 0, color: '#C9A96E', sub: mem.penetration ? `渗透率 ${mem.penetration}%` : '', subColor: '#C9A96E' },
+    { icon: <UserOutlined />, iconBg: '#F0EDFB', title: '总用户', value: stats.totalUsers || 0, color: '#8b5cf6', sub: stats.newUsersToday ? `今日 +${stats.newUsersToday}` : '', subColor: '#10b981' },
+    { icon: <CheckCircleOutlined />, iconBg: '#E6F7F0', title: '总报名', value: stats.totalSignups || 0, color: '#10b981', sub: '', subColor: '#bbb' },
+    { icon: <FireOutlined />, iconBg: '#FEF3E2', title: '进行中活动', value: stats.activeEvents || 0, color: '#f59e0b', sub: '', subColor: '#bbb' },
+    { icon: <WarningOutlined />, iconBg: '#FDECEC', title: '待处理退款', value: alerts.refundPending || 0, color: alerts.refundPending > 0 ? '#ef4444' : '#999', sub: alerts.refundPending > 0 ? '需尽快处理' : '', subColor: '#ef4444' },
   ]
 
   return (

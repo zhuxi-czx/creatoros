@@ -434,6 +434,8 @@ export class EventService {
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const yesterdayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
     const weekAgo = new Date(now); weekAgo.setDate(now.getDate() - 7);
     const trendStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13);
     const in24h = new Date(now.getTime() + 24 * 3600 * 1000);
@@ -447,6 +449,7 @@ export class EventService {
       activeMembers, newMembersMonth, expiringSoon,
       newUsersToday, newUsersWeek,
       refundPending, todayErrors, upcomingEvents, paidEventOrders,
+      revLastMonth, revYesterday,
     ] = await Promise.all([
       this.prisma.user.count(),
       this.prisma.event.count(),
@@ -470,6 +473,8 @@ export class EventService {
       this.prisma.systemLog.count({ where: { level: { in: ['ERROR', 'WARN'] }, createdAt: { gte: todayStart } } }),
       this.prisma.event.findMany({ where: { status: { in: ['PUBLISHED', 'FULL'] }, date: { gt: now, lte: in24h } }, orderBy: { date: 'asc' }, take: 10, select: { id: true, title: true, date: true, maxCapacity: true, _count: { select: { signups: { where: { status: 'CONFIRMED' } } } } } }),
       this.prisma.order.count({ where: { status: 'PAID', type: 'EVENT' } }),
+      this.prisma.order.aggregate({ _sum: { amount: true }, where: { status: 'PAID', paidAt: { gte: lastMonthStart, lt: monthStart } } }),
+      this.prisma.order.aggregate({ _sum: { amount: true }, where: { status: 'PAID', paidAt: { gte: yesterdayStart, lt: todayStart } } }),
     ]);
 
     // 趋势 + 分布（原生 SQL 按日聚合）
@@ -505,6 +510,7 @@ export class EventService {
       topEvents, recentEvents,
       revenue: {
         total: fen(revTotal), month: fen(revMonth), today: fen(revToday),
+        lastMonth: fen(revLastMonth), yesterday: fen(revYesterday),
         event: fen(revEvent), member: fen(revMember), refund: fen(revRefund),
         orders: { paid: orderCountMap['PAID'] || 0, pending: orderCountMap['PENDING'] || 0, refunded: orderCountMap['REFUNDED'] || 0 },
       },
