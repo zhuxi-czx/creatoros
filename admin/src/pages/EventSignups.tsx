@@ -21,6 +21,7 @@ interface SignupRecord {
   id: string
   status: string
   createdAt: string
+  orderId?: string | null
   order?: OrderInfo | null
   user: {
     id: string
@@ -30,10 +31,13 @@ interface SignupRecord {
     city?: string
     phone?: string
     mbti?: string
+    membership?: { status: string; expireAt: string } | null
   }
 }
 
 const yuan = (fen: number) => `¥${(fen / 100).toFixed(2)}`
+const isMember = (m?: { status: string; expireAt: string } | null) =>
+  !!m && m.status === 'ACTIVE' && dayjs(m.expireAt).isAfter(dayjs())
 
 export default function EventSignups() {
   const { id } = useParams()
@@ -115,13 +119,17 @@ export default function EventSignups() {
   const strategyOf = (r: SignupRecord): { text: string; color: string } => {
     const o = r.order
     const paid = o && (o.status === 'PAID' || o.status === 'REFUNDING' || o.status === 'REFUNDED')
-    if (!paid || !o || o.amount === 0) return { text: '免费', color: 'default' }
-    const price = event?.price || 0
-    const memberPrice = Math.round(price * 0.8)
-    if (event?.earlyBirdPrice && o.amount === event.earlyBirdPrice) return { text: '早鸟价', color: 'orange' }
-    if (o.amount === price) return { text: '原价', color: 'blue' }
-    if (o.amount === memberPrice) return { text: '会员价·8折', color: 'gold' }
-    return { text: '其他', color: 'default' }
+    if (paid && o && o.amount > 0) {
+      const price = event?.price || 0
+      const memberPrice = Math.round(price * 0.8)
+      if (event?.earlyBirdPrice && o.amount === event.earlyBirdPrice) return { text: '早鸟价', color: 'orange' }
+      if (o.amount === price) return { text: '原价', color: 'blue' }
+      if (o.amount === memberPrice) return { text: '会员价·8折', color: 'gold' }
+      return { text: '其他', color: 'default' }
+    }
+    // 免费报名：会员用大咖每月免费名额 vs 普通免费活动
+    if (!r.orderId && event?.isGuestShare && isMember(r.user.membership)) return { text: 'PlanF 本次免费', color: 'gold' }
+    return { text: '免费', color: 'default' }
   }
 
   const columns: ColumnsType<SignupRecord> = [
@@ -154,6 +162,12 @@ export default function EventSignups() {
           </Space>
         </Space>
       ),
+    },
+    {
+      title: 'PlanF 会员',
+      key: 'member',
+      width: 100,
+      render: (_: any, r: SignupRecord) => isMember(r.user.membership) ? <Tag color="gold">会员</Tag> : <Text type="secondary">非会员</Text>,
     },
     {
       title: '支付',

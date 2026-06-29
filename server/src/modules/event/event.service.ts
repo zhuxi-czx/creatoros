@@ -216,6 +216,7 @@ export class EventService {
             select: {
               id: true, uid: true, nickname: true, avatarUrl: true,
               city: true, phone: true, mbti: true, createdAt: true,
+              membership: { select: { status: true, expireAt: true } },
             },
           },
           order: {

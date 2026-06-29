@@ -59,14 +59,14 @@ export default function OrderList() {
   })
 
   const columns: ColumnsType<AdminOrder> = [
-    { title: '订单号', dataIndex: 'outTradeNo', width: 150, render: (n: string) => <Text style={{ fontFamily: 'monospace', fontSize: 12 }} copyable={{ text: n }}>{n ? `${n.slice(0, 12)}…` : '-'}</Text> },
-    { title: '用户', key: 'user', width: 150, render: (_: any, r: AdminOrder) => <Space direction="vertical" size={0}><Text strong>{r.user?.nickname || '未设置'}</Text>{r.user?.phone && <Text type="secondary" style={{ fontSize: 11 }}>{maskPhone(r.user.phone)}</Text>}</Space> },
+    { title: '订单号', dataIndex: 'outTradeNo', width: 130, render: (n: string) => <Text style={{ fontFamily: 'monospace', fontSize: 12 }} copyable={{ text: n }}>{n ? `${n.slice(0, 10)}…` : '-'}</Text> },
+    { title: '用户', key: 'user', width: 130, render: (_: any, r: AdminOrder) => <Space direction="vertical" size={0}><Text strong>{r.user?.nickname || '未设置'}</Text>{r.user?.phone && <Text type="secondary" style={{ fontSize: 11 }}>{maskPhone(r.user.phone)}</Text>}</Space> },
     { title: '用户ID', key: 'uid', width: 120, render: (_: any, r: AdminOrder) => <Text style={{ fontFamily: 'monospace', fontSize: 12 }} copyable={!!r.user?.uid}>{r.user?.uid || '-'}</Text> },
-    { title: '支付类型', dataIndex: 'type', width: 110, render: (t: string) => <Tag color={t === 'MEMBERSHIP' ? 'gold' : 'blue'}>{t === 'MEMBERSHIP' ? 'PlanF 会员' : '活动报名'}</Tag> },
+    { title: '支付类型', dataIndex: 'type', width: 100, render: (t: string) => <Tag color={t === 'MEMBERSHIP' ? 'gold' : 'blue'}>{t === 'MEMBERSHIP' ? 'PlanF 会员' : '活动报名'}</Tag> },
     { title: '活动 / 商品', dataIndex: 'title', ellipsis: true, render: (t: string) => <Text>{t}</Text> },
-    { title: '支付状态', dataIndex: 'status', width: 90, render: (s: string) => { const m = STATUS[s] || { text: s, color: 'default' }; return <Tag color={m.color}>{m.text}</Tag> } },
-    { title: '金额', dataIndex: 'amount', width: 100, align: 'right' as const, render: (a: number) => <Text strong>{yuan(a)}</Text> },
-    { title: '操作', key: 'action', width: 80, fixed: 'right' as const, render: (_: any, r: AdminOrder) => r.status === 'PAID' ? <Button size="small" type="link" danger onClick={() => setRefundTarget(r)}>退款</Button> : <Text type="secondary" style={{ fontSize: 12 }}>—</Text> },
+    { title: '支付状态', dataIndex: 'status', width: 100, align: 'center' as const, render: (s: string) => { const m = STATUS[s] || { text: s, color: 'default' }; return <Tag color={m.color}>{m.text}</Tag> } },
+    { title: '金额', dataIndex: 'amount', width: 110, align: 'right' as const, render: (a: number) => <Text strong>{yuan(a)}</Text> },
+    { title: '操作', key: 'action', width: 80, align: 'center' as const, render: (_: any, r: AdminOrder) => r.status === 'PAID' ? <Button size="small" type="link" danger onClick={() => setRefundTarget(r)}>退款</Button> : <Text type="secondary" style={{ fontSize: 12 }}>—</Text> },
   ]
 
   return (
@@ -90,7 +90,7 @@ export default function OrderList() {
           rowKey="id"
           loading={loading}
           size={isMobile ? 'small' : 'middle'}
-          scroll={{ x: 920 }}
+          scroll={isMobile ? { x: 900 } : undefined}
           pagination={{ defaultPageSize: 20, pageSizeOptions: [10, 15, 20, 30, 100], showSizeChanger: true, size: 'small', showTotal: (t, r) => `第 ${r[0]}-${r[1]} 条 / 共 ${t} 条` }}
         />
       </Card>
