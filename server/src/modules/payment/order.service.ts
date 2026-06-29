@@ -389,23 +389,34 @@ export class OrderService {
     return r;
   }
 
-  /** 后台订单管理：全部订单（含用户 + 活动名）+ 免费报名合成的「免费」记录，前端做搜索/筛选/分页。 */
+  /** 后台订单管理：全部订单（含用户 + 活动名 + 价格策略）+ 免费报名合成的「免费」记录。 */
   async adminListOrders() {
-    const userSel = { id: true, uid: true, nickname: true, phone: true };
+    const now = new Date();
+    const isMem = (m: any) => !!m && m.status === 'ACTIVE' && new Date(m.expireAt) > now;
+    const userSel = { id: true, uid: true, nickname: true, phone: true, membership: { select: { status: true, expireAt: true } } };
+    const eventSel = { title: true, price: true, earlyBirdPrice: true, isGuestShare: true };
     const [orders, freeSignups] = await Promise.all([
       this.prisma.order.findMany({
         orderBy: { createdAt: 'desc' },
         take: 1000,
-        include: { user: { select: userSel }, event: { select: { title: true } } },
+        include: { user: { select: userSel }, event: { select: eventSel } },
       }),
-      // 免费报名（已确认且无支付订单）：合成为「免费」记录展示
       this.prisma.signup.findMany({
         where: { status: 'CONFIRMED', orderId: null },
         orderBy: { createdAt: 'desc' },
         take: 1000,
-        include: { user: { select: userSel }, event: { select: { title: true } } },
+        include: { user: { select: userSel }, event: { select: eventSel } },
       }),
     ]);
+    // 付费活动订单的价格策略（按实付金额 vs 活动价反推）
+    const eventStrategy = (amount: number, ev: any): string => {
+      if (!ev) return '其他';
+      const mp = Math.round((ev.price || 0) * 0.8);
+      if (ev.earlyBirdPrice && amount === ev.earlyBirdPrice) return '早鸟价';
+      if (amount === ev.price) return '原价';
+      if (amount === mp) return 'PlanF 会员·8折';
+      return '其他';
+    };
     const orderItems = orders.map((o) => ({
       id: o.id,
       outTradeNo: o.outTradeNo,
@@ -413,9 +424,10 @@ export class OrderService {
       title: o.type === 'MEMBERSHIP' ? 'PlanF 会员（年）' : o.event?.title || '活动报名',
       amount: o.amount,
       status: o.status as string,
+      strategy: o.type === 'MEMBERSHIP' ? '会员开通' : eventStrategy(o.amount, o.event),
       paidAt: o.paidAt as Date | null,
       createdAt: o.createdAt,
-      user: o.user,
+      user: { id: o.user.id, uid: o.user.uid, nickname: o.user.nickname, phone: o.user.phone },
     }));
     const freeItems = freeSignups.map((s) => ({
       id: 'free-' + s.id,
@@ -424,9 +436,10 @@ export class OrderService {
       title: s.event?.title || '活动报名',
       amount: 0,
       status: 'FREE',
+      strategy: (s.event as any)?.isGuestShare && isMem((s.user as any).membership) ? 'PlanF 本次免费' : '免费',
       paidAt: null as Date | null,
       createdAt: s.createdAt,
-      user: s.user,
+      user: { id: s.user.id, uid: s.user.uid, nickname: s.user.nickname, phone: s.user.phone },
     }));
     const data = [...orderItems, ...freeItems].sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),

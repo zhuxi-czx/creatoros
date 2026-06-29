@@ -7,6 +7,7 @@ export interface AdminOrder {
   title: string
   amount: number
   status: string
+  strategy?: string
   paidAt?: string | null
   createdAt: string
   user: { id: string; uid?: string; nickname?: string; phone?: string }

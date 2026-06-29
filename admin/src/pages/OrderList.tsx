@@ -16,6 +16,15 @@ const STATUS: Record<string, { text: string; color: string }> = {
   REFUNDING: { text: '退款中', color: 'blue' },
   REFUNDED: { text: '已退款', color: 'red' },
 }
+const STRATEGY_COLOR: Record<string, string> = {
+  '早鸟价': 'orange',
+  '原价': 'blue',
+  'PlanF 会员·8折': 'gold',
+  'PlanF 本次免费': 'gold',
+  '会员开通': 'purple',
+  '免费': 'default',
+  '其他': 'default',
+}
 const yuan = (fen: number) => `¥${(fen / 100).toFixed(2)}`
 
 export default function OrderList() {
@@ -72,7 +81,8 @@ export default function OrderList() {
     { title: '支付类型', dataIndex: 'type', width: 100, render: (t: string) => <Tag color={t === 'MEMBERSHIP' ? 'gold' : 'blue'}>{t === 'MEMBERSHIP' ? 'PlanF 会员' : '活动报名'}</Tag> },
     { title: '活动 / 商品', dataIndex: 'title', width: 240, ellipsis: true, render: (t: string) => <Text>{t}</Text> },
     { title: '支付状态', dataIndex: 'status', width: 100, align: 'center' as const, render: (s: string) => { const m = STATUS[s] || { text: s, color: 'default' }; return <Tag color={m.color}>{m.text}</Tag> } },
-    { title: '金额', dataIndex: 'amount', width: 110, align: 'right' as const, render: (a: number, r: AdminOrder) => r.status === 'FREE' || a === 0 ? <Text type="secondary">免费</Text> : <Text strong>{yuan(a)}</Text> },
+    { title: '支付策略', dataIndex: 'strategy', width: 120, render: (s?: string) => s ? <Tag color={STRATEGY_COLOR[s] || 'default'}>{s}</Tag> : <Text type="secondary">—</Text> },
+    { title: '金额', dataIndex: 'amount', width: 110, render: (a: number, r: AdminOrder) => r.status === 'FREE' || a === 0 ? <Text type="secondary">免费</Text> : <Text strong>{yuan(a)}</Text> },
     { title: '下单时间', dataIndex: 'createdAt', width: 150, render: (t: string) => <Text style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{dayjs(t).format('YYYY-MM-DD HH:mm')}</Text> },
     { title: '操作', key: 'action', width: 80, align: 'center' as const, render: (_: any, r: AdminOrder) => r.status === 'PAID' ? <Button size="small" type="link" danger onClick={() => setRefundTarget(r)}>退款</Button> : <Text type="secondary" style={{ fontSize: 12 }}>—</Text> },
   ]
@@ -112,7 +122,7 @@ export default function OrderList() {
           rowKey="id"
           loading={loading}
           size={isMobile ? 'small' : 'middle'}
-          scroll={{ x: 1180 }}
+          scroll={{ x: 1300 }}
           pagination={{ defaultPageSize: 20, pageSizeOptions: [10, 15, 20, 30, 100], showSizeChanger: true, size: 'small', showTotal: (t, r) => `第 ${r[0]}-${r[1]} 条 / 共 ${t} 条` }}
         />
       </Card>
