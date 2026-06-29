@@ -118,6 +118,19 @@ export default function UserList() {
     }
   }
 
+  // 高危操作（开通 / 续费 / 取消会员）需操作密码（复用查看手机号那套）
+  const [actionModal, setActionModal] = useState<{ type: 'grant' | 'revoke'; user: User } | null>(null)
+  const [actionPwd, setActionPwd] = useState('')
+  // 操作后的有效期截止日：续费从原到期日顺延 365 天，新开通从今日起 365 天（与后端一致）
+  const newExpireOf = (u: User) =>
+    (isActiveMember(u) ? dayjs(u.membership!.expireAt) : dayjs()).add(365, 'day').format('YYYY-MM-DD')
+  const confirmAction = () => {
+    if (actionPwd !== PHONE_VIEW_PASSWORD) { message.error('操作密码错误'); return }
+    const m = actionModal!
+    setActionModal(null); setActionPwd('')
+    if (m.type === 'grant') handleGrant(m.user); else handleRevoke(m.user)
+  }
+
   // 前端搜索（用户/标签/状态字段）+ 会员筛选
   const kw = keyword.trim().toLowerCase()
   const filteredUsers = users.filter(u => {
@@ -253,28 +266,11 @@ export default function UserList() {
           <Button size="small" type="link" icon={<ProfileOutlined />} onClick={() => openOrders(r)}>
             查看订单
           </Button>
-          <Popconfirm
-            title="设为 PlanF 会员"
-            description={isActiveMember(r) ? '该用户已是会员，确认续费一年？' : '确认为该用户开通 PlanF 会员（一年期）？'}
-            okText="确认开通"
-            cancelText="取消"
-            onConfirm={() => handleGrant(r)}
-          >
-            <Button size="small" type="link" icon={<CrownOutlined />} loading={granting === r.id}>
-              {isActiveMember(r) ? '续费' : '设为会员'}
-            </Button>
-          </Popconfirm>
+          <Button size="small" type="link" icon={<CrownOutlined />} loading={granting === r.id} onClick={() => setActionModal({ type: 'grant', user: r })}>
+            {isActiveMember(r) ? '续费' : '设为会员'}
+          </Button>
           {isActiveMember(r) && (
-            <Popconfirm
-              title="取消 PlanF 会员"
-              description="确认取消该用户的 PlanF 会员资格？（保留记录，可再次开通）"
-              okText="确认取消"
-              cancelText="返回"
-              okButtonProps={{ danger: true }}
-              onConfirm={() => handleRevoke(r)}
-            >
-              <Button size="small" type="link" danger loading={revoking === r.id}>取消会员</Button>
-            </Popconfirm>
+            <Button size="small" type="link" danger loading={revoking === r.id} onClick={() => setActionModal({ type: 'revoke', user: r })}>取消会员</Button>
           )}
         </Space>
       )
@@ -373,6 +369,43 @@ export default function UserList() {
           placeholder="查看密码"
           autoFocus
         />
+      </Modal>
+
+      {/* 会员高危操作：开通/续费/取消，需操作密码 */}
+      <Modal
+        title={actionModal?.type === 'revoke' ? '取消 PlanF 会员' : (actionModal && isActiveMember(actionModal.user) ? '续费 PlanF 会员' : '开通 PlanF 会员')}
+        open={!!actionModal}
+        onOk={confirmAction}
+        onCancel={() => { setActionModal(null); setActionPwd('') }}
+        okText="验证并执行"
+        cancelText="取消"
+        okButtonProps={{ danger: actionModal?.type === 'revoke' }}
+        destroyOnClose
+        width={400}
+        centered
+      >
+        {actionModal && (
+          <>
+            <p style={{ color: '#555', marginBottom: 8 }}>
+              {actionModal.type === 'revoke'
+                ? <>确认取消「<b>{actionModal.user.nickname || actionModal.user.uid || '该用户'}</b>」的 PlanF 会员资格？保留记录，可再次开通。</>
+                : <>确认为「<b>{actionModal.user.nickname || actionModal.user.uid || '该用户'}</b>」{isActiveMember(actionModal.user) ? '续费一年' : '开通一年期 PlanF 会员'}？</>}
+            </p>
+            {actionModal.type === 'grant' && (
+              <p style={{ color: '#C9A96E', marginBottom: 12 }}>
+                {isActiveMember(actionModal.user) ? '续费后' : '开通后'}有效期至 <b>{newExpireOf(actionModal.user)}</b>
+              </p>
+            )}
+            <p style={{ color: '#999', fontSize: 12, marginBottom: 8 }}>⚠️ 高危操作，请输入操作密码</p>
+            <Input.Password
+              value={actionPwd}
+              onChange={e => setActionPwd(e.target.value)}
+              onPressEnter={confirmAction}
+              placeholder="操作密码"
+              autoFocus
+            />
+          </>
+        )}
       </Modal>
 
       <Modal
