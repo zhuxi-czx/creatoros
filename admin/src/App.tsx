@@ -8,6 +8,7 @@ import EventSignups from './pages/EventSignups'
 import BannerList from './pages/BannerList'
 import VenueList from './pages/VenueList'
 import UserList from './pages/UserList'
+import OrderList from './pages/OrderList'
 import CategoryList from './pages/CategoryList'
 import ColumnConfig from './pages/ColumnConfig'
 import SystemMonitor from './pages/SystemMonitor'
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="banners" element={<BannerList />} />
         <Route path="venues" element={<VenueList />} />
         <Route path="users" element={<UserList />} />
+        <Route path="orders" element={<OrderList />} />
         <Route path="categories" element={<CategoryList />} />
         <Route path="columns" element={<ColumnConfig />} />
         <Route path="logs" element={<SystemMonitor />} />

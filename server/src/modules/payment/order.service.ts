@@ -389,6 +389,87 @@ export class OrderService {
     return r;
   }
 
+  /** 后台订单管理：全部订单列表（含用户 + 活动名），前端做搜索/筛选/分页。 */
+  async adminListOrders() {
+    const orders = await this.prisma.order.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 1000,
+      include: {
+        user: { select: { id: true, uid: true, nickname: true, phone: true } },
+        event: { select: { title: true } },
+      },
+    });
+    return {
+      data: orders.map((o) => ({
+        id: o.id,
+        outTradeNo: o.outTradeNo,
+        type: o.type,
+        title: o.type === 'MEMBERSHIP' ? 'PlanF 会员（年）' : o.event?.title || '活动报名',
+        amount: o.amount,
+        status: o.status,
+        paidAt: o.paidAt,
+        createdAt: o.createdAt,
+        user: o.user,
+      })),
+      total: orders.length,
+    };
+  }
+
+  /** 后台按订单退款：活动订单复用报名退款；会员订单退款并取消会员资格。 */
+  async adminRefundOrder(orderId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { signup: true },
+    });
+    if (!order) throw new NotFoundException('订单不存在');
+    if (order.status === 'REFUNDED') return { status: 'REFUNDED', refunded: true };
+    if (order.status !== 'PAID') {
+      throw new BadRequestException('仅「已支付」订单可退款');
+    }
+    if (order.type === 'EVENT') {
+      if (!order.signup) throw new BadRequestException('该订单无关联报名，无法退款');
+      return this.refundSignup(order.signup.id, { reason: '后台订单退款' });
+    }
+    return this.refundMembershipOrder(order as any);
+  }
+
+  /** 会员订单退款：乐观锁 → 微信退款 → 成功后取消会员资格。 */
+  private async refundMembershipOrder(order: { id: string; outTradeNo: string; amount: number; userId: string }) {
+    const refundNo = 'rf' + order.outTradeNo.slice(2);
+    const locked = await this.prisma.order.updateMany({
+      where: { id: order.id, status: 'PAID' },
+      data: { status: 'REFUNDING', refundNo },
+    });
+    if (locked.count === 0) throw new ConflictException('订单状态已变化，请刷新重试');
+
+    const result = await this.wechatPay.refund({
+      outTradeNo: order.outTradeNo,
+      outRefundNo: refundNo,
+      amount: order.amount,
+      reason: '后台会员退款',
+    });
+    if (!result || result.status === 'ABNORMAL' || result.status === 'CLOSED') {
+      await this.prisma.order.updateMany({
+        where: { id: order.id, status: 'REFUNDING' },
+        data: { status: 'PAID' },
+      });
+      throw new ServiceUnavailableException('微信退款失败，请稍后重试');
+    }
+    const done = result.status === 'SUCCESS';
+    await this.prisma.$transaction(async (tx) => {
+      await tx.order.update({
+        where: { id: order.id },
+        data: { status: done ? 'REFUNDED' : 'REFUNDING', refundedAt: done ? new Date() : null },
+      });
+      // 退款成功即取消会员资格（置为过期）
+      if (done) {
+        await tx.membership.updateMany({ where: { userId: order.userId }, data: { status: 'EXPIRED' } });
+      }
+    });
+    this.logger.log(`会员退款受理 order=${order.id} status=${result.status}`);
+    return { status: result.status, refunded: done };
+  }
+
   /**
    * 定时任务调用：对账处理中(REFUNDING)的退款单，
    * 查微信确认已退款则置 REFUNDED，避免长期卡在「退款中」。

@@ -10,7 +10,8 @@ import {
   LogoutOutlined,
   MenuOutlined,
   ReadOutlined,
-  AlertOutlined
+  AlertOutlined,
+  AccountBookOutlined
 } from '@ant-design/icons'
 import { logout, getCurrentUser } from '../stores/useAuthStore'
 
@@ -25,6 +26,7 @@ const menuItems = [
   { key: '/categories', icon: <ReadOutlined />, label: '分类管理' },
   { key: '/columns', icon: <PictureOutlined />, label: '专栏配置' },
   { key: '/users', icon: <UserOutlined />, label: '用户管理' },
+  { key: '/orders', icon: <AccountBookOutlined />, label: '订单管理' },
   { key: '/logs', icon: <AlertOutlined />, label: '系统监控' }
 ]
 
