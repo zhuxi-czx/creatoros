@@ -378,8 +378,8 @@ export default function EventDetail() {
               <Text className='info-label'>退改</Text>
               <Text className='info-value'>
                 {(event.price ?? 0) > 0
-                  ? '活动开始前可取消报名并退费，开始后不可取消、不退费'
-                  : '活动开始前可取消报名，开始后不可取消'}
+                  ? '报名后至活动开始前可取消并退款，开始后不再支持取消或退款'
+                  : '报名后至活动开始前可取消，开始后不再支持'}
               </Text>
             </View>
           </View>
