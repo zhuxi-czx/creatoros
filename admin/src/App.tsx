@@ -5,7 +5,6 @@ import Dashboard from './pages/Dashboard'
 import EventList from './pages/EventList'
 import EventForm from './pages/EventForm'
 import EventSignups from './pages/EventSignups'
-import BannerList from './pages/BannerList'
 import VenueList from './pages/VenueList'
 import UserList from './pages/UserList'
 import OrderList from './pages/OrderList'
@@ -40,7 +39,6 @@ export default function App() {
         <Route path="events/create" element={<EventForm />} />
         <Route path="events/:id/edit" element={<EventForm />} />
         <Route path="events/:id/signups" element={<EventSignups />} />
-        <Route path="banners" element={<BannerList />} />
         <Route path="venues" element={<VenueList />} />
         <Route path="users" element={<UserList />} />
         <Route path="orders" element={<OrderList />} />
