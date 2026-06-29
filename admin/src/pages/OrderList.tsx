@@ -9,6 +9,7 @@ const { Title, Text } = Typography
 const { useBreakpoint } = Grid
 
 const STATUS: Record<string, { text: string; color: string }> = {
+  FREE: { text: '免费', color: 'default' },
   PAID: { text: '已支付', color: 'green' },
   PENDING: { text: '待支付', color: 'orange' },
   CLOSED: { text: '已关闭', color: 'default' },
@@ -65,13 +66,13 @@ export default function OrderList() {
   })
 
   const columns: ColumnsType<AdminOrder> = [
-    { title: '订单号', dataIndex: 'outTradeNo', width: 130, render: (n: string) => <Text style={{ fontFamily: 'monospace', fontSize: 12 }} copyable={{ text: n }}>{n ? `${n.slice(0, 10)}…` : '-'}</Text> },
+    { title: '订单号', dataIndex: 'outTradeNo', width: 130, render: (n: string) => n ? <Text style={{ fontFamily: 'monospace', fontSize: 12 }} copyable={{ text: n }}>{`${n.slice(0, 10)}…`}</Text> : <Text type="secondary">—</Text> },
     { title: '用户', key: 'user', width: 130, render: (_: any, r: AdminOrder) => <Space direction="vertical" size={0}><Text strong>{r.user?.nickname || '未设置'}</Text>{r.user?.phone && <Text type="secondary" style={{ fontSize: 11 }}>{maskPhone(r.user.phone)}</Text>}</Space> },
     { title: '用户ID', key: 'uid', width: 120, render: (_: any, r: AdminOrder) => <Text style={{ fontFamily: 'monospace', fontSize: 12 }} copyable={!!r.user?.uid}>{r.user?.uid || '-'}</Text> },
     { title: '支付类型', dataIndex: 'type', width: 100, render: (t: string) => <Tag color={t === 'MEMBERSHIP' ? 'gold' : 'blue'}>{t === 'MEMBERSHIP' ? 'PlanF 会员' : '活动报名'}</Tag> },
-    { title: '活动 / 商品', dataIndex: 'title', ellipsis: true, render: (t: string) => <Text>{t}</Text> },
+    { title: '活动 / 商品', dataIndex: 'title', width: 240, ellipsis: true, render: (t: string) => <Text>{t}</Text> },
     { title: '支付状态', dataIndex: 'status', width: 100, align: 'center' as const, render: (s: string) => { const m = STATUS[s] || { text: s, color: 'default' }; return <Tag color={m.color}>{m.text}</Tag> } },
-    { title: '金额', dataIndex: 'amount', width: 110, align: 'right' as const, render: (a: number) => <Text strong>{yuan(a)}</Text> },
+    { title: '金额', dataIndex: 'amount', width: 110, align: 'right' as const, render: (a: number, r: AdminOrder) => r.status === 'FREE' || a === 0 ? <Text type="secondary">免费</Text> : <Text strong>{yuan(a)}</Text> },
     { title: '下单时间', dataIndex: 'createdAt', width: 150, render: (t: string) => <Text style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{dayjs(t).format('YYYY-MM-DD HH:mm')}</Text> },
     { title: '操作', key: 'action', width: 80, align: 'center' as const, render: (_: any, r: AdminOrder) => r.status === 'PAID' ? <Button size="small" type="link" danger onClick={() => setRefundTarget(r)}>退款</Button> : <Text type="secondary" style={{ fontSize: 12 }}>—</Text> },
   ]
@@ -86,8 +87,6 @@ export default function OrderList() {
         extra={
           <Space wrap>
             <Input.Search allowClear placeholder="订单号 / 用户 / 用户ID / 活动名" style={{ width: isMobile ? 170 : 260 }} value={keyword} onChange={e => setKeyword(e.target.value)} />
-            <Select value={typeFilter} onChange={setTypeFilter} style={{ width: 120 }} options={[{ value: 'all', label: '全部类型' }, { value: 'EVENT', label: '活动报名' }, { value: 'MEMBERSHIP', label: 'PlanF 会员' }]} />
-            <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 120 }} options={[{ value: 'all', label: '全部状态' }, { value: 'PAID', label: '已支付' }, { value: 'PENDING', label: '待支付' }, { value: 'CLOSED', label: '已关闭' }, { value: 'REFUNDING', label: '退款中' }, { value: 'REFUNDED', label: '已退款' }]} />
             <DatePicker.RangePicker
               value={dateRange as any}
               onChange={(v) => setDateRange(v as any)}
@@ -102,6 +101,8 @@ export default function OrderList() {
                 { label: '最近一个月', value: [dayjs().subtract(1, 'month').startOf('day'), dayjs().endOf('day')] },
               ]}
             />
+            <Select value={typeFilter} onChange={setTypeFilter} style={{ width: 120 }} options={[{ value: 'all', label: '全部类型' }, { value: 'EVENT', label: '活动报名' }, { value: 'MEMBERSHIP', label: 'PlanF 会员' }]} />
+            <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 120 }} options={[{ value: 'all', label: '全部状态' }, { value: 'FREE', label: '免费' }, { value: 'PAID', label: '已支付' }, { value: 'PENDING', label: '待支付' }, { value: 'CLOSED', label: '已关闭' }, { value: 'REFUNDING', label: '退款中' }, { value: 'REFUNDED', label: '已退款' }]} />
           </Space>
         }
       >
@@ -111,7 +112,7 @@ export default function OrderList() {
           rowKey="id"
           loading={loading}
           size={isMobile ? 'small' : 'middle'}
-          scroll={isMobile ? { x: 900 } : undefined}
+          scroll={{ x: 1180 }}
           pagination={{ defaultPageSize: 20, pageSizeOptions: [10, 15, 20, 30, 100], showSizeChanger: true, size: 'small', showTotal: (t, r) => `第 ${r[0]}-${r[1]} 条 / 共 ${t} 条` }}
         />
       </Card>

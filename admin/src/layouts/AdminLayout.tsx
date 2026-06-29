@@ -21,12 +21,12 @@ const { Text } = Typography
 const menuItems = [
   { key: '/', icon: <DashboardOutlined />, label: '数据概览' },
   { key: '/events', icon: <CalendarOutlined />, label: '活动管理' },
+  { key: '/orders', icon: <AccountBookOutlined />, label: '订单管理' },
+  { key: '/users', icon: <UserOutlined />, label: '用户管理' },
   { key: '/banners', icon: <PictureOutlined />, label: 'Banner管理' },
   { key: '/venues', icon: <EnvironmentOutlined />, label: '场馆管理' },
   { key: '/categories', icon: <ReadOutlined />, label: '分类管理' },
   { key: '/columns', icon: <PictureOutlined />, label: '专栏配置' },
-  { key: '/users', icon: <UserOutlined />, label: '用户管理' },
-  { key: '/orders', icon: <AccountBookOutlined />, label: '订单管理' },
   { key: '/logs', icon: <AlertOutlined />, label: '系统监控' }
 ]
 

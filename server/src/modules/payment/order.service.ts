@@ -389,30 +389,49 @@ export class OrderService {
     return r;
   }
 
-  /** 后台订单管理：全部订单列表（含用户 + 活动名），前端做搜索/筛选/分页。 */
+  /** 后台订单管理：全部订单（含用户 + 活动名）+ 免费报名合成的「免费」记录，前端做搜索/筛选/分页。 */
   async adminListOrders() {
-    const orders = await this.prisma.order.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 1000,
-      include: {
-        user: { select: { id: true, uid: true, nickname: true, phone: true } },
-        event: { select: { title: true } },
-      },
-    });
-    return {
-      data: orders.map((o) => ({
-        id: o.id,
-        outTradeNo: o.outTradeNo,
-        type: o.type,
-        title: o.type === 'MEMBERSHIP' ? 'PlanF 会员（年）' : o.event?.title || '活动报名',
-        amount: o.amount,
-        status: o.status,
-        paidAt: o.paidAt,
-        createdAt: o.createdAt,
-        user: o.user,
-      })),
-      total: orders.length,
-    };
+    const userSel = { id: true, uid: true, nickname: true, phone: true };
+    const [orders, freeSignups] = await Promise.all([
+      this.prisma.order.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 1000,
+        include: { user: { select: userSel }, event: { select: { title: true } } },
+      }),
+      // 免费报名（已确认且无支付订单）：合成为「免费」记录展示
+      this.prisma.signup.findMany({
+        where: { status: 'CONFIRMED', orderId: null },
+        orderBy: { createdAt: 'desc' },
+        take: 1000,
+        include: { user: { select: userSel }, event: { select: { title: true } } },
+      }),
+    ]);
+    const orderItems = orders.map((o) => ({
+      id: o.id,
+      outTradeNo: o.outTradeNo,
+      type: o.type as string,
+      title: o.type === 'MEMBERSHIP' ? 'PlanF 会员（年）' : o.event?.title || '活动报名',
+      amount: o.amount,
+      status: o.status as string,
+      paidAt: o.paidAt as Date | null,
+      createdAt: o.createdAt,
+      user: o.user,
+    }));
+    const freeItems = freeSignups.map((s) => ({
+      id: 'free-' + s.id,
+      outTradeNo: '',
+      type: 'EVENT',
+      title: s.event?.title || '活动报名',
+      amount: 0,
+      status: 'FREE',
+      paidAt: null as Date | null,
+      createdAt: s.createdAt,
+      user: s.user,
+    }));
+    const data = [...orderItems, ...freeItems].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+    return { data, total: data.length };
   }
 
   /** 后台按订单退款：活动订单复用报名退款；会员订单退款并取消会员资格。 */
