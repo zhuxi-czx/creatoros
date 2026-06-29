@@ -234,9 +234,14 @@ export default function UserList() {
     {
       title: 'PlanF 会员',
       key: 'membership',
-      width: isMobile ? 110 : 150,
+      width: isMobile ? 140 : 190,
       render: (_: any, r: User) => isActiveMember(r)
-        ? <Tag color="gold">{dayjs(r.membership!.expireAt).format('YYYY-MM-DD')} 到期</Tag>
+        ? (
+          <Space direction="vertical" size={2}>
+            <Text style={{ fontSize: 12, color: '#888', whiteSpace: 'nowrap' }}>开通 {dayjs(r.membership!.startAt).format('YYYY-MM-DD')}</Text>
+            <Tag color="gold" style={{ marginRight: 0 }}>{dayjs(r.membership!.expireAt).format('YYYY-MM-DD')} 到期</Tag>
+          </Space>
+        )
         : <Text type="secondary">非会员</Text>
     },
     {

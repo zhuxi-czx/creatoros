@@ -17,7 +17,7 @@ export interface User {
   status: string
   createdAt: string
   statuses?: string[]
-  membership?: { status: string; expireAt: string } | null
+  membership?: { status: string; startAt: string; expireAt: string } | null
   _count?: { signups: number }
 }
 

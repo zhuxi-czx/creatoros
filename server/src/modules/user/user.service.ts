@@ -113,7 +113,7 @@ export class UserService {
           tags: true,
           createdAt: true,
           statuses: true,
-          membership: { select: { status: true, expireAt: true } },
+          membership: { select: { status: true, startAt: true, expireAt: true } },
           _count: {
             select: { signups: true },
           },
