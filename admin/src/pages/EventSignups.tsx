@@ -124,7 +124,7 @@ export default function EventSignups() {
       const memberPrice = Math.round(price * 0.8)
       if (event?.earlyBirdPrice && o.amount === event.earlyBirdPrice) return { text: '早鸟价', color: 'orange' }
       if (o.amount === price) return { text: '原价', color: 'blue' }
-      if (o.amount === memberPrice) return { text: '会员价·8折', color: 'gold' }
+      if (o.amount === memberPrice) return { text: 'PlanF 会员·8折', color: 'gold' }
       return { text: '其他', color: 'default' }
     }
     // 免费报名：会员用大咖每月免费名额 vs 普通免费活动

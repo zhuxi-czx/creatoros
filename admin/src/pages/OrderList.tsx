@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Card, Table, Tag, Typography, Space, Input, Select, Button, Modal, message, Grid } from 'antd'
+import { Card, Table, Tag, Typography, Space, Input, Select, Button, Modal, message, Grid, DatePicker } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
+import dayjs, { Dayjs } from 'dayjs'
 import { getOrders, refundOrder, type AdminOrder } from '../services/order'
 import { maskPhone, PHONE_VIEW_PASSWORD } from '../utils/phone'
 
@@ -24,6 +25,7 @@ export default function OrderList() {
   const [keyword, setKeyword] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null] | null>(null)
   const [refundTarget, setRefundTarget] = useState<AdminOrder | null>(null)
   const [refundPwd, setRefundPwd] = useState('')
   const [refunding, setRefunding] = useState(false)
@@ -53,6 +55,10 @@ export default function OrderList() {
   const filtered = orders.filter(o => {
     if (typeFilter !== 'all' && o.type !== typeFilter) return false
     if (statusFilter !== 'all' && o.status !== statusFilter) return false
+    if (dateRange && dateRange[0] && dateRange[1]) {
+      const t = dayjs(o.createdAt)
+      if (t.isBefore(dateRange[0]) || t.isAfter(dateRange[1])) return false
+    }
     if (!kw) return true
     const hay = [o.outTradeNo, o.user?.nickname, o.user?.uid, o.title, o.user?.phone].filter(Boolean).join(' ').toLowerCase()
     return hay.includes(kw)
@@ -66,6 +72,7 @@ export default function OrderList() {
     { title: '活动 / 商品', dataIndex: 'title', ellipsis: true, render: (t: string) => <Text>{t}</Text> },
     { title: '支付状态', dataIndex: 'status', width: 100, align: 'center' as const, render: (s: string) => { const m = STATUS[s] || { text: s, color: 'default' }; return <Tag color={m.color}>{m.text}</Tag> } },
     { title: '金额', dataIndex: 'amount', width: 110, align: 'right' as const, render: (a: number) => <Text strong>{yuan(a)}</Text> },
+    { title: '下单时间', dataIndex: 'createdAt', width: 150, render: (t: string) => <Text style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{dayjs(t).format('YYYY-MM-DD HH:mm')}</Text> },
     { title: '操作', key: 'action', width: 80, align: 'center' as const, render: (_: any, r: AdminOrder) => r.status === 'PAID' ? <Button size="small" type="link" danger onClick={() => setRefundTarget(r)}>退款</Button> : <Text type="secondary" style={{ fontSize: 12 }}>—</Text> },
   ]
 
@@ -81,6 +88,20 @@ export default function OrderList() {
             <Input.Search allowClear placeholder="订单号 / 用户 / 用户ID / 活动名" style={{ width: isMobile ? 170 : 260 }} value={keyword} onChange={e => setKeyword(e.target.value)} />
             <Select value={typeFilter} onChange={setTypeFilter} style={{ width: 120 }} options={[{ value: 'all', label: '全部类型' }, { value: 'EVENT', label: '活动报名' }, { value: 'MEMBERSHIP', label: 'PlanF 会员' }]} />
             <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 120 }} options={[{ value: 'all', label: '全部状态' }, { value: 'PAID', label: '已支付' }, { value: 'PENDING', label: '待支付' }, { value: 'CLOSED', label: '已关闭' }, { value: 'REFUNDING', label: '退款中' }, { value: 'REFUNDED', label: '已退款' }]} />
+            <DatePicker.RangePicker
+              value={dateRange as any}
+              onChange={(v) => setDateRange(v as any)}
+              allowClear
+              format="YYYY-MM-DD"
+              placeholder={['下单起', '下单止']}
+              disabledDate={(d) => !!d && (d.isAfter(dayjs().endOf('day')) || d.isBefore(dayjs().subtract(1, 'year').startOf('day')))}
+              presets={[
+                { label: '今天', value: [dayjs().startOf('day'), dayjs().endOf('day')] },
+                { label: '昨天', value: [dayjs().subtract(1, 'day').startOf('day'), dayjs().subtract(1, 'day').endOf('day')] },
+                { label: '最近七天', value: [dayjs().subtract(6, 'day').startOf('day'), dayjs().endOf('day')] },
+                { label: '最近一个月', value: [dayjs().subtract(1, 'month').startOf('day'), dayjs().endOf('day')] },
+              ]}
+            />
           </Space>
         }
       >
