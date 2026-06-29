@@ -321,6 +321,7 @@ export default function EventDetail() {
               <Text className='info-value' selectable userSelect>
                 {event.venue?.name || event.location || '待定'}{event.venue?.id ? ' ›' : ''}
               </Text>
+              {event.venue?.address && <Text className='info-sub' selectable userSelect>{event.venue.address}</Text>}
             </View>
           </View>
           {event.hostName && (
