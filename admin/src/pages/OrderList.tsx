@@ -82,7 +82,12 @@ export default function OrderList() {
     { title: '活动 / 商品', dataIndex: 'title', width: 240, ellipsis: true, render: (t: string) => <Text>{t}</Text> },
     { title: '支付状态', dataIndex: 'status', width: 100, align: 'center' as const, render: (s: string) => { const m = STATUS[s] || { text: s, color: 'default' }; return <Tag color={m.color}>{m.text}</Tag> } },
     { title: '支付策略', dataIndex: 'strategy', width: 120, render: (s?: string) => s ? <Tag color={STRATEGY_COLOR[s] || 'default'}>{s}</Tag> : <Text type="secondary">—</Text> },
-    { title: '金额', dataIndex: 'amount', width: 110, render: (a: number, r: AdminOrder) => r.status === 'FREE' || a === 0 ? <Text type="secondary">免费</Text> : <Text strong>{yuan(a)}</Text> },
+    { title: '金额', dataIndex: 'amount', width: 110, render: (a: number, r: AdminOrder) => {
+      const txt = r.status === 'FREE' ? '免费' : yuan(a)
+      // 支付成功 / 免费报名成功 → 黑体；待支付 / 已关闭 / 退款 → 置灰
+      const solid = r.status === 'PAID' || r.status === 'FREE'
+      return solid ? <Text strong>{txt}</Text> : <Text type="secondary">{txt}</Text>
+    } },
     { title: '下单时间', dataIndex: 'createdAt', width: 150, render: (t: string) => <Text style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{dayjs(t).format('YYYY-MM-DD HH:mm')}</Text> },
     { title: '操作', key: 'action', width: 80, align: 'center' as const, render: (_: any, r: AdminOrder) => r.status === 'PAID' ? <Button size="small" type="link" danger onClick={() => setRefundTarget(r)}>退款</Button> : <Text type="secondary" style={{ fontSize: 12 }}>—</Text> },
   ]
