@@ -84,9 +84,10 @@ export default function OrderList() {
     { title: '支付策略', dataIndex: 'strategy', width: 120, render: (s?: string) => s ? <Tag color={STRATEGY_COLOR[s] || 'default'}>{s}</Tag> : <Text type="secondary">—</Text> },
     { title: '金额', dataIndex: 'amount', width: 110, render: (a: number, r: AdminOrder) => {
       const txt = r.status === 'FREE' ? '免费' : yuan(a)
-      // 支付成功 / 免费报名成功 → 黑体；待支付 / 已关闭 / 退款 → 置灰
-      const solid = r.status === 'PAID' || r.status === 'FREE'
-      return solid ? <Text strong>{txt}</Text> : <Text type="secondary">{txt}</Text>
+      // 支付成功 / 免费报名成功 → 黑体；待支付 → 橙色；已关闭 / 退款 → 置灰
+      if (r.status === 'PAID' || r.status === 'FREE') return <Text strong>{txt}</Text>
+      if (r.status === 'PENDING') return <Text style={{ color: '#fa8c16' }}>{txt}</Text>
+      return <Text type="secondary">{txt}</Text>
     } },
     { title: '下单时间', dataIndex: 'createdAt', width: 150, render: (t: string) => <Text style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{dayjs(t).format('YYYY-MM-DD HH:mm')}</Text> },
     { title: '操作', key: 'action', width: 80, align: 'center' as const, render: (_: any, r: AdminOrder) => r.status === 'PAID' ? <Button size="small" type="link" danger onClick={() => setRefundTarget(r)}>退款</Button> : <Text type="secondary" style={{ fontSize: 12 }}>—</Text> },
