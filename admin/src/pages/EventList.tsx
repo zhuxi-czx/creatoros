@@ -14,6 +14,7 @@ import { getEvents, getStats, updateEventStatus, copyEvent, deleteEvent, type Ev
 
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid
+const EVENT_TABLE_SCROLL_X = 1160
 
 // 活动是否已结束：到了活动当天的次日 0 点
 function isEnded(date?: string): boolean {
@@ -94,9 +95,9 @@ export default function EventList() {
       title: '活动名称',
       dataIndex: 'title',
       key: 'title',
-      width: 180,
+      width: 260,
       ellipsis: true,
-      render: (title: string) => <Text strong>{title}</Text>
+      render: (title: string) => <Text strong style={{ whiteSpace: 'nowrap' }}>{title}</Text>
     },
     {
       title: '活动类型',
@@ -108,29 +109,29 @@ export default function EventList() {
         ? <Tag color="purple">大咖分享</Tag>
         : <Tag>普通活动</Tag>
     },
-    ...(!isMobile ? [{
+    {
       title: '时间',
       dataIndex: 'date',
       key: 'date',
-      width: 150,
-      render: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm')
-    } as any] : []),
+      width: 160,
+      render: (date: string) => <Text style={{ whiteSpace: 'nowrap' }}>{dayjs(date).format('YYYY-MM-DD HH:mm')}</Text>
+    },
     {
       title: '报名',
       key: 'signups',
-      width: 70,
+      width: 90,
       render: (_: any, record: Event) => (
-        <Text>{record._count?.signups || 0}/{record.maxCapacity}</Text>
+        <Text style={{ whiteSpace: 'nowrap' }}>{record._count?.signups || 0}/{record.maxCapacity}</Text>
       )
     },
     {
       title: '状态',
       key: 'status',
-      width: 120,
+      width: 160,
       render: (_: any, record: Event) => {
         const s = STATUS_MAP[record.status] || { color: 'default', label: record.status }
         return (
-          <Space size={4}>
+          <Space size={4} style={{ whiteSpace: 'nowrap' }}>
             <Tag color={s.color}>{s.label}</Tag>
             {record.featured && <Tag color="purple">精选</Tag>}
           </Space>
@@ -140,10 +141,9 @@ export default function EventList() {
     {
       title: '操作',
       key: 'actions',
-      width: isMobile ? 120 : 160,
-      fixed: 'right' as const,
+      width: 280,
       render: (_: any, record: Event) => (
-        <Space size={0} wrap>
+        <Space size={0} style={{ whiteSpace: 'nowrap' }}>
           <Button type="link" size="small" icon={<EditOutlined />}
             onClick={() => navigate(`/events/${record.id}/edit`)}
           >编辑</Button>
@@ -248,7 +248,7 @@ export default function EventList() {
             size: 'small',
             showTotal: (t, range) => `第 ${range[0]}-${range[1]} 条 / 共 ${t} 条`,
           }}
-          scroll={{ x: 600 }}
+          scroll={{ x: EVENT_TABLE_SCROLL_X }}
         />
       </Card>
     </div>

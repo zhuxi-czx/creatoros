@@ -16,6 +16,7 @@ function isActiveMember(u: User): boolean {
 
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid
+const USER_TABLE_SCROLL_X = 1700
 
 // 订单状态 → 展示文案 / 颜色
 const ORDER_STATUS: Record<string, { text: string; color: string }> = {
@@ -146,9 +147,9 @@ export default function UserList() {
     {
       title: '用户',
       key: 'user',
-      width: isMobile ? 160 : 220,
+      width: 220,
       render: (_, record) => (
-        <Space>
+        <Space style={{ whiteSpace: 'nowrap' }}>
           <Avatar
             src={fullImg(record.avatarUrl)}
             size={isMobile ? 'small' : 'default'}
@@ -158,8 +159,8 @@ export default function UserList() {
             {record.nickname?.charAt(0) || '?'}
           </Avatar>
           <Space direction="vertical" size={0}>
-            <Text strong style={{ fontSize: isMobile ? 13 : 14 }}>{record.nickname || '未设置'}</Text>
-            {record.city && <Text type="secondary" style={{ fontSize: 11 }}>{record.city}</Text>}
+            <Text strong style={{ fontSize: isMobile ? 13 : 14, whiteSpace: 'nowrap' }}>{record.nickname || '未设置'}</Text>
+            {record.city && <Text type="secondary" style={{ fontSize: 11, whiteSpace: 'nowrap' }}>{record.city}</Text>}
           </Space>
         </Space>
       )
@@ -168,9 +169,9 @@ export default function UserList() {
       title: 'UID',
       dataIndex: 'uid',
       key: 'uid',
-      width: isMobile ? 110 : 130,
+      width: 130,
       render: (uid?: string) => (
-        <Text style={{ fontFamily: 'monospace', fontSize: isMobile ? 12 : 13 }} copyable={!!uid}>
+        <Text style={{ fontFamily: 'monospace', fontSize: isMobile ? 12 : 13, whiteSpace: 'nowrap' }} copyable={!!uid}>
           {uid || '-'}
         </Text>
       ),
@@ -186,7 +187,7 @@ export default function UserList() {
           return <Text style={{ fontFamily: 'monospace' }} copyable>{phone}</Text>
         }
         return (
-          <Space size={4}>
+          <Space size={4} style={{ whiteSpace: 'nowrap' }}>
             <Text style={{ fontFamily: 'monospace' }}>{maskPhone(phone)}</Text>
             <Typography.Link style={{ fontSize: 12 }} onClick={() => setPwdOpen(true)}>
               <EyeOutlined /> 查看
@@ -195,14 +196,14 @@ export default function UserList() {
         )
       }
     },
-    ...(!isMobile ? [{
+    {
       title: '标签',
       key: 'tags',
       width: 240,
       render: (_: any, record: User) => {
         const hasAny = record.tags?.length || record.mbti || record.zodiac || record.generation
         return hasAny ? (
-          <Space size={4} wrap>
+          <Space size={4} style={{ whiteSpace: 'nowrap' }}>
             {record.tags?.map(t => <Tag key={t} color="gold">{t}</Tag>)}
             {record.mbti && <Tag color="purple">{record.mbti}</Tag>}
             {record.zodiac && <Tag>{record.zodiac}</Tag>}
@@ -210,13 +211,13 @@ export default function UserList() {
           </Space>
         ) : <Text type="secondary">-</Text>
       }
-    } as any] : []),
+    },
     {
       title: '状态',
       key: 'statuses',
-      width: isMobile ? 130 : 200,
+      width: 200,
       render: (_: any, record: User) => record.statuses?.length
-        ? <Space size={4} wrap>{record.statuses.map(s => <Tag key={s} color="cyan">{s}</Tag>)}</Space>
+        ? <Space size={4} style={{ whiteSpace: 'nowrap' }}>{record.statuses.map(s => <Tag key={s} color="cyan">{s}</Tag>)}</Space>
         : <Text type="secondary">-</Text>
     },
     {
@@ -224,7 +225,7 @@ export default function UserList() {
       key: 'signups',
       width: 70,
       align: 'center' as const,
-      render: (_: any, record: User) => record._count?.signups || 0
+      render: (_: any, record: User) => <Text style={{ whiteSpace: 'nowrap' }}>{record._count?.signups || 0}</Text>
     },
     {
       title: '状态',
@@ -232,22 +233,24 @@ export default function UserList() {
       key: 'status',
       width: 80,
       render: (status: string) => (
-        <Tag color={status === 'ACTIVE' ? 'green' : 'red'}>
-          {status === 'ACTIVE' ? '正常' : '禁用'}
-        </Tag>
+        <span style={{ whiteSpace: 'nowrap' }}>
+          <Tag color={status === 'ACTIVE' ? 'green' : 'red'}>
+            {status === 'ACTIVE' ? '正常' : '禁用'}
+          </Tag>
+        </span>
       )
     },
-    ...(!isMobile ? [{
+    {
       title: '注册时间',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      width: 120,
-      render: (time: string) => dayjs(time).format('YYYY-MM-DD')
-    } as any] : []),
+      width: 150,
+      render: (time: string) => <Text style={{ whiteSpace: 'nowrap' }}>{dayjs(time).format('YYYY-MM-DD HH:mm')}</Text>
+    },
     {
       title: 'PlanF 会员',
       key: 'membership',
-      width: isMobile ? 140 : 190,
+      width: 190,
       render: (_: any, r: User) => isActiveMember(r)
         ? (
           <Space direction="vertical" size={2}>
@@ -260,9 +263,9 @@ export default function UserList() {
     {
       title: '操作',
       key: 'action',
-      width: isMobile ? 150 : 280,
+      width: 280,
       render: (_: any, r: User) => (
-        <Space size={0} wrap>
+        <Space size={0} style={{ whiteSpace: 'nowrap' }}>
           <Button size="small" type="link" icon={<ProfileOutlined />} onClick={() => openOrders(r)}>
             查看订单
           </Button>
@@ -331,6 +334,7 @@ export default function UserList() {
           rowKey="id"
           loading={loading}
           size={isMobile ? 'small' : 'middle'}
+          scroll={{ x: USER_TABLE_SCROLL_X }}
           pagination={{
             defaultPageSize: 20,
             pageSizeOptions: [10, 15, 20, 30, 100],
