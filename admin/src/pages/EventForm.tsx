@@ -8,12 +8,13 @@ import {
   ArrowLeftOutlined, SaveOutlined, SendOutlined, UploadOutlined,
   ArrowUpOutlined, ArrowDownOutlined, DeleteOutlined
 } from '@ant-design/icons'
-import dayjs from 'dayjs'
+import type { Dayjs } from 'dayjs'
 import { createEvent, updateEvent, updateEventStatus, getEventDetail, uploadImage, type EventFormData } from '../services/event'
 import { getVenues } from '../services/venue'
 import { resolveImageUrl } from '../services/api'
 import RichEditor from '../components/RichEditor'
 import { getCategories } from '../services/category'
+import { chinaDatePickerValueToIso, toChinaTime } from '../utils/chinaTime'
 
 const { Title } = Typography
 const { TextArea } = Input
@@ -72,7 +73,7 @@ export default function EventForm() {
         priceNote: event.priceNote,
         earlyBirdPrice: event.earlyBirdPrice ? event.earlyBirdPrice / 100 : undefined,
         earlyBirdQuota: event.earlyBirdQuota ?? undefined,
-        date: event.date ? dayjs(event.date) : undefined,
+        date: toChinaTime(event.date),
         venueId: event.venueId,
         featured: event.featured,
         categoryId: event.categoryId,
@@ -152,13 +153,19 @@ export default function EventForm() {
   }, [])
 
   const handleSubmit = async (values: Record<string, unknown>, publish = false) => {
+    const eventDate = chinaDatePickerValueToIso(values.date as Dayjs)
+    if (!eventDate) {
+      message.error('请选择活动时间')
+      return
+    }
+
     const data: EventFormData = {
       title: values.title as string,
       description: values.description as string,
       highlights: values.highlights as string || undefined,
       schedule: values.schedule as string || undefined,
       notes: values.notes as string || undefined,
-      date: (values.date as dayjs.Dayjs)?.toISOString(),
+      date: eventDate,
       venueId: (values.venueId as string) || 'default',
       hostName: values.hostName as string,
       maxCapacity: values.maxCapacity as number,
@@ -339,7 +346,7 @@ export default function EventForm() {
             <TextArea placeholder="参与者须知、费用说明等（可选）" rows={3} maxLength={500} showCount />
           </Form.Item>
 
-          <Form.Item label="活动时间" name="date" rules={[{ required: true, message: '请选择活动时间' }]}>
+          <Form.Item label="活动时间（北京时间）" name="date" rules={[{ required: true, message: '请选择活动时间' }]}>
             <DatePicker showTime format="YYYY-MM-DD HH:mm" style={{ width: '100%' }} placeholder="选择活动时间" />
           </Form.Item>
 

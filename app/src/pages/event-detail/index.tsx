@@ -71,7 +71,12 @@ export default function EventDetail() {
     // 报名结束/已结束 → 不可报名
     const disp = getEventDisplay(event.date || event.startTime, event._count?.signups ?? 0, event.maxCapacity || event.maxParticipants)
     if (disp.state !== 'OPEN') {
-      Taro.showToast({ title: disp.state === 'ENDED' ? '活动已结束' : '报名已结束', icon: 'none' })
+      const message = disp.state === 'ENDED'
+        ? '活动已结束'
+        : disp.reason === 'STARTED'
+        ? '活动已开始，报名暂停'
+        : '活动名额已满'
+      Taro.showToast({ title: message, icon: 'none' })
       return
     }
     // 未登录 → 弹手机号快捷登录，登录成功后继续报名
@@ -149,7 +154,7 @@ export default function EventDetail() {
       if (err?.errMsg && err.errMsg.indexOf('cancel') !== -1) {
         Taro.showToast({ title: '已取消支付', icon: 'none' })
       } else {
-        Taro.showToast({ title: '操作失败', icon: 'none' })
+        Taro.showToast({ title: err?.message || '操作失败', icon: 'none' })
       }
     } finally {
       setSigning(false)
@@ -225,6 +230,11 @@ export default function EventDetail() {
   const signupCount = event._count?.signups ?? event.currentParticipants ?? 0
   const status = getEventDisplay(event.date || event.startTime, signupCount, event.maxCapacity || event.maxParticipants)
   const signupClosed = status.state !== 'OPEN' // 报名结束/已结束 → 不能报名
+  const signupClosedText = status.state === 'ENDED'
+    ? '活动已结束'
+    : status.reason === 'STARTED'
+    ? '活动已开始，报名暂停'
+    : '活动名额已满'
   const startTimeMs = (event.date || event.startTime) ? new Date(event.date || event.startTime).getTime() : 0
   const notStarted = startTimeMs > 0 && Date.now() < startTimeMs // 活动未开始 → 才可取消报名/退费、订阅开始提醒
   // PlanF 专属活动 + 非会员 + 未报名 + 仍可报名：拦截下单，按钮引导开通会员
@@ -439,7 +449,7 @@ export default function EventDetail() {
               : event.isSignedUp
               ? '已报名'
               : signupClosed
-              ? (status.state === 'ENDED' ? '活动已结束' : '报名已结束')
+              ? signupClosedText
               : planfBlocked
               ? '立即报名 · 升级 PlanF 会员'
               : event.isPlanfExclusive

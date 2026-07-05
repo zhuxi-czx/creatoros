@@ -9,18 +9,12 @@ import {
   CalendarOutlined, UserOutlined, FireOutlined, CheckCircleOutlined
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
 import { getEvents, getStats, updateEventStatus, copyEvent, deleteEvent, type Event } from '../services/event'
+import { formatChinaTime } from '../utils/chinaTime'
 
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid
 const EVENT_TABLE_SCROLL_X = 1160
-
-// 活动是否已结束：到了活动当天的次日 0 点
-function isEnded(date?: string): boolean {
-  if (!date) return false
-  return dayjs().isAfter(dayjs(date).add(1, 'day').startOf('day'))
-}
 
 const STATUS_MAP: Record<string, { color: string; label: string }> = {
   DRAFT: { color: 'default', label: '草稿' },
@@ -114,7 +108,7 @@ export default function EventList() {
       dataIndex: 'date',
       key: 'date',
       width: 160,
-      render: (date: string) => <Text style={{ whiteSpace: 'nowrap' }}>{dayjs(date).format('YYYY-MM-DD HH:mm')}</Text>
+      render: (date: string) => <Text style={{ whiteSpace: 'nowrap' }}>{formatChinaTime(date)}</Text>
     },
     {
       title: '报名',

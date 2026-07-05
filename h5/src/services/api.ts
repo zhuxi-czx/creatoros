@@ -37,7 +37,8 @@ api.interceptors.response.use(
       return api(config)
     }
 
-    return Promise.reject(error)
+    const message = error.response?.data?.message || error.message || '请求失败'
+    return Promise.reject(new Error(message))
   }
 )
 

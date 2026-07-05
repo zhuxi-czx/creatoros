@@ -31,32 +31,33 @@ const WEEK_CN = ['日', '一', '二', '三', '四', '五', '六']
  */
 export function formatEventDate(dateStr: string | number | undefined): string {
   if (!dateStr) return '时间待定'
-  const date = new Date(dateStr)
-  if (isNaN(date.getTime())) return String(dateStr)
+  const date = getChinaDateParts(dateStr)
+  if (!date) return String(dateStr)
 
-  const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-  const diffDays = Math.round((target.getTime() - today.getTime()) / 86400000)
-  const m = date.getMonth() + 1
-  const d = date.getDate()
+  const now = getChinaDateParts(Date.now())!
+  const todayStart = getChinaDayStartMs(Date.now())
+  const targetStart = getChinaDayStartMs(dateStr)
+  const diffDays = Math.round((targetStart - todayStart) / 86400000)
+  const m = date.month
+  const d = date.day
 
   if (diffDays === 0) return '今天'
   if (diffDays === 1) return '明天'
   if (diffDays === 2) return '后天'
   if (diffDays >= 3 && diffDays <= 7) {
-    return `${m}月${d}日（周${WEEK_CN[date.getDay()]}）`
+    return `${m}月${d}日（周${WEEK_CN[date.weekDay]}）`
   }
-  if (date.getFullYear() === now.getFullYear()) return `${m}月${d}日`
-  return `${date.getFullYear()}年${m}月${d}日`
+  if (date.year === now.year) return `${m}月${d}日`
+  return `${date.year}年${m}月${d}日`
 }
 
 /** 活动日期(人性化) + 时间 HH:mm，如「今天 19:00」「6月28日（周五） 19:00」 */
 export function formatEventDateTime(dateStr: string | number | undefined): string {
   if (!dateStr) return '时间待定'
-  const date = new Date(dateStr)
-  if (isNaN(date.getTime())) return String(dateStr)
-  const hh = date.getHours().toString().padStart(2, '0')
-  const mm = date.getMinutes().toString().padStart(2, '0')
+  const date = getChinaDateParts(dateStr)
+  if (!date) return String(dateStr)
+  const hh = date.hours.toString().padStart(2, '0')
+  const mm = date.minutes.toString().padStart(2, '0')
   return `${formatEventDate(dateStr)} ${hh}:${mm}`
 }
+import { getChinaDateParts, getChinaDayStartMs } from './chinaTime'

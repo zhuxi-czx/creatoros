@@ -7,6 +7,7 @@ import dayjs from 'dayjs'
 import { getEventDetail, getEventSignups, refundSignup, adminAddSignup, type Event } from '../services/event'
 import { getUsers } from '../services/user'
 import { maskPhone } from '../utils/phone'
+import { formatChinaTime } from '../utils/chinaTime'
 
 const { Title, Text } = Typography
 
@@ -250,7 +251,7 @@ export default function EventSignups() {
         <Card bordered={false} style={{ borderRadius: 12, marginBottom: 16 }} styles={{ body: { padding: 16 } }}>
           <Space direction="vertical" size={4}>
             <Text strong style={{ fontSize: 16 }}>{event.title}</Text>
-            <Text type="secondary">{event.venue?.name} · {dayjs(event.date).format('YYYY-MM-DD HH:mm')}</Text>
+            <Text type="secondary">{event.venue?.name} · {formatChinaTime(event.date)}</Text>
             <Space size={16} style={{ marginTop: 4 }}>
               <Text>已确认 <Text strong style={{ color: '#22C55E' }}>{confirmedCount}</Text></Text>
               <Text>已取消 <Text strong style={{ color: '#999' }}>{cancelledCount}</Text></Text>

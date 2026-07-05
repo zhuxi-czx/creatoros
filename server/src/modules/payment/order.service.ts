@@ -17,6 +17,7 @@ import {
   freeTypeOf,
   earlyBirdInfo,
 } from '../membership/membership.service';
+import { EVENT_SIGNUP_STARTED_MESSAGE, isEventStarted } from '../../common/event-time';
 
 /** 订单超时分钟数（与微信 time_expire 一致，超时释放名额）。 */
 const ORDER_TTL_MIN = 15;
@@ -55,6 +56,9 @@ export class OrderService {
       include: { category: true },
     });
     if (!eventFull) throw new NotFoundException('活动不存在');
+    if (isEventStarted(eventFull.date)) {
+      throw new BadRequestException(EVENT_SIGNUP_STARTED_MESSAGE);
+    }
     if (eventFull.status !== 'PUBLISHED') {
       throw new BadRequestException(
         eventFull.status === 'FULL' ? '活动名额已满' : '活动当前不可报名',
@@ -548,6 +552,19 @@ export class OrderService {
   ) {
     // 行锁：序列化并发抢名额，避免「读 count → 判断 → 插入」的 TOCTOU 超卖
     await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${eventId} FOR UPDATE`;
+    const event = await tx.event.findUnique({
+      where: { id: eventId },
+      select: { date: true, status: true },
+    });
+    if (!event) throw new NotFoundException('活动不存在');
+    if (isEventStarted(event.date)) {
+      throw new BadRequestException(EVENT_SIGNUP_STARTED_MESSAGE);
+    }
+    if (event.status !== 'PUBLISHED') {
+      throw new BadRequestException(
+        event.status === 'FULL' ? '活动名额已满' : '活动当前不可报名',
+      );
+    }
     const existing = await tx.signup.findUnique({
       where: { userId_eventId: { userId, eventId } },
     });

@@ -81,8 +81,8 @@ export default function EventDetail() {
       }
       // Refetch event and participants
       await fetchAll()
-    } catch {
-      showToast('操作失败，请重试')
+    } catch (err: any) {
+      showToast(err?.message || '操作失败，请重试')
     } finally {
       setActionLoading(false)
     }

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { OrderService } from '../payment/order.service';
+import { EVENT_SIGNUP_STARTED_MESSAGE, isEventStarted } from '../../common/event-time';
 
 @Injectable()
 export class SignupService {
@@ -29,14 +30,18 @@ export class SignupService {
       });
 
       if (!event) {
-        throw new NotFoundException('Event not found');
+        throw new NotFoundException('活动不存在');
+      }
+
+      if (isEventStarted(event.date)) {
+        throw new BadRequestException(EVENT_SIGNUP_STARTED_MESSAGE);
       }
 
       if (event.status !== 'PUBLISHED') {
         if (event.status === 'FULL') {
-          throw new BadRequestException('Event is full');
+          throw new BadRequestException('活动名额已满');
         }
-        throw new BadRequestException(`Cannot sign up for event with status: ${event.status}`);
+        throw new BadRequestException('活动当前不可报名');
       }
 
       // 付费活动必须走支付下单（checkout），免费报名接口不得绕过支付
@@ -65,13 +70,13 @@ export class SignupService {
 
       if (existingSignup) {
         if (existingSignup.status === 'CONFIRMED') {
-          throw new ConflictException('Already signed up for this event');
+          throw new ConflictException('你已报名该活动');
         }
 
         // Re-activate a cancelled signup
         const confirmedCount = event._count.signups;
         if (confirmedCount >= event.maxCapacity) {
-          throw new BadRequestException('Event is full');
+          throw new BadRequestException('活动名额已满');
         }
 
         const signup = await tx.signup.update({
@@ -101,7 +106,7 @@ export class SignupService {
           where: { id: eventId },
           data: { status: 'FULL' },
         });
-        throw new BadRequestException('Event is full');
+        throw new BadRequestException('活动名额已满');
       }
 
       // Create signup
@@ -147,7 +152,7 @@ export class SignupService {
     }
 
     // 活动一旦开始即不可取消报名 / 退费（防前端绕过）
-    if (event.date && Date.now() >= new Date(event.date).getTime()) {
+    if (isEventStarted(event.date)) {
       throw new BadRequestException('活动已开始，不可取消报名');
     }
 

@@ -9,6 +9,7 @@ import {
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { getStats } from '../services/event'
+import { formatChinaTime } from '../utils/chinaTime'
 
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid
@@ -225,7 +226,7 @@ export default function Dashboard() {
               locale={{ emptyText: '24 小时内无活动开始' }}
               columns={[
                 { title: '活动', dataIndex: 'title', key: 't', ellipsis: true, render: (t: string) => <Text strong>{t}</Text> },
-                { title: '开始', dataIndex: 'date', key: 'd', width: 108, render: (t: string) => dayjs(t).format('MM-DD HH:mm') },
+                { title: '开始', dataIndex: 'date', key: 'd', width: 108, render: (t: string) => formatChinaTime(t, 'MM-DD HH:mm') },
                 { title: '报名', key: 's', width: 76, render: (_: any, r: any) => <Text>{r.signups}/{r.maxCapacity}</Text> },
               ]}
             />
